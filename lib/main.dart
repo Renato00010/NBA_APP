@@ -31,13 +31,48 @@ class NbaApp extends StatefulWidget {
 
 class _NbaAppState extends State<NbaApp> {
   String? _favoriteTeamId;
+  bool _loadingPrefs = true;
 
-  void updateTeam(String? teamId) {
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    try {
+      final prefs = await database.preferencesDao.getPreferences();
+      setState(() {
+        _favoriteTeamId = prefs?.favoriteTeamId;
+        _loadingPrefs = false;
+      });
+    } catch (e) {
+      setState(() => _loadingPrefs = false);
+    }
+  }
+
+  Future<void> updateTeam(String? teamId) async {
     setState(() => _favoriteTeamId = teamId);
+    try {
+      await database.preferencesDao.updateFavoriteTeam(teamId ?? '');
+    } catch (e) {
+      print('Erro ao guardar equipa: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingPrefs) {
+      return const MaterialApp(
+        home: Scaffold(
+          backgroundColor: Color(0xFF0A0A0A),
+          body: Center(
+            child: CircularProgressIndicator(color: Color(0xFF17408B)),
+          ),
+        ),
+      );
+    }
+
     final teamTheme = ThemeService.getTheme(_favoriteTeamId);
     return MaterialApp(
       title: 'NBA App',

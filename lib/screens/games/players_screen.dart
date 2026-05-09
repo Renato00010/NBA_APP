@@ -1,8 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
-import '../../services/repository.dart';
+
 import 'player_detail_screen.dart';
 
 class PlayersScreen extends StatefulWidget {
@@ -16,13 +16,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
   List<Player> _players = [];
   bool _loading = true;
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
     _loadPlayers();
-    _searchController.addListener(() {
-      if (_searchController.text.isEmpty) {
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 800), () {
+      final text = _searchController.text;
+      if (text.length >= 3) {
+        _loadPlayers(search: text);
+      } else if (text.isEmpty) {
         _loadPlayers();
       }
     });
@@ -30,6 +39,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
@@ -64,14 +75,13 @@ class _PlayersScreenState extends State<PlayersScreen> {
       ),
       body: Column(
         children: [
-          // Barra de pesquisa
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Pesquisar jogador...',
+                hintText: 'Pesquisar jogador (mín. 3 letras)...',
                 hintStyle: const TextStyle(color: Colors.white38),
                 prefixIcon: const Icon(Icons.search, color: Colors.white38),
                 suffixIcon: _searchController.text.isNotEmpty
@@ -97,10 +107,8 @@ class _PlayersScreenState extends State<PlayersScreen> {
                   ),
                 ),
               ),
-              onSubmitted: (value) => _loadPlayers(search: value),
             ),
           ),
-          // Lista de jogadores
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
@@ -116,9 +124,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
                     itemCount: _players.length,
                     itemBuilder: (context, index) {
                       final player = _players[index];
-                      final photoUrl = NbaRepository.getPlayerPhotoUrl(
-                        player.playerId,
-                      );
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -138,51 +143,22 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           ),
                           child: Row(
                             children: [
-                              // Foto do jogador
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(26),
-                                child: CachedNetworkImage(
-                                  imageUrl: photoUrl,
-                                  width: 52,
-                                  height: 52,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) => CircleAvatar(
-                                    radius: 26,
-                                    backgroundColor: theme.colorScheme.primary
-                                        .withOpacity(0.3),
-                                    child: Text(
-                                      player.fullName.isNotEmpty
-                                          ? player.fullName[0]
-                                          : '?',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
+                              CircleAvatar(
+                                radius: 26,
+                                backgroundColor: theme.colorScheme.primary
+                                    .withOpacity(0.3),
+                                child: Text(
+                                  player.fullName.isNotEmpty
+                                      ? player.fullName[0]
+                                      : '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  errorWidget: (context, url, error) =>
-                                      CircleAvatar(
-                                        radius: 26,
-                                        backgroundColor: theme
-                                            .colorScheme
-                                            .primary
-                                            .withOpacity(0.3),
-                                        child: Text(
-                                          player.fullName.isNotEmpty
-                                              ? player.fullName[0]
-                                              : '?',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
-                                      ),
                                 ),
                               ),
                               const SizedBox(width: 14),
-                              // Info
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +182,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                   ],
                                 ),
                               ),
-                              // Seta
                               const Icon(
                                 Icons.chevron_right,
                                 color: Colors.white38,

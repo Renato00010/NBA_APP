@@ -7,7 +7,6 @@ class NbaRepository {
   final AppDatabase _db;
   final NbaApiService _api;
 
-  // Cache em memória dos nomes das equipas
   Map<String, String> _teamNames = {};
   Map<String, String> _teamCities = {};
 
@@ -18,41 +17,27 @@ class NbaRepository {
     return !results.contains(ConnectivityResult.none);
   }
 
-  // Obter nome da equipa por ID
-  String getTeamName(String teamId) {
-    return _teamNames[teamId] ?? 'Equipa $teamId';
-  }
+  String getTeamName(String teamId) => _teamNames[teamId] ?? 'Equipa $teamId';
+  String getTeamCity(String teamId) => _teamCities[teamId] ?? '';
 
-  // Obter cidade da equipa por ID
-  String getTeamCity(String teamId) {
-    return _teamCities[teamId] ?? '';
-  }
+  static String getTeamLogoUrl(String teamId) =>
+      'https://cdn.nba.com/logos/nba/$teamId/global/L/logo.svg';
 
-  // Logo da equipa via NBA CDN
-  static String getTeamLogoUrl(String teamId) {
-    return 'https://cdn.nba.com/logos/nba/$teamId/global/L/logo.svg';
-  }
+  static String getPlayerPhotoUrl(String playerId) =>
+      'https://cdn.nba.com/headshots/nba/latest/1040x760/$playerId.png';
 
-  // Foto do jogador via NBA CDN
-  static String getPlayerPhotoUrl(String playerId) {
-    return 'https://cdn.nba.com/headshots/nba/latest/1040x760/$playerId.png';
-  }
-
-  // EQUIPAS
   Future<List<NbaTeam>> getTeams() async {
     if (await _hasInternet()) {
       try {
         final data = await _api.getTeams();
         final companions = data.map((t) {
           final id = t['id'].toString();
-          final name = t['full_name'] ?? '';
-          final city = t['city'] ?? '';
-          _teamNames[id] = name;
-          _teamCities[id] = city;
+          _teamNames[id] = t['full_name'] ?? '';
+          _teamCities[id] = t['city'] ?? '';
           return NbaTeamsCompanion(
             teamId: Value(id),
-            name: Value(name),
-            city: Value(city),
+            name: Value(t['full_name'] ?? ''),
+            city: Value(t['city'] ?? ''),
             conference: Value(t['conference'] ?? ''),
             division: Value(t['division'] ?? ''),
             colorPrimary: Value('#17408B'),
@@ -60,10 +45,10 @@ class NbaRepository {
           );
         }).toList();
         await _db.teamsDao.upsertAllTeams(companions);
-      } catch (_) {}
+      } catch (e) {
+        print('Erro getTeams: $e');
+      }
     }
-
-    // Carrega cache em memória do SQLite
     final teams = await _db.teamsDao.getAllTeams();
     for (final t in teams) {
       _teamNames[t.teamId] = t.name;
@@ -72,11 +57,9 @@ class NbaRepository {
     return teams;
   }
 
-  // JOGOS
   Future<List<CachedGame>> getGamesByDate(DateTime date) async {
     final dateStr =
         '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-
     if (await _hasInternet()) {
       try {
         final data = await _api.getGamesByDate(dateStr);
@@ -94,16 +77,52 @@ class NbaRepository {
             )
             .toList();
         await _db.gamesDao.upsertAllGames(companions);
-      } catch (_) {}
+      } catch (e) {
+        print('Erro getGamesByDate: $e');
+      }
     }
     return _db.gamesDao.getAllGames();
   }
 
-  // JOGADORES
   Future<List<Player>> getPlayers({String? search}) async {
-    if (await _hasInternet()) {
+    print('getPlayers search=$search');
+    final hasNet = await _hasInternet();
+    print('hasInternet=$hasNet');
+
+    if (search != null && search.isNotEmpty) {
+      if (hasNet) {
+        try {
+          final data = await _api.getPlayers(search: search);
+          print('API retornou ${data.length} jogadores');
+          return data
+              .map(
+                (p) => Player(
+                  playerId: p['id'].toString(),
+                  teamId: p['team']['id'].toString(),
+                  fullName: '${p['first_name'] ?? ''} ${p['last_name'] ?? ''}'
+                      .trim(),
+                  position: p['position'] ?? '',
+                  ppg: 0.0,
+                  rpg: 0.0,
+                  apg: 0.0,
+                  spg: 0.0,
+                  bpg: 0.0,
+                  photoWebpPath: null,
+                  cachedAt: DateTime.now(),
+                ),
+              )
+              .toList();
+        } catch (e) {
+          print('Erro pesquisa jogadores: $e');
+        }
+      }
+      return [];
+    }
+
+    if (hasNet) {
       try {
-        final data = await _api.getPlayers(search: search);
+        final data = await _api.getPlayers();
+        print('Cache: API retornou ${data.length} jogadores');
         final companions = data
             .map(
               (p) => PlayersCompanion(
@@ -117,18 +136,21 @@ class NbaRepository {
             )
             .toList();
         await _db.playersDao.upsertAllPlayers(companions);
-      } catch (_) {}
+      } catch (e) {
+        print('Erro cache jogadores: $e');
+      }
     }
     return _db.playersDao.getAllPlayers();
   }
 
-  // ESTATÍSTICAS DO JOGADOR
   Future<Map<String, dynamic>?> getPlayerStats(int playerId) async {
     if (await _hasInternet()) {
       try {
         final data = await _api.getPlayerStats(playerId);
         if (data.isNotEmpty) return data.first as Map<String, dynamic>;
-      } catch (_) {}
+      } catch (e) {
+        print('Erro getPlayerStats: $e');
+      }
     }
     return null;
   }

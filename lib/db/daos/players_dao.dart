@@ -37,4 +37,8 @@ class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
   // Apagar jogadores de uma equipa
   Future<void> deletePlayersByTeam(String teamId) =>
       (delete(players)..where((p) => p.teamId.equals(teamId))).go();
+
+  // Pesquisar jogadores por nome
+  Future<List<Player>> searchPlayers(String query) =>
+      (select(players)..where((p) => p.fullName.like('%$query%'))).get();
 }

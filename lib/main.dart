@@ -5,6 +5,7 @@ import 'screens/games/games_screen.dart';
 import 'screens/news/news_screen.dart';
 import 'screens/store/store_screen.dart';
 import 'screens/profile/profile_screen.dart';
+import 'screens/auth/login_screen.dart';
 import 'services/theme_service.dart';
 import 'services/nba_api_service.dart';
 import 'services/repository.dart';
@@ -31,6 +32,7 @@ class NbaApp extends StatefulWidget {
 
 class _NbaAppState extends State<NbaApp> {
   String? _favoriteTeamId;
+  String? _userEmail;
   bool _loadingPrefs = true;
 
   @override
@@ -44,6 +46,7 @@ class _NbaAppState extends State<NbaApp> {
       final prefs = await database.preferencesDao.getPreferences();
       setState(() {
         _favoriteTeamId = prefs?.favoriteTeamId;
+        _userEmail = prefs?.email;
         _loadingPrefs = false;
       });
     } catch (e) {
@@ -57,6 +60,27 @@ class _NbaAppState extends State<NbaApp> {
       await database.preferencesDao.updateFavoriteTeam(teamId ?? '');
     } catch (e) {
       print('Erro ao guardar equipa: $e');
+    }
+  }
+
+  Future<void> login(String email) async {
+    try {
+      await database.preferencesDao.updateEmail(email);
+      setState(() => _userEmail = email);
+    } catch (e) {
+      print('Erro ao guardar login: $e');
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      await database.preferencesDao.updateEmail('');
+      setState(() {
+        _userEmail = null;
+        _favoriteTeamId = null;
+      });
+    } catch (e) {
+      print('Erro ao fazer logout: $e');
     }
   }
 
@@ -74,11 +98,14 @@ class _NbaAppState extends State<NbaApp> {
     }
 
     final teamTheme = ThemeService.getTheme(_favoriteTeamId);
+
     return MaterialApp(
       title: 'NBA App',
       debugShowCheckedModeBanner: false,
       theme: ThemeService.buildTheme(teamTheme),
-      home: MainNavigation(teamTheme: teamTheme),
+      home: (_userEmail == null || _userEmail!.isEmpty)
+          ? const LoginScreen()
+          : MainNavigation(teamTheme: teamTheme),
     );
   }
 }

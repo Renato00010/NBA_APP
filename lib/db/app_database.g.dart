@@ -1721,6 +1721,37 @@ class $UserPreferencesTable extends UserPreferences
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _passwordHashMeta = const VerificationMeta(
+    'passwordHash',
+  );
+  @override
+  late final GeneratedColumn<String> passwordHash = GeneratedColumn<String>(
+    'password_hash',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _favoriteTeamIdMeta = const VerificationMeta(
     'favoriteTeamId',
   );
@@ -1789,6 +1820,9 @@ class $UserPreferencesTable extends UserPreferences
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    email,
+    passwordHash,
+    displayName,
     favoriteTeamId,
     themeMode,
     notificationsOn,
@@ -1809,6 +1843,30 @@ class $UserPreferencesTable extends UserPreferences
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    if (data.containsKey('password_hash')) {
+      context.handle(
+        _passwordHashMeta,
+        passwordHash.isAcceptableOrUnknown(
+          data['password_hash']!,
+          _passwordHashMeta,
+        ),
+      );
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
     }
     if (data.containsKey('favorite_team_id')) {
       context.handle(
@@ -1859,6 +1917,18 @@ class $UserPreferencesTable extends UserPreferences
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      ),
+      passwordHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}password_hash'],
+      ),
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
       favoriteTeamId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}favorite_team_id'],
@@ -1890,6 +1960,9 @@ class $UserPreferencesTable extends UserPreferences
 
 class UserPreference extends DataClass implements Insertable<UserPreference> {
   final int id;
+  final String? email;
+  final String? passwordHash;
+  final String? displayName;
   final String? favoriteTeamId;
   final String themeMode;
   final bool notificationsOn;
@@ -1897,6 +1970,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   final DateTime updatedAt;
   const UserPreference({
     required this.id,
+    this.email,
+    this.passwordHash,
+    this.displayName,
     this.favoriteTeamId,
     required this.themeMode,
     required this.notificationsOn,
@@ -1907,6 +1983,15 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
+    if (!nullToAbsent || email != null) {
+      map['email'] = Variable<String>(email);
+    }
+    if (!nullToAbsent || passwordHash != null) {
+      map['password_hash'] = Variable<String>(passwordHash);
+    }
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
     if (!nullToAbsent || favoriteTeamId != null) {
       map['favorite_team_id'] = Variable<String>(favoriteTeamId);
     }
@@ -1920,6 +2005,15 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   UserPreferencesCompanion toCompanion(bool nullToAbsent) {
     return UserPreferencesCompanion(
       id: Value(id),
+      email: email == null && nullToAbsent
+          ? const Value.absent()
+          : Value(email),
+      passwordHash: passwordHash == null && nullToAbsent
+          ? const Value.absent()
+          : Value(passwordHash),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
       favoriteTeamId: favoriteTeamId == null && nullToAbsent
           ? const Value.absent()
           : Value(favoriteTeamId),
@@ -1937,6 +2031,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserPreference(
       id: serializer.fromJson<int>(json['id']),
+      email: serializer.fromJson<String?>(json['email']),
+      passwordHash: serializer.fromJson<String?>(json['passwordHash']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
       favoriteTeamId: serializer.fromJson<String?>(json['favoriteTeamId']),
       themeMode: serializer.fromJson<String>(json['themeMode']),
       notificationsOn: serializer.fromJson<bool>(json['notificationsOn']),
@@ -1949,6 +2046,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
+      'email': serializer.toJson<String?>(email),
+      'passwordHash': serializer.toJson<String?>(passwordHash),
+      'displayName': serializer.toJson<String?>(displayName),
       'favoriteTeamId': serializer.toJson<String?>(favoriteTeamId),
       'themeMode': serializer.toJson<String>(themeMode),
       'notificationsOn': serializer.toJson<bool>(notificationsOn),
@@ -1959,6 +2059,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
 
   UserPreference copyWith({
     int? id,
+    Value<String?> email = const Value.absent(),
+    Value<String?> passwordHash = const Value.absent(),
+    Value<String?> displayName = const Value.absent(),
     Value<String?> favoriteTeamId = const Value.absent(),
     String? themeMode,
     bool? notificationsOn,
@@ -1966,6 +2069,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     DateTime? updatedAt,
   }) => UserPreference(
     id: id ?? this.id,
+    email: email.present ? email.value : this.email,
+    passwordHash: passwordHash.present ? passwordHash.value : this.passwordHash,
+    displayName: displayName.present ? displayName.value : this.displayName,
     favoriteTeamId: favoriteTeamId.present
         ? favoriteTeamId.value
         : this.favoriteTeamId,
@@ -1977,6 +2083,13 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   UserPreference copyWithCompanion(UserPreferencesCompanion data) {
     return UserPreference(
       id: data.id.present ? data.id.value : this.id,
+      email: data.email.present ? data.email.value : this.email,
+      passwordHash: data.passwordHash.present
+          ? data.passwordHash.value
+          : this.passwordHash,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
       favoriteTeamId: data.favoriteTeamId.present
           ? data.favoriteTeamId.value
           : this.favoriteTeamId,
@@ -1993,6 +2106,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   String toString() {
     return (StringBuffer('UserPreference(')
           ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('displayName: $displayName, ')
           ..write('favoriteTeamId: $favoriteTeamId, ')
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
@@ -2005,6 +2121,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   @override
   int get hashCode => Object.hash(
     id,
+    email,
+    passwordHash,
+    displayName,
     favoriteTeamId,
     themeMode,
     notificationsOn,
@@ -2016,6 +2135,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       identical(this, other) ||
       (other is UserPreference &&
           other.id == this.id &&
+          other.email == this.email &&
+          other.passwordHash == this.passwordHash &&
+          other.displayName == this.displayName &&
           other.favoriteTeamId == this.favoriteTeamId &&
           other.themeMode == this.themeMode &&
           other.notificationsOn == this.notificationsOn &&
@@ -2025,6 +2147,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
 
 class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<int> id;
+  final Value<String?> email;
+  final Value<String?> passwordHash;
+  final Value<String?> displayName;
   final Value<String?> favoriteTeamId;
   final Value<String> themeMode;
   final Value<bool> notificationsOn;
@@ -2032,6 +2157,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<DateTime> updatedAt;
   const UserPreferencesCompanion({
     this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.passwordHash = const Value.absent(),
+    this.displayName = const Value.absent(),
     this.favoriteTeamId = const Value.absent(),
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
@@ -2040,6 +2168,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   });
   UserPreferencesCompanion.insert({
     this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.passwordHash = const Value.absent(),
+    this.displayName = const Value.absent(),
     this.favoriteTeamId = const Value.absent(),
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
@@ -2048,6 +2179,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   });
   static Insertable<UserPreference> custom({
     Expression<int>? id,
+    Expression<String>? email,
+    Expression<String>? passwordHash,
+    Expression<String>? displayName,
     Expression<String>? favoriteTeamId,
     Expression<String>? themeMode,
     Expression<bool>? notificationsOn,
@@ -2056,6 +2190,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (email != null) 'email': email,
+      if (passwordHash != null) 'password_hash': passwordHash,
+      if (displayName != null) 'display_name': displayName,
       if (favoriteTeamId != null) 'favorite_team_id': favoriteTeamId,
       if (themeMode != null) 'theme_mode': themeMode,
       if (notificationsOn != null) 'notifications_on': notificationsOn,
@@ -2066,6 +2203,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
 
   UserPreferencesCompanion copyWith({
     Value<int>? id,
+    Value<String?>? email,
+    Value<String?>? passwordHash,
+    Value<String?>? displayName,
     Value<String?>? favoriteTeamId,
     Value<String>? themeMode,
     Value<bool>? notificationsOn,
@@ -2074,6 +2214,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   }) {
     return UserPreferencesCompanion(
       id: id ?? this.id,
+      email: email ?? this.email,
+      passwordHash: passwordHash ?? this.passwordHash,
+      displayName: displayName ?? this.displayName,
       favoriteTeamId: favoriteTeamId ?? this.favoriteTeamId,
       themeMode: themeMode ?? this.themeMode,
       notificationsOn: notificationsOn ?? this.notificationsOn,
@@ -2087,6 +2230,15 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<int>(id.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (passwordHash.present) {
+      map['password_hash'] = Variable<String>(passwordHash.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
     }
     if (favoriteTeamId.present) {
       map['favorite_team_id'] = Variable<String>(favoriteTeamId.value);
@@ -2110,6 +2262,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   String toString() {
     return (StringBuffer('UserPreferencesCompanion(')
           ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('displayName: $displayName, ')
           ..write('favoriteTeamId: $favoriteTeamId, ')
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
@@ -3822,6 +3977,9 @@ typedef $$CachedGamesTableProcessedTableManager =
 typedef $$UserPreferencesTableCreateCompanionBuilder =
     UserPreferencesCompanion Function({
       Value<int> id,
+      Value<String?> email,
+      Value<String?> passwordHash,
+      Value<String?> displayName,
       Value<String?> favoriteTeamId,
       Value<String> themeMode,
       Value<bool> notificationsOn,
@@ -3831,6 +3989,9 @@ typedef $$UserPreferencesTableCreateCompanionBuilder =
 typedef $$UserPreferencesTableUpdateCompanionBuilder =
     UserPreferencesCompanion Function({
       Value<int> id,
+      Value<String?> email,
+      Value<String?> passwordHash,
+      Value<String?> displayName,
       Value<String?> favoriteTeamId,
       Value<String> themeMode,
       Value<bool> notificationsOn,
@@ -3881,6 +4042,21 @@ class $$UserPreferencesTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3942,6 +4118,21 @@ class $$UserPreferencesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get themeMode => $composableBuilder(
     column: $table.themeMode,
     builder: (column) => ColumnOrderings(column),
@@ -3997,6 +4188,19 @@ class $$UserPreferencesTableAnnotationComposer
   });
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get themeMode =>
       $composableBuilder(column: $table.themeMode, builder: (column) => column);
@@ -4067,6 +4271,9 @@ class $$UserPreferencesTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> passwordHash = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
                 Value<String?> favoriteTeamId = const Value.absent(),
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
@@ -4074,6 +4281,9 @@ class $$UserPreferencesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserPreferencesCompanion(
                 id: id,
+                email: email,
+                passwordHash: passwordHash,
+                displayName: displayName,
                 favoriteTeamId: favoriteTeamId,
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,
@@ -4083,6 +4293,9 @@ class $$UserPreferencesTableTableManager
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
+                Value<String?> email = const Value.absent(),
+                Value<String?> passwordHash = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
                 Value<String?> favoriteTeamId = const Value.absent(),
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
@@ -4090,6 +4303,9 @@ class $$UserPreferencesTableTableManager
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserPreferencesCompanion.insert(
                 id: id,
+                email: email,
+                passwordHash: passwordHash,
+                displayName: displayName,
                 favoriteTeamId: favoriteTeamId,
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,

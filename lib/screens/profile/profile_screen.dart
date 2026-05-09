@@ -66,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.logout,
               title: 'Terminar Sessão',
               subtitle: '',
-              onTap: () {},
+              onTap: () => NbaApp.of(context)?.logout(),
               isDestructive: true,
             ),
           ],

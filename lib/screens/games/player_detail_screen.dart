@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../db/app_database.dart';
 import '../../main.dart';
-import '../../services/repository.dart';
 
 class PlayerDetailScreen extends StatefulWidget {
   final Player player;

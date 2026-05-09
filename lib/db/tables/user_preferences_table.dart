@@ -3,6 +3,9 @@ import 'nba_teams_table.dart';
 
 class UserPreferences extends Table {
   IntColumn get id => integer().autoIncrement()();
+  TextColumn get email => text().nullable()();
+  TextColumn get passwordHash => text().nullable()();
+  TextColumn get displayName => text().nullable()();
   TextColumn get favoriteTeamId =>
       text().nullable().references(NbaTeams, #teamId)();
   TextColumn get themeMode => text().withDefault(const Constant('system'))();

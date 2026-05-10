@@ -8,6 +8,8 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final userEmail = NbaApp.of(context)?.userEmail ?? '';
+
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
@@ -31,7 +33,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Utilizador NBA',
+              'Olá, seja bem vindo',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 20,
@@ -39,9 +41,9 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'utilizador@email.com',
-              style: TextStyle(color: Colors.white54, fontSize: 13),
+            Text(
+              userEmail,
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
             ),
             const SizedBox(height: 24),
             _buildSection(

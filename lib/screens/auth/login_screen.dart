@@ -64,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       if (_isRegister) {
+        // Verifica se já existe
         final existing = await database.preferencesDao.getUserByEmail(email);
         if (existing != null) {
           setState(() {
@@ -73,19 +74,19 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
+        // Hash da password
         final hashedPassword = await _hashPassword(password);
 
-        await database.preferencesDao.upsertPreferences(
-          UserPreferencesCompanion(
-            email: Value(email),
-            passwordHash: Value(hashedPassword),
-            updatedAt: Value(DateTime.now()),
-          ),
-        );
+        // Regista
+        await database.preferencesDao.registerUser(email, hashedPassword);
+
+        // Inicia sessão
+        await database.preferencesDao.setLoggedIn(email);
 
         if (!mounted) return;
         await NbaApp.of(context)?.login(email);
       } else {
+        // Login
         final user = await database.preferencesDao.getUserByEmail(email);
 
         if (user == null) {
@@ -114,13 +115,13 @@ class _LoginScreenState extends State<LoginScreen> {
           return;
         }
 
+        await database.preferencesDao.setLoggedIn(email);
         if (!mounted) return;
         await NbaApp.of(context)?.login(email);
       }
     } catch (e) {
-      print('Erro submit: $e');
       setState(() {
-        _error = 'Erro inesperado: ${e.toString()}';
+        _error = 'Erro: ${e.toString()}';
         _loading = false;
       });
     }

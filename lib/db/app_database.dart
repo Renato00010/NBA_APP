@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -35,6 +35,9 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(userPreferences, userPreferences.email);
         await m.addColumn(userPreferences, userPreferences.passwordHash);
         await m.addColumn(userPreferences, userPreferences.displayName);
+      }
+      if (from < 3) {
+        await m.addColumn(userPreferences, userPreferences.isLoggedIn);
       }
     },
   );

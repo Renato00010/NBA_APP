@@ -54,11 +54,7 @@ class NbaApiService {
     try {
       final response = await _dio.get(
         '/players',
-        queryParameters: {
-          if (search != null) 'search': search,
-          'page': page,
-          'per_page': 25,
-        },
+        queryParameters: {'search': ?search, 'page': page, 'per_page': 25},
       );
       return response.data['data'] as List<dynamic>;
     } on DioException catch (e) {

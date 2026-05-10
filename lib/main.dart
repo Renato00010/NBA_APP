@@ -23,17 +23,19 @@ void main() async {
 class NbaApp extends StatefulWidget {
   const NbaApp({super.key});
 
-  static _NbaAppState? of(BuildContext context) =>
-      context.findAncestorStateOfType<_NbaAppState>();
+  static NbaAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<NbaAppState>();
 
   @override
-  State<NbaApp> createState() => _NbaAppState();
+  State<NbaApp> createState() => NbaAppState();
 }
 
-class _NbaAppState extends State<NbaApp> {
+class NbaAppState extends State<NbaApp> {
   String? _favoriteTeamId;
   String? _userEmail;
   bool _loadingPrefs = true;
+
+  String? get userEmail => _userEmail;
 
   @override
   void initState() {
@@ -65,8 +67,12 @@ class _NbaAppState extends State<NbaApp> {
 
   Future<void> login(String email) async {
     try {
-      await database.preferencesDao.updateEmail(email);
-      setState(() => _userEmail = email);
+      await database.preferencesDao.setLoggedIn(email);
+      final prefs = await database.preferencesDao.getPreferences();
+      setState(() {
+        _userEmail = prefs?.email ?? email;
+        _favoriteTeamId = prefs?.favoriteTeamId;
+      });
     } catch (e) {
       print('Erro ao guardar login: $e');
     }
@@ -74,7 +80,7 @@ class _NbaAppState extends State<NbaApp> {
 
   Future<void> logout() async {
     try {
-      await database.preferencesDao.updateEmail('');
+      await database.preferencesDao.setLoggedOut();
       setState(() {
         _userEmail = null;
         _favoriteTeamId = null;
@@ -98,7 +104,6 @@ class _NbaAppState extends State<NbaApp> {
     }
 
     final teamTheme = ThemeService.getTheme(_favoriteTeamId);
-
     return MaterialApp(
       title: 'NBA App',
       debugShowCheckedModeBanner: false,

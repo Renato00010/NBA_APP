@@ -1729,6 +1729,7 @@ class $UserPreferencesTable extends UserPreferences
     true,
     type: DriftSqlType.string,
     requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
   );
   static const VerificationMeta _passwordHashMeta = const VerificationMeta(
     'passwordHash',
@@ -1765,6 +1766,21 @@ class $UserPreferencesTable extends UserPreferences
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES nba_teams (team_id)',
     ),
+  );
+  static const VerificationMeta _isLoggedInMeta = const VerificationMeta(
+    'isLoggedIn',
+  );
+  @override
+  late final GeneratedColumn<bool> isLoggedIn = GeneratedColumn<bool>(
+    'is_logged_in',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_logged_in" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
   );
   static const VerificationMeta _themeModeMeta = const VerificationMeta(
     'themeMode',
@@ -1824,6 +1840,7 @@ class $UserPreferencesTable extends UserPreferences
     passwordHash,
     displayName,
     favoriteTeamId,
+    isLoggedIn,
     themeMode,
     notificationsOn,
     language,
@@ -1874,6 +1891,15 @@ class $UserPreferencesTable extends UserPreferences
         favoriteTeamId.isAcceptableOrUnknown(
           data['favorite_team_id']!,
           _favoriteTeamIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_logged_in')) {
+      context.handle(
+        _isLoggedInMeta,
+        isLoggedIn.isAcceptableOrUnknown(
+          data['is_logged_in']!,
+          _isLoggedInMeta,
         ),
       );
     }
@@ -1933,6 +1959,10 @@ class $UserPreferencesTable extends UserPreferences
         DriftSqlType.string,
         data['${effectivePrefix}favorite_team_id'],
       ),
+      isLoggedIn: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_logged_in'],
+      )!,
       themeMode: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}theme_mode'],
@@ -1964,6 +1994,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   final String? passwordHash;
   final String? displayName;
   final String? favoriteTeamId;
+  final bool isLoggedIn;
   final String themeMode;
   final bool notificationsOn;
   final String language;
@@ -1974,6 +2005,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     this.passwordHash,
     this.displayName,
     this.favoriteTeamId,
+    required this.isLoggedIn,
     required this.themeMode,
     required this.notificationsOn,
     required this.language,
@@ -1995,6 +2027,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     if (!nullToAbsent || favoriteTeamId != null) {
       map['favorite_team_id'] = Variable<String>(favoriteTeamId);
     }
+    map['is_logged_in'] = Variable<bool>(isLoggedIn);
     map['theme_mode'] = Variable<String>(themeMode);
     map['notifications_on'] = Variable<bool>(notificationsOn);
     map['language'] = Variable<String>(language);
@@ -2017,6 +2050,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       favoriteTeamId: favoriteTeamId == null && nullToAbsent
           ? const Value.absent()
           : Value(favoriteTeamId),
+      isLoggedIn: Value(isLoggedIn),
       themeMode: Value(themeMode),
       notificationsOn: Value(notificationsOn),
       language: Value(language),
@@ -2035,6 +2069,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       passwordHash: serializer.fromJson<String?>(json['passwordHash']),
       displayName: serializer.fromJson<String?>(json['displayName']),
       favoriteTeamId: serializer.fromJson<String?>(json['favoriteTeamId']),
+      isLoggedIn: serializer.fromJson<bool>(json['isLoggedIn']),
       themeMode: serializer.fromJson<String>(json['themeMode']),
       notificationsOn: serializer.fromJson<bool>(json['notificationsOn']),
       language: serializer.fromJson<String>(json['language']),
@@ -2050,6 +2085,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       'passwordHash': serializer.toJson<String?>(passwordHash),
       'displayName': serializer.toJson<String?>(displayName),
       'favoriteTeamId': serializer.toJson<String?>(favoriteTeamId),
+      'isLoggedIn': serializer.toJson<bool>(isLoggedIn),
       'themeMode': serializer.toJson<String>(themeMode),
       'notificationsOn': serializer.toJson<bool>(notificationsOn),
       'language': serializer.toJson<String>(language),
@@ -2063,6 +2099,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     Value<String?> passwordHash = const Value.absent(),
     Value<String?> displayName = const Value.absent(),
     Value<String?> favoriteTeamId = const Value.absent(),
+    bool? isLoggedIn,
     String? themeMode,
     bool? notificationsOn,
     String? language,
@@ -2075,6 +2112,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     favoriteTeamId: favoriteTeamId.present
         ? favoriteTeamId.value
         : this.favoriteTeamId,
+    isLoggedIn: isLoggedIn ?? this.isLoggedIn,
     themeMode: themeMode ?? this.themeMode,
     notificationsOn: notificationsOn ?? this.notificationsOn,
     language: language ?? this.language,
@@ -2093,6 +2131,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       favoriteTeamId: data.favoriteTeamId.present
           ? data.favoriteTeamId.value
           : this.favoriteTeamId,
+      isLoggedIn: data.isLoggedIn.present
+          ? data.isLoggedIn.value
+          : this.isLoggedIn,
       themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
       notificationsOn: data.notificationsOn.present
           ? data.notificationsOn.value
@@ -2110,6 +2151,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ..write('passwordHash: $passwordHash, ')
           ..write('displayName: $displayName, ')
           ..write('favoriteTeamId: $favoriteTeamId, ')
+          ..write('isLoggedIn: $isLoggedIn, ')
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
           ..write('language: $language, ')
@@ -2125,6 +2167,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     passwordHash,
     displayName,
     favoriteTeamId,
+    isLoggedIn,
     themeMode,
     notificationsOn,
     language,
@@ -2139,6 +2182,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           other.passwordHash == this.passwordHash &&
           other.displayName == this.displayName &&
           other.favoriteTeamId == this.favoriteTeamId &&
+          other.isLoggedIn == this.isLoggedIn &&
           other.themeMode == this.themeMode &&
           other.notificationsOn == this.notificationsOn &&
           other.language == this.language &&
@@ -2151,6 +2195,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<String?> passwordHash;
   final Value<String?> displayName;
   final Value<String?> favoriteTeamId;
+  final Value<bool> isLoggedIn;
   final Value<String> themeMode;
   final Value<bool> notificationsOn;
   final Value<String> language;
@@ -2161,6 +2206,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.passwordHash = const Value.absent(),
     this.displayName = const Value.absent(),
     this.favoriteTeamId = const Value.absent(),
+    this.isLoggedIn = const Value.absent(),
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
     this.language = const Value.absent(),
@@ -2172,6 +2218,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.passwordHash = const Value.absent(),
     this.displayName = const Value.absent(),
     this.favoriteTeamId = const Value.absent(),
+    this.isLoggedIn = const Value.absent(),
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
     this.language = const Value.absent(),
@@ -2183,6 +2230,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Expression<String>? passwordHash,
     Expression<String>? displayName,
     Expression<String>? favoriteTeamId,
+    Expression<bool>? isLoggedIn,
     Expression<String>? themeMode,
     Expression<bool>? notificationsOn,
     Expression<String>? language,
@@ -2194,6 +2242,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       if (passwordHash != null) 'password_hash': passwordHash,
       if (displayName != null) 'display_name': displayName,
       if (favoriteTeamId != null) 'favorite_team_id': favoriteTeamId,
+      if (isLoggedIn != null) 'is_logged_in': isLoggedIn,
       if (themeMode != null) 'theme_mode': themeMode,
       if (notificationsOn != null) 'notifications_on': notificationsOn,
       if (language != null) 'language': language,
@@ -2207,6 +2256,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Value<String?>? passwordHash,
     Value<String?>? displayName,
     Value<String?>? favoriteTeamId,
+    Value<bool>? isLoggedIn,
     Value<String>? themeMode,
     Value<bool>? notificationsOn,
     Value<String>? language,
@@ -2218,6 +2268,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       passwordHash: passwordHash ?? this.passwordHash,
       displayName: displayName ?? this.displayName,
       favoriteTeamId: favoriteTeamId ?? this.favoriteTeamId,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       themeMode: themeMode ?? this.themeMode,
       notificationsOn: notificationsOn ?? this.notificationsOn,
       language: language ?? this.language,
@@ -2243,6 +2294,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     if (favoriteTeamId.present) {
       map['favorite_team_id'] = Variable<String>(favoriteTeamId.value);
     }
+    if (isLoggedIn.present) {
+      map['is_logged_in'] = Variable<bool>(isLoggedIn.value);
+    }
     if (themeMode.present) {
       map['theme_mode'] = Variable<String>(themeMode.value);
     }
@@ -2266,6 +2320,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
           ..write('passwordHash: $passwordHash, ')
           ..write('displayName: $displayName, ')
           ..write('favoriteTeamId: $favoriteTeamId, ')
+          ..write('isLoggedIn: $isLoggedIn, ')
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
           ..write('language: $language, ')
@@ -3981,6 +4036,7 @@ typedef $$UserPreferencesTableCreateCompanionBuilder =
       Value<String?> passwordHash,
       Value<String?> displayName,
       Value<String?> favoriteTeamId,
+      Value<bool> isLoggedIn,
       Value<String> themeMode,
       Value<bool> notificationsOn,
       Value<String> language,
@@ -3993,6 +4049,7 @@ typedef $$UserPreferencesTableUpdateCompanionBuilder =
       Value<String?> passwordHash,
       Value<String?> displayName,
       Value<String?> favoriteTeamId,
+      Value<bool> isLoggedIn,
       Value<String> themeMode,
       Value<bool> notificationsOn,
       Value<String> language,
@@ -4057,6 +4114,11 @@ class $$UserPreferencesTableFilterComposer
 
   ColumnFilters<String> get displayName => $composableBuilder(
     column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4133,6 +4195,11 @@ class $$UserPreferencesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get themeMode => $composableBuilder(
     column: $table.themeMode,
     builder: (column) => ColumnOrderings(column),
@@ -4199,6 +4266,11 @@ class $$UserPreferencesTableAnnotationComposer
 
   GeneratedColumn<String> get displayName => $composableBuilder(
     column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isLoggedIn => $composableBuilder(
+    column: $table.isLoggedIn,
     builder: (column) => column,
   );
 
@@ -4275,6 +4347,7 @@ class $$UserPreferencesTableTableManager
                 Value<String?> passwordHash = const Value.absent(),
                 Value<String?> displayName = const Value.absent(),
                 Value<String?> favoriteTeamId = const Value.absent(),
+                Value<bool> isLoggedIn = const Value.absent(),
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
                 Value<String> language = const Value.absent(),
@@ -4285,6 +4358,7 @@ class $$UserPreferencesTableTableManager
                 passwordHash: passwordHash,
                 displayName: displayName,
                 favoriteTeamId: favoriteTeamId,
+                isLoggedIn: isLoggedIn,
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,
                 language: language,
@@ -4297,6 +4371,7 @@ class $$UserPreferencesTableTableManager
                 Value<String?> passwordHash = const Value.absent(),
                 Value<String?> displayName = const Value.absent(),
                 Value<String?> favoriteTeamId = const Value.absent(),
+                Value<bool> isLoggedIn = const Value.absent(),
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
                 Value<String> language = const Value.absent(),
@@ -4307,6 +4382,7 @@ class $$UserPreferencesTableTableManager
                 passwordHash: passwordHash,
                 displayName: displayName,
                 favoriteTeamId: favoriteTeamId,
+                isLoggedIn: isLoggedIn,
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,
                 language: language,

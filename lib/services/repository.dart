@@ -7,8 +7,8 @@ class NbaRepository {
   final AppDatabase _db;
   final NbaApiService _api;
 
-  Map<String, String> _teamNames = {};
-  Map<String, String> _teamCities = {};
+  final Map<String, String> _teamNames = {};
+  final Map<String, String> _teamCities = {};
 
   NbaRepository(this._db, this._api);
 

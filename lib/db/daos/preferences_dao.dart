@@ -10,13 +10,88 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
   PreferencesDao(super.db);
 
   Future<UserPreference?> getPreferences() =>
-      select(userPreferences).getSingleOrNull();
+      (select(userPreferences)
+            ..where((p) => p.isLoggedIn.equals(true))
+            ..limit(1))
+          .getSingleOrNull();
 
   Stream<UserPreference?> watchPreferences() =>
-      select(userPreferences).watchSingleOrNull();
+      (select(userPreferences)
+            ..where((p) => p.isLoggedIn.equals(true))
+            ..limit(1))
+          .watchSingleOrNull();
 
-  Future<void> upsertPreferences(UserPreferencesCompanion prefs) =>
-      into(userPreferences).insertOnConflictUpdate(prefs);
+  Future<UserPreference?> getUserByEmail(String email) async {
+    final results = await (select(
+      userPreferences,
+    )..where((p) => p.email.equals(email))).get();
+    return results.isEmpty ? null : results.first;
+  }
+
+  Future<void> registerUser(String email, String passwordHash) async {
+    final existing = await getUserByEmail(email);
+    if (existing != null) {
+      throw Exception('Email ja registado');
+    }
+
+    await into(userPreferences).insert(
+      UserPreferencesCompanion(
+        email: Value(email),
+        passwordHash: Value(passwordHash),
+        isLoggedIn: const Value(false),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> setLoggedIn(String email) async {
+    final user = await getUserByEmail(email);
+    if (user == null) {
+      throw Exception('Email nao registado');
+    }
+
+    await update(userPreferences).write(
+      UserPreferencesCompanion(
+        isLoggedIn: const Value(false),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+
+    await (update(userPreferences)..where((p) => p.id.equals(user.id))).write(
+      UserPreferencesCompanion(
+        isLoggedIn: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> setLoggedOut() async {
+    final prefs = await getPreferences();
+    if (prefs != null) {
+      await (update(
+        userPreferences,
+      )..where((p) => p.id.equals(prefs.id))).write(
+        UserPreferencesCompanion(
+          isLoggedIn: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+  }
+
+  Future<void> updateFavoriteTeam(String teamId) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(
+      userPreferences,
+    )..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        favoriteTeamId: Value(teamId),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
 
   UserPreferencesCompanion buildCompanion({String? email}) {
     return UserPreferencesCompanion(
@@ -24,50 +99,4 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
       updatedAt: Value(DateTime.now()),
     );
   }
-
-  Future<void> updateFavoriteTeam(String teamId) async {
-    final prefs = await getPreferences();
-    if (prefs == null) {
-      await upsertPreferences(
-        UserPreferencesCompanion(
-          favoriteTeamId: Value(teamId),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-    } else {
-      await (update(
-        userPreferences,
-      )..where((p) => p.id.equals(prefs.id))).write(
-        UserPreferencesCompanion(
-          favoriteTeamId: Value(teamId),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-    }
-  }
-
-  Future<void> updateEmail(String email) async {
-    final prefs = await getPreferences();
-    if (prefs == null) {
-      await upsertPreferences(
-        UserPreferencesCompanion(
-          email: Value(email),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-    } else {
-      await (update(
-        userPreferences,
-      )..where((p) => p.id.equals(prefs.id))).write(
-        UserPreferencesCompanion(
-          email: Value(email),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-    }
-  }
-
-  Future<UserPreference?> getUserByEmail(String email) => (select(
-    userPreferences,
-  )..where((p) => p.email.equals(email))).getSingleOrNull();
 }

@@ -13,5 +13,10 @@ class UserPreferences extends Table {
   BoolColumn get notificationsOn =>
       boolean().withDefault(const Constant(true))();
   TextColumn get language => text().withDefault(const Constant('pt'))();
+  TextColumn get measurementUnit =>
+      text().withDefault(const Constant('metric'))();
+  TextColumn get currencyCode => text().withDefault(const Constant('EUR'))();
+  BoolColumn get favoriteTeamAlerts =>
+      boolean().withDefault(const Constant(true))();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 }

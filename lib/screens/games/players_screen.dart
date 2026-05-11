@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
@@ -56,6 +58,46 @@ class _PlayersScreenState extends State<PlayersScreen> {
     } catch (e) {
       setState(() => _loading = false);
     }
+  }
+
+  Widget _playerAvatar(Player player, ThemeData theme) {
+    final photoPath = player.photoWebpPath;
+    if (photoPath != null && photoPath.isNotEmpty) {
+      final imageProvider = photoPath.startsWith('assets/')
+          ? AssetImage(photoPath)
+          : photoPath.startsWith('http')
+          ? CachedNetworkImageProvider(photoPath)
+          : File(photoPath).existsSync()
+          ? FileImage(File(photoPath)) as ImageProvider
+          : null;
+
+      if (imageProvider == null) {
+        return _initialsAvatar(player, theme);
+      }
+
+      return CircleAvatar(
+        radius: 26,
+        backgroundImage: imageProvider,
+        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+      );
+    }
+
+    return _initialsAvatar(player, theme);
+  }
+
+  Widget _initialsAvatar(Player player, ThemeData theme) {
+    return CircleAvatar(
+      radius: 26,
+      backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+      child: Text(
+        player.fullName.isNotEmpty ? player.fullName[0] : '?',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 
   @override
@@ -143,21 +185,7 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           ),
                           child: Row(
                             children: [
-                              CircleAvatar(
-                                radius: 26,
-                                backgroundColor: theme.colorScheme.primary
-                                    .withOpacity(0.3),
-                                child: Text(
-                                  player.fullName.isNotEmpty
-                                      ? player.fullName[0]
-                                      : '?',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
+                              _playerAvatar(player, theme),
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Column(

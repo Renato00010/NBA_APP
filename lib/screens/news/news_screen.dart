@@ -111,8 +111,9 @@ class _NewsScreenState extends State<NewsScreen> {
                                   fit: BoxFit.cover,
                                   placeholder: (context, url) => Container(
                                     height: 180,
-                                    color: theme.colorScheme.primary
-                                        .withOpacity(0.2),
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     child: const Center(
                                       child: CircularProgressIndicator(),
                                     ),
@@ -121,7 +122,7 @@ class _NewsScreenState extends State<NewsScreen> {
                                       Container(
                                         height: 180,
                                         color: theme.colorScheme.primary
-                                            .withOpacity(0.2),
+                                            .withValues(alpha: 0.2),
                                         child: const Icon(
                                           Icons.image_outlined,
                                           color: Colors.white54,
@@ -131,8 +132,8 @@ class _NewsScreenState extends State<NewsScreen> {
                                 )
                               : Container(
                                   height: 180,
-                                  color: theme.colorScheme.primary.withOpacity(
-                                    0.2,
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.2,
                                   ),
                                   child: const Center(
                                     child: Icon(

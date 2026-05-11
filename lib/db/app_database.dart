@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -38,6 +38,21 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 3) {
         await m.addColumn(userPreferences, userPreferences.isLoggedIn);
+      }
+      if (from < 4) {
+        await m.addColumn(userPreferences, userPreferences.measurementUnit);
+        await m.addColumn(userPreferences, userPreferences.currencyCode);
+        await m.addColumn(userPreferences, userPreferences.favoriteTeamAlerts);
+      }
+      if (from < 5) {
+        await m.addColumn(players, players.displayName);
+        await m.addColumn(players, players.jerseyNumber);
+        await m.addColumn(players, players.heightCm);
+        await m.addColumn(players, players.weightKg);
+        await m.addColumn(players, players.birthDate);
+        await m.addColumn(players, players.country);
+        await m.addColumn(players, players.previousTeam);
+        await m.addColumn(players, players.experienceYears);
       }
     },
   );

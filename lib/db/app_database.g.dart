@@ -570,6 +570,17 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _positionMeta = const VerificationMeta(
     'position',
   );
@@ -579,6 +590,83 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     aliasedName,
     true,
     type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _jerseyNumberMeta = const VerificationMeta(
+    'jerseyNumber',
+  );
+  @override
+  late final GeneratedColumn<String> jerseyNumber = GeneratedColumn<String>(
+    'jersey_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _heightCmMeta = const VerificationMeta(
+    'heightCm',
+  );
+  @override
+  late final GeneratedColumn<double> heightCm = GeneratedColumn<double>(
+    'height_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _birthDateMeta = const VerificationMeta(
+    'birthDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> birthDate = GeneratedColumn<DateTime>(
+    'birth_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countryMeta = const VerificationMeta(
+    'country',
+  );
+  @override
+  late final GeneratedColumn<String> country = GeneratedColumn<String>(
+    'country',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _previousTeamMeta = const VerificationMeta(
+    'previousTeam',
+  );
+  @override
+  late final GeneratedColumn<String> previousTeam = GeneratedColumn<String>(
+    'previous_team',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _experienceYearsMeta = const VerificationMeta(
+    'experienceYears',
+  );
+  @override
+  late final GeneratedColumn<int> experienceYears = GeneratedColumn<int>(
+    'experience_years',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _ppgMeta = const VerificationMeta('ppg');
@@ -659,7 +747,15 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     playerId,
     teamId,
     fullName,
+    displayName,
     position,
+    jerseyNumber,
+    heightCm,
+    weightKg,
+    birthDate,
+    country,
+    previousTeam,
+    experienceYears,
     ppg,
     rpg,
     apg,
@@ -704,10 +800,70 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     } else if (isInserting) {
       context.missing(_fullNameMeta);
     }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
     if (data.containsKey('position')) {
       context.handle(
         _positionMeta,
         position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    if (data.containsKey('jersey_number')) {
+      context.handle(
+        _jerseyNumberMeta,
+        jerseyNumber.isAcceptableOrUnknown(
+          data['jersey_number']!,
+          _jerseyNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('height_cm')) {
+      context.handle(
+        _heightCmMeta,
+        heightCm.isAcceptableOrUnknown(data['height_cm']!, _heightCmMeta),
+      );
+    }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    }
+    if (data.containsKey('birth_date')) {
+      context.handle(
+        _birthDateMeta,
+        birthDate.isAcceptableOrUnknown(data['birth_date']!, _birthDateMeta),
+      );
+    }
+    if (data.containsKey('country')) {
+      context.handle(
+        _countryMeta,
+        country.isAcceptableOrUnknown(data['country']!, _countryMeta),
+      );
+    }
+    if (data.containsKey('previous_team')) {
+      context.handle(
+        _previousTeamMeta,
+        previousTeam.isAcceptableOrUnknown(
+          data['previous_team']!,
+          _previousTeamMeta,
+        ),
+      );
+    }
+    if (data.containsKey('experience_years')) {
+      context.handle(
+        _experienceYearsMeta,
+        experienceYears.isAcceptableOrUnknown(
+          data['experience_years']!,
+          _experienceYearsMeta,
+        ),
       );
     }
     if (data.containsKey('ppg')) {
@@ -776,9 +932,41 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.string,
         data['${effectivePrefix}full_name'],
       )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
       position: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}position'],
+      ),
+      jerseyNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}jersey_number'],
+      ),
+      heightCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}height_cm'],
+      ),
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      ),
+      birthDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}birth_date'],
+      ),
+      country: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country'],
+      ),
+      previousTeam: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}previous_team'],
+      ),
+      experienceYears: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}experience_years'],
       ),
       ppg: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
@@ -821,7 +1009,15 @@ class Player extends DataClass implements Insertable<Player> {
   final String playerId;
   final String teamId;
   final String fullName;
+  final String? displayName;
   final String? position;
+  final String? jerseyNumber;
+  final double? heightCm;
+  final double? weightKg;
+  final DateTime? birthDate;
+  final String? country;
+  final String? previousTeam;
+  final int? experienceYears;
   final double ppg;
   final double rpg;
   final double apg;
@@ -833,7 +1029,15 @@ class Player extends DataClass implements Insertable<Player> {
     required this.playerId,
     required this.teamId,
     required this.fullName,
+    this.displayName,
     this.position,
+    this.jerseyNumber,
+    this.heightCm,
+    this.weightKg,
+    this.birthDate,
+    this.country,
+    this.previousTeam,
+    this.experienceYears,
     required this.ppg,
     required this.rpg,
     required this.apg,
@@ -848,8 +1052,32 @@ class Player extends DataClass implements Insertable<Player> {
     map['player_id'] = Variable<String>(playerId);
     map['team_id'] = Variable<String>(teamId);
     map['full_name'] = Variable<String>(fullName);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
     if (!nullToAbsent || position != null) {
       map['position'] = Variable<String>(position);
+    }
+    if (!nullToAbsent || jerseyNumber != null) {
+      map['jersey_number'] = Variable<String>(jerseyNumber);
+    }
+    if (!nullToAbsent || heightCm != null) {
+      map['height_cm'] = Variable<double>(heightCm);
+    }
+    if (!nullToAbsent || weightKg != null) {
+      map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || birthDate != null) {
+      map['birth_date'] = Variable<DateTime>(birthDate);
+    }
+    if (!nullToAbsent || country != null) {
+      map['country'] = Variable<String>(country);
+    }
+    if (!nullToAbsent || previousTeam != null) {
+      map['previous_team'] = Variable<String>(previousTeam);
+    }
+    if (!nullToAbsent || experienceYears != null) {
+      map['experience_years'] = Variable<int>(experienceYears);
     }
     map['ppg'] = Variable<double>(ppg);
     map['rpg'] = Variable<double>(rpg);
@@ -868,9 +1096,33 @@ class Player extends DataClass implements Insertable<Player> {
       playerId: Value(playerId),
       teamId: Value(teamId),
       fullName: Value(fullName),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
       position: position == null && nullToAbsent
           ? const Value.absent()
           : Value(position),
+      jerseyNumber: jerseyNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(jerseyNumber),
+      heightCm: heightCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(heightCm),
+      weightKg: weightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightKg),
+      birthDate: birthDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(birthDate),
+      country: country == null && nullToAbsent
+          ? const Value.absent()
+          : Value(country),
+      previousTeam: previousTeam == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousTeam),
+      experienceYears: experienceYears == null && nullToAbsent
+          ? const Value.absent()
+          : Value(experienceYears),
       ppg: Value(ppg),
       rpg: Value(rpg),
       apg: Value(apg),
@@ -892,7 +1144,15 @@ class Player extends DataClass implements Insertable<Player> {
       playerId: serializer.fromJson<String>(json['playerId']),
       teamId: serializer.fromJson<String>(json['teamId']),
       fullName: serializer.fromJson<String>(json['fullName']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
       position: serializer.fromJson<String?>(json['position']),
+      jerseyNumber: serializer.fromJson<String?>(json['jerseyNumber']),
+      heightCm: serializer.fromJson<double?>(json['heightCm']),
+      weightKg: serializer.fromJson<double?>(json['weightKg']),
+      birthDate: serializer.fromJson<DateTime?>(json['birthDate']),
+      country: serializer.fromJson<String?>(json['country']),
+      previousTeam: serializer.fromJson<String?>(json['previousTeam']),
+      experienceYears: serializer.fromJson<int?>(json['experienceYears']),
       ppg: serializer.fromJson<double>(json['ppg']),
       rpg: serializer.fromJson<double>(json['rpg']),
       apg: serializer.fromJson<double>(json['apg']),
@@ -909,7 +1169,15 @@ class Player extends DataClass implements Insertable<Player> {
       'playerId': serializer.toJson<String>(playerId),
       'teamId': serializer.toJson<String>(teamId),
       'fullName': serializer.toJson<String>(fullName),
+      'displayName': serializer.toJson<String?>(displayName),
       'position': serializer.toJson<String?>(position),
+      'jerseyNumber': serializer.toJson<String?>(jerseyNumber),
+      'heightCm': serializer.toJson<double?>(heightCm),
+      'weightKg': serializer.toJson<double?>(weightKg),
+      'birthDate': serializer.toJson<DateTime?>(birthDate),
+      'country': serializer.toJson<String?>(country),
+      'previousTeam': serializer.toJson<String?>(previousTeam),
+      'experienceYears': serializer.toJson<int?>(experienceYears),
       'ppg': serializer.toJson<double>(ppg),
       'rpg': serializer.toJson<double>(rpg),
       'apg': serializer.toJson<double>(apg),
@@ -924,7 +1192,15 @@ class Player extends DataClass implements Insertable<Player> {
     String? playerId,
     String? teamId,
     String? fullName,
+    Value<String?> displayName = const Value.absent(),
     Value<String?> position = const Value.absent(),
+    Value<String?> jerseyNumber = const Value.absent(),
+    Value<double?> heightCm = const Value.absent(),
+    Value<double?> weightKg = const Value.absent(),
+    Value<DateTime?> birthDate = const Value.absent(),
+    Value<String?> country = const Value.absent(),
+    Value<String?> previousTeam = const Value.absent(),
+    Value<int?> experienceYears = const Value.absent(),
     double? ppg,
     double? rpg,
     double? apg,
@@ -936,7 +1212,17 @@ class Player extends DataClass implements Insertable<Player> {
     playerId: playerId ?? this.playerId,
     teamId: teamId ?? this.teamId,
     fullName: fullName ?? this.fullName,
+    displayName: displayName.present ? displayName.value : this.displayName,
     position: position.present ? position.value : this.position,
+    jerseyNumber: jerseyNumber.present ? jerseyNumber.value : this.jerseyNumber,
+    heightCm: heightCm.present ? heightCm.value : this.heightCm,
+    weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    birthDate: birthDate.present ? birthDate.value : this.birthDate,
+    country: country.present ? country.value : this.country,
+    previousTeam: previousTeam.present ? previousTeam.value : this.previousTeam,
+    experienceYears: experienceYears.present
+        ? experienceYears.value
+        : this.experienceYears,
     ppg: ppg ?? this.ppg,
     rpg: rpg ?? this.rpg,
     apg: apg ?? this.apg,
@@ -952,7 +1238,23 @@ class Player extends DataClass implements Insertable<Player> {
       playerId: data.playerId.present ? data.playerId.value : this.playerId,
       teamId: data.teamId.present ? data.teamId.value : this.teamId,
       fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
       position: data.position.present ? data.position.value : this.position,
+      jerseyNumber: data.jerseyNumber.present
+          ? data.jerseyNumber.value
+          : this.jerseyNumber,
+      heightCm: data.heightCm.present ? data.heightCm.value : this.heightCm,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      birthDate: data.birthDate.present ? data.birthDate.value : this.birthDate,
+      country: data.country.present ? data.country.value : this.country,
+      previousTeam: data.previousTeam.present
+          ? data.previousTeam.value
+          : this.previousTeam,
+      experienceYears: data.experienceYears.present
+          ? data.experienceYears.value
+          : this.experienceYears,
       ppg: data.ppg.present ? data.ppg.value : this.ppg,
       rpg: data.rpg.present ? data.rpg.value : this.rpg,
       apg: data.apg.present ? data.apg.value : this.apg,
@@ -971,7 +1273,15 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('playerId: $playerId, ')
           ..write('teamId: $teamId, ')
           ..write('fullName: $fullName, ')
+          ..write('displayName: $displayName, ')
           ..write('position: $position, ')
+          ..write('jerseyNumber: $jerseyNumber, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('country: $country, ')
+          ..write('previousTeam: $previousTeam, ')
+          ..write('experienceYears: $experienceYears, ')
           ..write('ppg: $ppg, ')
           ..write('rpg: $rpg, ')
           ..write('apg: $apg, ')
@@ -988,7 +1298,15 @@ class Player extends DataClass implements Insertable<Player> {
     playerId,
     teamId,
     fullName,
+    displayName,
     position,
+    jerseyNumber,
+    heightCm,
+    weightKg,
+    birthDate,
+    country,
+    previousTeam,
+    experienceYears,
     ppg,
     rpg,
     apg,
@@ -1004,7 +1322,15 @@ class Player extends DataClass implements Insertable<Player> {
           other.playerId == this.playerId &&
           other.teamId == this.teamId &&
           other.fullName == this.fullName &&
+          other.displayName == this.displayName &&
           other.position == this.position &&
+          other.jerseyNumber == this.jerseyNumber &&
+          other.heightCm == this.heightCm &&
+          other.weightKg == this.weightKg &&
+          other.birthDate == this.birthDate &&
+          other.country == this.country &&
+          other.previousTeam == this.previousTeam &&
+          other.experienceYears == this.experienceYears &&
           other.ppg == this.ppg &&
           other.rpg == this.rpg &&
           other.apg == this.apg &&
@@ -1018,7 +1344,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<String> playerId;
   final Value<String> teamId;
   final Value<String> fullName;
+  final Value<String?> displayName;
   final Value<String?> position;
+  final Value<String?> jerseyNumber;
+  final Value<double?> heightCm;
+  final Value<double?> weightKg;
+  final Value<DateTime?> birthDate;
+  final Value<String?> country;
+  final Value<String?> previousTeam;
+  final Value<int?> experienceYears;
   final Value<double> ppg;
   final Value<double> rpg;
   final Value<double> apg;
@@ -1031,7 +1365,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.playerId = const Value.absent(),
     this.teamId = const Value.absent(),
     this.fullName = const Value.absent(),
+    this.displayName = const Value.absent(),
     this.position = const Value.absent(),
+    this.jerseyNumber = const Value.absent(),
+    this.heightCm = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.country = const Value.absent(),
+    this.previousTeam = const Value.absent(),
+    this.experienceYears = const Value.absent(),
     this.ppg = const Value.absent(),
     this.rpg = const Value.absent(),
     this.apg = const Value.absent(),
@@ -1045,7 +1387,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     required String playerId,
     required String teamId,
     required String fullName,
+    this.displayName = const Value.absent(),
     this.position = const Value.absent(),
+    this.jerseyNumber = const Value.absent(),
+    this.heightCm = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.country = const Value.absent(),
+    this.previousTeam = const Value.absent(),
+    this.experienceYears = const Value.absent(),
     this.ppg = const Value.absent(),
     this.rpg = const Value.absent(),
     this.apg = const Value.absent(),
@@ -1061,7 +1411,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<String>? playerId,
     Expression<String>? teamId,
     Expression<String>? fullName,
+    Expression<String>? displayName,
     Expression<String>? position,
+    Expression<String>? jerseyNumber,
+    Expression<double>? heightCm,
+    Expression<double>? weightKg,
+    Expression<DateTime>? birthDate,
+    Expression<String>? country,
+    Expression<String>? previousTeam,
+    Expression<int>? experienceYears,
     Expression<double>? ppg,
     Expression<double>? rpg,
     Expression<double>? apg,
@@ -1075,7 +1433,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (playerId != null) 'player_id': playerId,
       if (teamId != null) 'team_id': teamId,
       if (fullName != null) 'full_name': fullName,
+      if (displayName != null) 'display_name': displayName,
       if (position != null) 'position': position,
+      if (jerseyNumber != null) 'jersey_number': jerseyNumber,
+      if (heightCm != null) 'height_cm': heightCm,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (birthDate != null) 'birth_date': birthDate,
+      if (country != null) 'country': country,
+      if (previousTeam != null) 'previous_team': previousTeam,
+      if (experienceYears != null) 'experience_years': experienceYears,
       if (ppg != null) 'ppg': ppg,
       if (rpg != null) 'rpg': rpg,
       if (apg != null) 'apg': apg,
@@ -1091,7 +1457,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<String>? playerId,
     Value<String>? teamId,
     Value<String>? fullName,
+    Value<String?>? displayName,
     Value<String?>? position,
+    Value<String?>? jerseyNumber,
+    Value<double?>? heightCm,
+    Value<double?>? weightKg,
+    Value<DateTime?>? birthDate,
+    Value<String?>? country,
+    Value<String?>? previousTeam,
+    Value<int?>? experienceYears,
     Value<double>? ppg,
     Value<double>? rpg,
     Value<double>? apg,
@@ -1105,7 +1479,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       playerId: playerId ?? this.playerId,
       teamId: teamId ?? this.teamId,
       fullName: fullName ?? this.fullName,
+      displayName: displayName ?? this.displayName,
       position: position ?? this.position,
+      jerseyNumber: jerseyNumber ?? this.jerseyNumber,
+      heightCm: heightCm ?? this.heightCm,
+      weightKg: weightKg ?? this.weightKg,
+      birthDate: birthDate ?? this.birthDate,
+      country: country ?? this.country,
+      previousTeam: previousTeam ?? this.previousTeam,
+      experienceYears: experienceYears ?? this.experienceYears,
       ppg: ppg ?? this.ppg,
       rpg: rpg ?? this.rpg,
       apg: apg ?? this.apg,
@@ -1129,8 +1511,32 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (fullName.present) {
       map['full_name'] = Variable<String>(fullName.value);
     }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
     if (position.present) {
       map['position'] = Variable<String>(position.value);
+    }
+    if (jerseyNumber.present) {
+      map['jersey_number'] = Variable<String>(jerseyNumber.value);
+    }
+    if (heightCm.present) {
+      map['height_cm'] = Variable<double>(heightCm.value);
+    }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (birthDate.present) {
+      map['birth_date'] = Variable<DateTime>(birthDate.value);
+    }
+    if (country.present) {
+      map['country'] = Variable<String>(country.value);
+    }
+    if (previousTeam.present) {
+      map['previous_team'] = Variable<String>(previousTeam.value);
+    }
+    if (experienceYears.present) {
+      map['experience_years'] = Variable<int>(experienceYears.value);
     }
     if (ppg.present) {
       map['ppg'] = Variable<double>(ppg.value);
@@ -1165,7 +1571,15 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('playerId: $playerId, ')
           ..write('teamId: $teamId, ')
           ..write('fullName: $fullName, ')
+          ..write('displayName: $displayName, ')
           ..write('position: $position, ')
+          ..write('jerseyNumber: $jerseyNumber, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('country: $country, ')
+          ..write('previousTeam: $previousTeam, ')
+          ..write('experienceYears: $experienceYears, ')
           ..write('ppg: $ppg, ')
           ..write('rpg: $rpg, ')
           ..write('apg: $apg, ')
@@ -1821,6 +2235,44 @@ class $UserPreferencesTable extends UserPreferences
     requiredDuringInsert: false,
     defaultValue: const Constant('pt'),
   );
+  static const VerificationMeta _measurementUnitMeta = const VerificationMeta(
+    'measurementUnit',
+  );
+  @override
+  late final GeneratedColumn<String> measurementUnit = GeneratedColumn<String>(
+    'measurement_unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('metric'),
+  );
+  static const VerificationMeta _currencyCodeMeta = const VerificationMeta(
+    'currencyCode',
+  );
+  @override
+  late final GeneratedColumn<String> currencyCode = GeneratedColumn<String>(
+    'currency_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('EUR'),
+  );
+  static const VerificationMeta _favoriteTeamAlertsMeta =
+      const VerificationMeta('favoriteTeamAlerts');
+  @override
+  late final GeneratedColumn<bool> favoriteTeamAlerts = GeneratedColumn<bool>(
+    'favorite_team_alerts',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("favorite_team_alerts" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -1844,6 +2296,9 @@ class $UserPreferencesTable extends UserPreferences
     themeMode,
     notificationsOn,
     language,
+    measurementUnit,
+    currencyCode,
+    favoriteTeamAlerts,
     updatedAt,
   ];
   @override
@@ -1924,6 +2379,33 @@ class $UserPreferencesTable extends UserPreferences
         language.isAcceptableOrUnknown(data['language']!, _languageMeta),
       );
     }
+    if (data.containsKey('measurement_unit')) {
+      context.handle(
+        _measurementUnitMeta,
+        measurementUnit.isAcceptableOrUnknown(
+          data['measurement_unit']!,
+          _measurementUnitMeta,
+        ),
+      );
+    }
+    if (data.containsKey('currency_code')) {
+      context.handle(
+        _currencyCodeMeta,
+        currencyCode.isAcceptableOrUnknown(
+          data['currency_code']!,
+          _currencyCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('favorite_team_alerts')) {
+      context.handle(
+        _favoriteTeamAlertsMeta,
+        favoriteTeamAlerts.isAcceptableOrUnknown(
+          data['favorite_team_alerts']!,
+          _favoriteTeamAlertsMeta,
+        ),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -1975,6 +2457,18 @@ class $UserPreferencesTable extends UserPreferences
         DriftSqlType.string,
         data['${effectivePrefix}language'],
       )!,
+      measurementUnit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}measurement_unit'],
+      )!,
+      currencyCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency_code'],
+      )!,
+      favoriteTeamAlerts: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}favorite_team_alerts'],
+      )!,
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -1998,6 +2492,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   final String themeMode;
   final bool notificationsOn;
   final String language;
+  final String measurementUnit;
+  final String currencyCode;
+  final bool favoriteTeamAlerts;
   final DateTime updatedAt;
   const UserPreference({
     required this.id,
@@ -2009,6 +2506,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     required this.themeMode,
     required this.notificationsOn,
     required this.language,
+    required this.measurementUnit,
+    required this.currencyCode,
+    required this.favoriteTeamAlerts,
     required this.updatedAt,
   });
   @override
@@ -2031,6 +2531,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     map['theme_mode'] = Variable<String>(themeMode);
     map['notifications_on'] = Variable<bool>(notificationsOn);
     map['language'] = Variable<String>(language);
+    map['measurement_unit'] = Variable<String>(measurementUnit);
+    map['currency_code'] = Variable<String>(currencyCode);
+    map['favorite_team_alerts'] = Variable<bool>(favoriteTeamAlerts);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -2054,6 +2557,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       themeMode: Value(themeMode),
       notificationsOn: Value(notificationsOn),
       language: Value(language),
+      measurementUnit: Value(measurementUnit),
+      currencyCode: Value(currencyCode),
+      favoriteTeamAlerts: Value(favoriteTeamAlerts),
       updatedAt: Value(updatedAt),
     );
   }
@@ -2073,6 +2579,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       themeMode: serializer.fromJson<String>(json['themeMode']),
       notificationsOn: serializer.fromJson<bool>(json['notificationsOn']),
       language: serializer.fromJson<String>(json['language']),
+      measurementUnit: serializer.fromJson<String>(json['measurementUnit']),
+      currencyCode: serializer.fromJson<String>(json['currencyCode']),
+      favoriteTeamAlerts: serializer.fromJson<bool>(json['favoriteTeamAlerts']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -2089,6 +2598,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       'themeMode': serializer.toJson<String>(themeMode),
       'notificationsOn': serializer.toJson<bool>(notificationsOn),
       'language': serializer.toJson<String>(language),
+      'measurementUnit': serializer.toJson<String>(measurementUnit),
+      'currencyCode': serializer.toJson<String>(currencyCode),
+      'favoriteTeamAlerts': serializer.toJson<bool>(favoriteTeamAlerts),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
@@ -2103,6 +2615,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     String? themeMode,
     bool? notificationsOn,
     String? language,
+    String? measurementUnit,
+    String? currencyCode,
+    bool? favoriteTeamAlerts,
     DateTime? updatedAt,
   }) => UserPreference(
     id: id ?? this.id,
@@ -2116,6 +2631,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     themeMode: themeMode ?? this.themeMode,
     notificationsOn: notificationsOn ?? this.notificationsOn,
     language: language ?? this.language,
+    measurementUnit: measurementUnit ?? this.measurementUnit,
+    currencyCode: currencyCode ?? this.currencyCode,
+    favoriteTeamAlerts: favoriteTeamAlerts ?? this.favoriteTeamAlerts,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   UserPreference copyWithCompanion(UserPreferencesCompanion data) {
@@ -2139,6 +2657,15 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ? data.notificationsOn.value
           : this.notificationsOn,
       language: data.language.present ? data.language.value : this.language,
+      measurementUnit: data.measurementUnit.present
+          ? data.measurementUnit.value
+          : this.measurementUnit,
+      currencyCode: data.currencyCode.present
+          ? data.currencyCode.value
+          : this.currencyCode,
+      favoriteTeamAlerts: data.favoriteTeamAlerts.present
+          ? data.favoriteTeamAlerts.value
+          : this.favoriteTeamAlerts,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -2155,6 +2682,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
           ..write('language: $language, ')
+          ..write('measurementUnit: $measurementUnit, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('favoriteTeamAlerts: $favoriteTeamAlerts, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -2171,6 +2701,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     themeMode,
     notificationsOn,
     language,
+    measurementUnit,
+    currencyCode,
+    favoriteTeamAlerts,
     updatedAt,
   );
   @override
@@ -2186,6 +2719,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           other.themeMode == this.themeMode &&
           other.notificationsOn == this.notificationsOn &&
           other.language == this.language &&
+          other.measurementUnit == this.measurementUnit &&
+          other.currencyCode == this.currencyCode &&
+          other.favoriteTeamAlerts == this.favoriteTeamAlerts &&
           other.updatedAt == this.updatedAt);
 }
 
@@ -2199,6 +2735,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<String> themeMode;
   final Value<bool> notificationsOn;
   final Value<String> language;
+  final Value<String> measurementUnit;
+  final Value<String> currencyCode;
+  final Value<bool> favoriteTeamAlerts;
   final Value<DateTime> updatedAt;
   const UserPreferencesCompanion({
     this.id = const Value.absent(),
@@ -2210,6 +2749,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
     this.language = const Value.absent(),
+    this.measurementUnit = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.favoriteTeamAlerts = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   UserPreferencesCompanion.insert({
@@ -2222,6 +2764,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.themeMode = const Value.absent(),
     this.notificationsOn = const Value.absent(),
     this.language = const Value.absent(),
+    this.measurementUnit = const Value.absent(),
+    this.currencyCode = const Value.absent(),
+    this.favoriteTeamAlerts = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
   static Insertable<UserPreference> custom({
@@ -2234,6 +2779,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Expression<String>? themeMode,
     Expression<bool>? notificationsOn,
     Expression<String>? language,
+    Expression<String>? measurementUnit,
+    Expression<String>? currencyCode,
+    Expression<bool>? favoriteTeamAlerts,
     Expression<DateTime>? updatedAt,
   }) {
     return RawValuesInsertable({
@@ -2246,6 +2794,10 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       if (themeMode != null) 'theme_mode': themeMode,
       if (notificationsOn != null) 'notifications_on': notificationsOn,
       if (language != null) 'language': language,
+      if (measurementUnit != null) 'measurement_unit': measurementUnit,
+      if (currencyCode != null) 'currency_code': currencyCode,
+      if (favoriteTeamAlerts != null)
+        'favorite_team_alerts': favoriteTeamAlerts,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
@@ -2260,6 +2812,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Value<String>? themeMode,
     Value<bool>? notificationsOn,
     Value<String>? language,
+    Value<String>? measurementUnit,
+    Value<String>? currencyCode,
+    Value<bool>? favoriteTeamAlerts,
     Value<DateTime>? updatedAt,
   }) {
     return UserPreferencesCompanion(
@@ -2272,6 +2827,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       themeMode: themeMode ?? this.themeMode,
       notificationsOn: notificationsOn ?? this.notificationsOn,
       language: language ?? this.language,
+      measurementUnit: measurementUnit ?? this.measurementUnit,
+      currencyCode: currencyCode ?? this.currencyCode,
+      favoriteTeamAlerts: favoriteTeamAlerts ?? this.favoriteTeamAlerts,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -2306,6 +2864,15 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     if (language.present) {
       map['language'] = Variable<String>(language.value);
     }
+    if (measurementUnit.present) {
+      map['measurement_unit'] = Variable<String>(measurementUnit.value);
+    }
+    if (currencyCode.present) {
+      map['currency_code'] = Variable<String>(currencyCode.value);
+    }
+    if (favoriteTeamAlerts.present) {
+      map['favorite_team_alerts'] = Variable<bool>(favoriteTeamAlerts.value);
+    }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
@@ -2324,6 +2891,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
           ..write('themeMode: $themeMode, ')
           ..write('notificationsOn: $notificationsOn, ')
           ..write('language: $language, ')
+          ..write('measurementUnit: $measurementUnit, ')
+          ..write('currencyCode: $currencyCode, ')
+          ..write('favoriteTeamAlerts: $favoriteTeamAlerts, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
@@ -3137,7 +3707,15 @@ typedef $$PlayersTableCreateCompanionBuilder =
       required String playerId,
       required String teamId,
       required String fullName,
+      Value<String?> displayName,
       Value<String?> position,
+      Value<String?> jerseyNumber,
+      Value<double?> heightCm,
+      Value<double?> weightKg,
+      Value<DateTime?> birthDate,
+      Value<String?> country,
+      Value<String?> previousTeam,
+      Value<int?> experienceYears,
       Value<double> ppg,
       Value<double> rpg,
       Value<double> apg,
@@ -3152,7 +3730,15 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<String> playerId,
       Value<String> teamId,
       Value<String> fullName,
+      Value<String?> displayName,
       Value<String?> position,
+      Value<String?> jerseyNumber,
+      Value<double?> heightCm,
+      Value<double?> weightKg,
+      Value<DateTime?> birthDate,
+      Value<String?> country,
+      Value<String?> previousTeam,
+      Value<int?> experienceYears,
       Value<double> ppg,
       Value<double> rpg,
       Value<double> apg,
@@ -3204,8 +3790,48 @@ class $$PlayersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get position => $composableBuilder(
     column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get birthDate => $composableBuilder(
+    column: $table.birthDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3287,8 +3913,48 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get position => $composableBuilder(
     column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get birthDate => $composableBuilder(
+    column: $table.birthDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3366,8 +4032,40 @@ class $$PlayersTableAnnotationComposer
   GeneratedColumn<String> get fullName =>
       $composableBuilder(column: $table.fullName, builder: (column) => column);
 
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get heightCm =>
+      $composableBuilder(column: $table.heightCm, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get birthDate =>
+      $composableBuilder(column: $table.birthDate, builder: (column) => column);
+
+  GeneratedColumn<String> get country =>
+      $composableBuilder(column: $table.country, builder: (column) => column);
+
+  GeneratedColumn<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get ppg =>
       $composableBuilder(column: $table.ppg, builder: (column) => column);
@@ -3447,7 +4145,15 @@ class $$PlayersTableTableManager
                 Value<String> playerId = const Value.absent(),
                 Value<String> teamId = const Value.absent(),
                 Value<String> fullName = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
                 Value<String?> position = const Value.absent(),
+                Value<String?> jerseyNumber = const Value.absent(),
+                Value<double?> heightCm = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
+                Value<DateTime?> birthDate = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                Value<String?> previousTeam = const Value.absent(),
+                Value<int?> experienceYears = const Value.absent(),
                 Value<double> ppg = const Value.absent(),
                 Value<double> rpg = const Value.absent(),
                 Value<double> apg = const Value.absent(),
@@ -3460,7 +4166,15 @@ class $$PlayersTableTableManager
                 playerId: playerId,
                 teamId: teamId,
                 fullName: fullName,
+                displayName: displayName,
                 position: position,
+                jerseyNumber: jerseyNumber,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                birthDate: birthDate,
+                country: country,
+                previousTeam: previousTeam,
+                experienceYears: experienceYears,
                 ppg: ppg,
                 rpg: rpg,
                 apg: apg,
@@ -3475,7 +4189,15 @@ class $$PlayersTableTableManager
                 required String playerId,
                 required String teamId,
                 required String fullName,
+                Value<String?> displayName = const Value.absent(),
                 Value<String?> position = const Value.absent(),
+                Value<String?> jerseyNumber = const Value.absent(),
+                Value<double?> heightCm = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
+                Value<DateTime?> birthDate = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                Value<String?> previousTeam = const Value.absent(),
+                Value<int?> experienceYears = const Value.absent(),
                 Value<double> ppg = const Value.absent(),
                 Value<double> rpg = const Value.absent(),
                 Value<double> apg = const Value.absent(),
@@ -3488,7 +4210,15 @@ class $$PlayersTableTableManager
                 playerId: playerId,
                 teamId: teamId,
                 fullName: fullName,
+                displayName: displayName,
                 position: position,
+                jerseyNumber: jerseyNumber,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                birthDate: birthDate,
+                country: country,
+                previousTeam: previousTeam,
+                experienceYears: experienceYears,
                 ppg: ppg,
                 rpg: rpg,
                 apg: apg,
@@ -4040,6 +4770,9 @@ typedef $$UserPreferencesTableCreateCompanionBuilder =
       Value<String> themeMode,
       Value<bool> notificationsOn,
       Value<String> language,
+      Value<String> measurementUnit,
+      Value<String> currencyCode,
+      Value<bool> favoriteTeamAlerts,
       Value<DateTime> updatedAt,
     });
 typedef $$UserPreferencesTableUpdateCompanionBuilder =
@@ -4053,6 +4786,9 @@ typedef $$UserPreferencesTableUpdateCompanionBuilder =
       Value<String> themeMode,
       Value<bool> notificationsOn,
       Value<String> language,
+      Value<String> measurementUnit,
+      Value<String> currencyCode,
+      Value<bool> favoriteTeamAlerts,
       Value<DateTime> updatedAt,
     });
 
@@ -4137,6 +4873,21 @@ class $$UserPreferencesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get measurementUnit => $composableBuilder(
+    column: $table.measurementUnit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get favoriteTeamAlerts => $composableBuilder(
+    column: $table.favoriteTeamAlerts,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
@@ -4215,6 +4966,21 @@ class $$UserPreferencesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get measurementUnit => $composableBuilder(
+    column: $table.measurementUnit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get favoriteTeamAlerts => $composableBuilder(
+    column: $table.favoriteTeamAlerts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
@@ -4285,6 +5051,21 @@ class $$UserPreferencesTableAnnotationComposer
   GeneratedColumn<String> get language =>
       $composableBuilder(column: $table.language, builder: (column) => column);
 
+  GeneratedColumn<String> get measurementUnit => $composableBuilder(
+    column: $table.measurementUnit,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get currencyCode => $composableBuilder(
+    column: $table.currencyCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get favoriteTeamAlerts => $composableBuilder(
+    column: $table.favoriteTeamAlerts,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
@@ -4351,6 +5132,9 @@ class $$UserPreferencesTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> measurementUnit = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<bool> favoriteTeamAlerts = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserPreferencesCompanion(
                 id: id,
@@ -4362,6 +5146,9 @@ class $$UserPreferencesTableTableManager
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,
                 language: language,
+                measurementUnit: measurementUnit,
+                currencyCode: currencyCode,
+                favoriteTeamAlerts: favoriteTeamAlerts,
                 updatedAt: updatedAt,
               ),
           createCompanionCallback:
@@ -4375,6 +5162,9 @@ class $$UserPreferencesTableTableManager
                 Value<String> themeMode = const Value.absent(),
                 Value<bool> notificationsOn = const Value.absent(),
                 Value<String> language = const Value.absent(),
+                Value<String> measurementUnit = const Value.absent(),
+                Value<String> currencyCode = const Value.absent(),
+                Value<bool> favoriteTeamAlerts = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => UserPreferencesCompanion.insert(
                 id: id,
@@ -4386,6 +5176,9 @@ class $$UserPreferencesTableTableManager
                 themeMode: themeMode,
                 notificationsOn: notificationsOn,
                 language: language,
+                measurementUnit: measurementUnit,
+                currencyCode: currencyCode,
+                favoriteTeamAlerts: favoriteTeamAlerts,
                 updatedAt: updatedAt,
               ),
           withReferenceMapper: (p0) => p0

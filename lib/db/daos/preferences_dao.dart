@@ -83,11 +83,57 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
     final prefs = await getPreferences();
     if (prefs == null) return;
 
-    await (update(
-      userPreferences,
-    )..where((p) => p.id.equals(prefs.id))).write(
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
       UserPreferencesCompanion(
         favoriteTeamId: Value(teamId),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> updateMeasurementUnit(String measurementUnit) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        measurementUnit: Value(measurementUnit),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> updateCurrencyCode(String currencyCode) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        currencyCode: Value(currencyCode),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> updateFavoriteTeamAlerts(bool enabled) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        favoriteTeamAlerts: Value(enabled),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> updateNotifications(bool enabled) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        notificationsOn: Value(enabled),
         updatedAt: Value(DateTime.now()),
       ),
     );

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../main.dart';
-import '../../services/repository.dart';
 import '../../db/app_database.dart';
+import '../../widgets/team_logo.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -94,9 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: _teams.length,
                         itemBuilder: (context, index) {
                           final team = _teams[index];
-                          final logoUrl = NbaRepository.getTeamLogoUrl(
-                            team.teamId,
-                          );
                           return Container(
                             margin: const EdgeInsets.only(right: 10),
                             padding: const EdgeInsets.symmetric(
@@ -104,30 +100,23 @@ class _HomeScreenState extends State<HomeScreen> {
                               vertical: 8,
                             ),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withOpacity(
-                                0.15,
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.15,
                               ),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: theme.colorScheme.primary.withOpacity(
-                                  0.4,
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.4,
                                 ),
                               ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                CachedNetworkImage(
-                                  imageUrl: logoUrl,
-                                  height: 40,
-                                  width: 40,
-                                  placeholder: (context, url) =>
-                                      const SizedBox(width: 40, height: 40),
-                                  errorWidget: (context, url, error) => Icon(
-                                    Icons.sports_basketball,
-                                    color: theme.colorScheme.primary,
-                                    size: 28,
-                                  ),
+                                TeamLogo(
+                                  teamId: team.teamId,
+                                  size: 40,
+                                  fallbackColor: theme.colorScheme.primary,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -234,19 +223,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(
                                     child: Column(
                                       children: [
-                                        CachedNetworkImage(
-                                          imageUrl:
-                                              NbaRepository.getTeamLogoUrl(
-                                                game.homeTeamId,
-                                              ),
-                                          height: 36,
-                                          width: 36,
-                                          errorWidget: (context, url, error) =>
-                                              const Icon(
-                                                Icons.sports_basketball,
-                                                color: Colors.white38,
-                                                size: 28,
-                                              ),
+                                        TeamLogo(
+                                          teamId: game.homeTeamId,
+                                          size: 36,
+                                          fallbackColor: Colors.white38,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -289,19 +269,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Expanded(
                                     child: Column(
                                       children: [
-                                        CachedNetworkImage(
-                                          imageUrl:
-                                              NbaRepository.getTeamLogoUrl(
-                                                game.awayTeamId,
-                                              ),
-                                          height: 36,
-                                          width: 36,
-                                          errorWidget: (context, url, error) =>
-                                              const Icon(
-                                                Icons.sports_basketball,
-                                                color: Colors.white38,
-                                                size: 28,
-                                              ),
+                                        TeamLogo(
+                                          teamId: game.awayTeamId,
+                                          size: 36,
+                                          fallbackColor: Colors.white38,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(

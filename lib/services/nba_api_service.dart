@@ -50,12 +50,22 @@ class NbaApiService {
   }
 
   // Buscar jogadores
-  Future<List<dynamic>> getPlayers({String? search, int page = 1}) async {
+  Future<List<dynamic>> getPlayers({
+    String? search,
+    int page = 1,
+    List<int>? teamIds,
+  }) async {
     try {
-      final response = await _dio.get(
-        '/players',
-        queryParameters: {'search': ?search, 'page': page, 'per_page': 25},
-      );
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'per_page': 50, // Aumentado para obter mais jogadores de uma vez
+      };
+      if (search != null) queryParams['search'] = search;
+      if (teamIds != null && teamIds.isNotEmpty) {
+        queryParams['team_ids[]'] = teamIds;
+      }
+
+      final response = await _dio.get('/players', queryParameters: queryParams);
       return response.data['data'] as List<dynamic>;
     } on DioException catch (e) {
       throw Exception('Erro ao buscar jogadores: ${e.message}');
@@ -67,7 +77,10 @@ class NbaApiService {
     try {
       final response = await _dio.get(
         '/season_averages',
-        queryParameters: {'player_ids[]': playerId, 'season': 2024},
+        queryParameters: {
+          'player_ids[]': [playerId],
+          'season': 2023,
+        },
       );
       return response.data['data'] as List<dynamic>;
     } on DioException catch (e) {

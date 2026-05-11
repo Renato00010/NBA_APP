@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
+import '../../widgets/team_logo.dart';
 import 'players_screen.dart';
 
 class GamesScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _GamesScreenState extends State<GamesScreen> {
 
   Future<void> _loadGames() async {
     try {
+      await repository.getTeams();
       final games = await repository.getGamesByDate(DateTime.now());
       setState(() {
         _liveGames = games.where((g) => g.status == 'live').toList();
@@ -125,6 +127,10 @@ class _GamesScreenState extends State<GamesScreen> {
         itemBuilder: (context, index) {
           final game = games[index];
           final isLive = game.status == 'live';
+          final homeName = repository.getTeamName(game.homeTeamId);
+          final awayName = repository.getTeamName(game.awayTeamId);
+          final homeCity = repository.getTeamCity(game.homeTeamId);
+          final awayCity = repository.getTeamCity(game.awayTeamId);
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(16),
@@ -161,44 +167,95 @@ class _GamesScreenState extends State<GamesScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Text(
-                        game.homeTeamId,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 2),
+                          TeamLogo(
+                            teamId: game.homeTeamId,
+                            size: 42,
+                            fallbackColor: Colors.white38,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            homeCity,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            homeName.split(' ').last,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                    Column(
-                      children: [
-                        Text(
-                          '${game.scoreHome} - ${game.scoreAway}',
-                          style: TextStyle(
-                            color: theme.colorScheme.tertiary,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Text(
+                            '${game.scoreHome} - ${game.scoreAway}',
+                            style: TextStyle(
+                              color: theme.colorScheme.tertiary,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
-                        Text(
-                          game.status,
-                          style: const TextStyle(
-                            color: Colors.white54,
-                            fontSize: 11,
+                          Text(
+                            game.status,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     Expanded(
-                      child: Text(
-                        game.awayTeamId,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textAlign: TextAlign.center,
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 2),
+                          TeamLogo(
+                            teamId: game.awayTeamId,
+                            size: 42,
+                            fallbackColor: Colors.white38,
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            awayCity,
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 10,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            awayName.split(' ').last,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
                   ],

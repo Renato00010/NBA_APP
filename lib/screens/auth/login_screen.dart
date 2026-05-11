@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:drift/drift.dart' hide Column;
 import 'package:bcrypt/bcrypt.dart';
 import '../../main.dart';
-import '../../db/app_database.dart';
 
 String _hashPasswordSync(String password) {
   return BCrypt.hashpw(password, BCrypt.gensalt(logRounds: 6));
@@ -269,10 +267,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFC9082A).withOpacity(0.15),
+                    color: const Color(0xFFC9082A).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFC9082A).withOpacity(0.4),
+                      color: const Color(0xFFC9082A).withValues(alpha: 0.4),
                     ),
                   ),
                   child: Row(

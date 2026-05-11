@@ -9,6 +9,7 @@ import 'screens/auth/login_screen.dart';
 import 'services/theme_service.dart';
 import 'services/nba_api_service.dart';
 import 'services/repository.dart';
+import 'services/data_seed_service.dart';
 
 late AppDatabase database;
 late NbaRepository repository;
@@ -16,7 +17,13 @@ late NbaRepository repository;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   database = AppDatabase();
-  repository = NbaRepository(database, NbaApiService());
+  final apiService = NbaApiService();
+  await DataSeedService(
+    apiService,
+    database.playersDao,
+    database.teamsDao,
+  ).seedDatabase();
+  repository = NbaRepository(database, apiService);
   runApp(const NbaApp());
 }
 
@@ -61,7 +68,7 @@ class NbaAppState extends State<NbaApp> {
     try {
       await database.preferencesDao.updateFavoriteTeam(teamId ?? '');
     } catch (e) {
-      print('Erro ao guardar equipa: $e');
+      debugPrint('Erro ao guardar equipa: $e');
     }
   }
 
@@ -74,7 +81,7 @@ class NbaAppState extends State<NbaApp> {
         _favoriteTeamId = prefs?.favoriteTeamId;
       });
     } catch (e) {
-      print('Erro ao guardar login: $e');
+      debugPrint('Erro ao guardar login: $e');
     }
   }
 
@@ -86,7 +93,7 @@ class NbaAppState extends State<NbaApp> {
         _favoriteTeamId = null;
       });
     } catch (e) {
-      print('Erro ao fazer logout: $e');
+      debugPrint('Erro ao fazer logout: $e');
     }
   }
 

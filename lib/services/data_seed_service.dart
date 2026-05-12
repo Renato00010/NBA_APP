@@ -461,6 +461,28 @@ class DataSeedService {
       }
       await _playersDao.updatePlayerPhotoPath(player.playerId, assetPhotoPath);
     }
+
+    await _clearSeedStatsToRequireRealSource();
+  }
+
+  /// Limpa medias seeded para garantir que so dados reais sejam exibidos.
+  Future<void> _clearSeedStatsToRequireRealSource() async {
+    final all = await _playersDao.getAllPlayers();
+    for (final p in all) {
+      await _playersDao.updatePlayerSeasonStats(
+        p.playerId,
+        ppg: 0,
+        rpg: 0,
+        apg: 0,
+        spg: 0,
+        bpg: 0,
+        mpg: 0,
+        topg: 0,
+        fgPct: 0,
+        fg3Pct: 0,
+        ftPct: 0,
+      );
+    }
   }
 
   String _normalize(String value) => value

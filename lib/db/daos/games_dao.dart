@@ -11,6 +11,23 @@ class GamesDao extends DatabaseAccessor<AppDatabase> with _$GamesDaoMixin {
   // Buscar todos os jogos
   Future<List<CachedGame>> getAllGames() => select(cachedGames).get();
 
+  // Buscar jogos por data específica
+  Future<List<CachedGame>> getGamesByDate(DateTime date) {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    return (select(cachedGames)
+          ..where((g) => g.gameDate.isBetweenValues(startOfDay, endOfDay)))
+        .get();
+  }
+
+  // Buscar jogos num intervalo (ex: últimos 3 dias)
+  Future<List<CachedGame>> getGamesInDateRange(DateTime start, DateTime end) {
+    return (select(cachedGames)
+          ..where((g) => g.gameDate.isBetweenValues(start, end))
+          ..orderBy([(g) => OrderingTerm(expression: g.gameDate, mode: OrderingMode.desc)]))
+        .get();
+  }
+
   // Stream reativo
   Stream<List<CachedGame>> watchAllGames() => select(cachedGames).watch();
 

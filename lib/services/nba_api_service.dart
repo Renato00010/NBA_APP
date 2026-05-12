@@ -72,22 +72,6 @@ class NbaApiService {
     }
   }
 
-  // Buscar estatísticas de um jogador
-  Future<List<dynamic>> getPlayerStats(int playerId) async {
-    try {
-      final response = await _dio.get(
-        '/season_averages',
-        queryParameters: {
-          'player_ids[]': [playerId],
-          'season': 2023,
-        },
-      );
-      return response.data['data'] as List<dynamic>;
-    } on DioException catch (e) {
-      throw Exception('Erro ao buscar estatísticas: ${e.message}');
-    }
-  }
-
   // Buscar standings
   Future<List<dynamic>> getStandings() async {
     try {

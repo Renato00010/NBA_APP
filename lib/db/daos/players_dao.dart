@@ -1,10 +1,13 @@
 import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables/players_table.dart';
+import '../tables/player_seasons_table.dart';
+
 
 part 'players_dao.g.dart';
 
-@DriftAccessor(tables: [Players])
+@DriftAccessor(tables: [Players, PlayerSeasons])
+
 class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
   PlayersDao(super.db);
 
@@ -78,10 +81,77 @@ class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
     ),
   );
 
+  Future<void> updatePlayerSeasonStats(
+    String playerId, {
+    required double ppg,
+    required double rpg,
+    required double apg,
+    required double spg,
+    required double bpg,
+    required double mpg,
+    required double topg,
+    required double fgPct,
+    required double fg3Pct,
+    required double ftPct,
+  }) => (update(players)..where((p) => p.playerId.equals(playerId))).write(
+    PlayersCompanion(
+      ppg: Value(ppg),
+      rpg: Value(rpg),
+      apg: Value(apg),
+      spg: Value(spg),
+      bpg: Value(bpg),
+      mpg: Value(mpg),
+      topg: Value(topg),
+      fgPct: Value(fgPct),
+      fg3Pct: Value(fg3Pct),
+      ftPct: Value(ftPct),
+    ),
+  );
+
+  Future<void> updatePlayerCareerStats(
+    String playerId, {
+    required int points,
+    required int rebounds,
+    required int assists,
+    required int steals,
+    required int blocks,
+    required int games,
+    required int starts,
+    required int turnovers,
+    required String? careerTeams,
+  }) => (update(players)..where((p) => p.playerId.equals(playerId))).write(
+    PlayersCompanion(
+      careerPoints: Value(points),
+      careerRebounds: Value(rebounds),
+      careerAssists: Value(assists),
+      careerSteals: Value(steals),
+      careerBlocks: Value(blocks),
+      careerGames: Value(games),
+      careerStarts: Value(starts),
+      careerTurnovers: Value(turnovers),
+      careerTeams: Value(careerTeams),
+    ),
+  );
+
   // Apagar jogadores de uma equipa
   Future<void> deletePlayersByTeam(String teamId) =>
       (delete(players)..where((p) => p.teamId.equals(teamId))).go();
 
   Future<void> deletePlayer(String playerId) =>
       (delete(players)..where((p) => p.playerId.equals(playerId))).go();
+
+  // --- Metodos para PlayerSeasons ---
+
+  Future<void> upsertPlayerSeasons(List<PlayerSeasonsCompanion> seasonsList) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(playerSeasons, seasonsList);
+    });
+  }
+
+  Future<List<PlayerSeason>> getPlayerSeasons(String playerId) =>
+      (select(playerSeasons)..where((s) => s.playerId.equals(playerId))).get();
+
+  Future<void> deletePlayerSeasons(String playerId) =>
+      (delete(playerSeasons)..where((s) => s.playerId.equals(playerId))).go();
 }
+

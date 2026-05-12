@@ -3,6 +3,7 @@ import '../../main.dart';
 import '../../db/app_database.dart';
 import '../../widgets/team_logo.dart';
 import 'players_screen.dart';
+import '../teams/team_detail_screen.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -14,6 +15,7 @@ class GamesScreen extends StatefulWidget {
 class _GamesScreenState extends State<GamesScreen> {
   List<CachedGame> _liveGames = [];
   List<CachedGame> _todayGames = [];
+  List<CachedGame> _pastResults = [];
   bool _loading = true;
 
   @override
@@ -25,10 +27,18 @@ class _GamesScreenState extends State<GamesScreen> {
   Future<void> _loadGames() async {
     try {
       await repository.getTeams();
-      final games = await repository.getGamesByDate(DateTime.now());
+      final today = DateTime.now();
+      
+      // Busca jogos de hoje (inclui janela de ontem/amanhã no repo)
+      final games = await repository.getGamesByDate(today);
+      
+      // Busca resultados recentes (últimos 7 dias)
+      final recent = await repository.getRecentResults();
+
       setState(() {
-        _liveGames = games.where((g) => g.status == 'live').toList();
+        _liveGames = games.where((g) => g.status.toLowerCase().contains('qtr') || g.status.toLowerCase().contains('half') || g.status == 'live').toList();
         _todayGames = games;
+        _pastResults = recent.where((g) => g.status == 'Final').toList();
         _loading = false;
       });
     } catch (e) {
@@ -97,12 +107,7 @@ class _GamesScreenState extends State<GamesScreen> {
                                 ),
                               )
                             : _buildGamesList(_todayGames, theme),
-                        _buildGamesList(
-                          _todayGames
-                              .where((g) => g.status == 'Final')
-                              .toList(),
-                          theme,
-                        ),
+                        _buildGamesList(_pastResults, theme),
                       ],
                     ),
             ),
@@ -167,37 +172,41 @@ class _GamesScreenState extends State<GamesScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 2),
-                          TeamLogo(
-                            teamId: game.homeTeamId,
-                            size: 42,
-                            fallbackColor: Colors.white38,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            homeCity,
-                            style: const TextStyle(
-                              color: Colors.white54,
-                              fontSize: 10,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () => _openTeam(game.homeTeamId),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 2),
+                            TeamLogo(
+                              teamId: game.homeTeamId,
+                              size: 42,
+                              fallbackColor: Colors.white38,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            homeName.split(' ').last,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            const SizedBox(height: 6),
+                            Text(
+                              homeCity,
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            Text(
+                              homeName.split(' ').last,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Expanded(
@@ -225,37 +234,41 @@ class _GamesScreenState extends State<GamesScreen> {
                       ),
                     ),
                     Expanded(
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 2),
-                          TeamLogo(
-                            teamId: game.awayTeamId,
-                            size: 42,
-                            fallbackColor: Colors.white38,
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            awayCity,
-                            style: const TextStyle(
-                              color: Colors.white54,
-                              fontSize: 10,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () => _openTeam(game.awayTeamId),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 2),
+                            TeamLogo(
+                              teamId: game.awayTeamId,
+                              size: 42,
+                              fallbackColor: Colors.white38,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            awayName.split(' ').last,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
+                            const SizedBox(height: 6),
+                            Text(
+                              awayCity,
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            Text(
+                              awayName.split(' ').last,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -265,6 +278,13 @@ class _GamesScreenState extends State<GamesScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _openTeam(String teamId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TeamDetailScreen(teamId: teamId)),
     );
   }
 }

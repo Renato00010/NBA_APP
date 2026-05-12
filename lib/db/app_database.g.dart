@@ -719,12 +719,169 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0.0),
   );
+  static const VerificationMeta _mpgMeta = const VerificationMeta('mpg');
+  @override
+  late final GeneratedColumn<double> mpg = GeneratedColumn<double>(
+    'mpg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _topgMeta = const VerificationMeta('topg');
+  @override
+  late final GeneratedColumn<double> topg = GeneratedColumn<double>(
+    'topg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _fgPctMeta = const VerificationMeta('fgPct');
+  @override
+  late final GeneratedColumn<double> fgPct = GeneratedColumn<double>(
+    'fg_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _fg3PctMeta = const VerificationMeta('fg3Pct');
+  @override
+  late final GeneratedColumn<double> fg3Pct = GeneratedColumn<double>(
+    'fg3_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _ftPctMeta = const VerificationMeta('ftPct');
+  @override
+  late final GeneratedColumn<double> ftPct = GeneratedColumn<double>(
+    'ft_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _photoWebpPathMeta = const VerificationMeta(
     'photoWebpPath',
   );
   @override
   late final GeneratedColumn<String> photoWebpPath = GeneratedColumn<String>(
     'photo_webp_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _careerPointsMeta = const VerificationMeta(
+    'careerPoints',
+  );
+  @override
+  late final GeneratedColumn<int> careerPoints = GeneratedColumn<int>(
+    'career_points',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerReboundsMeta = const VerificationMeta(
+    'careerRebounds',
+  );
+  @override
+  late final GeneratedColumn<int> careerRebounds = GeneratedColumn<int>(
+    'career_rebounds',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerAssistsMeta = const VerificationMeta(
+    'careerAssists',
+  );
+  @override
+  late final GeneratedColumn<int> careerAssists = GeneratedColumn<int>(
+    'career_assists',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerStealsMeta = const VerificationMeta(
+    'careerSteals',
+  );
+  @override
+  late final GeneratedColumn<int> careerSteals = GeneratedColumn<int>(
+    'career_steals',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerBlocksMeta = const VerificationMeta(
+    'careerBlocks',
+  );
+  @override
+  late final GeneratedColumn<int> careerBlocks = GeneratedColumn<int>(
+    'career_blocks',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerGamesMeta = const VerificationMeta(
+    'careerGames',
+  );
+  @override
+  late final GeneratedColumn<int> careerGames = GeneratedColumn<int>(
+    'career_games',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerStartsMeta = const VerificationMeta(
+    'careerStarts',
+  );
+  @override
+  late final GeneratedColumn<int> careerStarts = GeneratedColumn<int>(
+    'career_starts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerTurnoversMeta = const VerificationMeta(
+    'careerTurnovers',
+  );
+  @override
+  late final GeneratedColumn<int> careerTurnovers = GeneratedColumn<int>(
+    'career_turnovers',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _careerTeamsMeta = const VerificationMeta(
+    'careerTeams',
+  );
+  @override
+  late final GeneratedColumn<String> careerTeams = GeneratedColumn<String>(
+    'career_teams',
     aliasedName,
     true,
     type: DriftSqlType.string,
@@ -761,7 +918,21 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
     apg,
     spg,
     bpg,
+    mpg,
+    topg,
+    fgPct,
+    fg3Pct,
+    ftPct,
     photoWebpPath,
+    careerPoints,
+    careerRebounds,
+    careerAssists,
+    careerSteals,
+    careerBlocks,
+    careerGames,
+    careerStarts,
+    careerTurnovers,
+    careerTeams,
     cachedAt,
   ];
   @override
@@ -896,12 +1067,123 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         bpg.isAcceptableOrUnknown(data['bpg']!, _bpgMeta),
       );
     }
+    if (data.containsKey('mpg')) {
+      context.handle(
+        _mpgMeta,
+        mpg.isAcceptableOrUnknown(data['mpg']!, _mpgMeta),
+      );
+    }
+    if (data.containsKey('topg')) {
+      context.handle(
+        _topgMeta,
+        topg.isAcceptableOrUnknown(data['topg']!, _topgMeta),
+      );
+    }
+    if (data.containsKey('fg_pct')) {
+      context.handle(
+        _fgPctMeta,
+        fgPct.isAcceptableOrUnknown(data['fg_pct']!, _fgPctMeta),
+      );
+    }
+    if (data.containsKey('fg3_pct')) {
+      context.handle(
+        _fg3PctMeta,
+        fg3Pct.isAcceptableOrUnknown(data['fg3_pct']!, _fg3PctMeta),
+      );
+    }
+    if (data.containsKey('ft_pct')) {
+      context.handle(
+        _ftPctMeta,
+        ftPct.isAcceptableOrUnknown(data['ft_pct']!, _ftPctMeta),
+      );
+    }
     if (data.containsKey('photo_webp_path')) {
       context.handle(
         _photoWebpPathMeta,
         photoWebpPath.isAcceptableOrUnknown(
           data['photo_webp_path']!,
           _photoWebpPathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_points')) {
+      context.handle(
+        _careerPointsMeta,
+        careerPoints.isAcceptableOrUnknown(
+          data['career_points']!,
+          _careerPointsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_rebounds')) {
+      context.handle(
+        _careerReboundsMeta,
+        careerRebounds.isAcceptableOrUnknown(
+          data['career_rebounds']!,
+          _careerReboundsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_assists')) {
+      context.handle(
+        _careerAssistsMeta,
+        careerAssists.isAcceptableOrUnknown(
+          data['career_assists']!,
+          _careerAssistsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_steals')) {
+      context.handle(
+        _careerStealsMeta,
+        careerSteals.isAcceptableOrUnknown(
+          data['career_steals']!,
+          _careerStealsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_blocks')) {
+      context.handle(
+        _careerBlocksMeta,
+        careerBlocks.isAcceptableOrUnknown(
+          data['career_blocks']!,
+          _careerBlocksMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_games')) {
+      context.handle(
+        _careerGamesMeta,
+        careerGames.isAcceptableOrUnknown(
+          data['career_games']!,
+          _careerGamesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_starts')) {
+      context.handle(
+        _careerStartsMeta,
+        careerStarts.isAcceptableOrUnknown(
+          data['career_starts']!,
+          _careerStartsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_turnovers')) {
+      context.handle(
+        _careerTurnoversMeta,
+        careerTurnovers.isAcceptableOrUnknown(
+          data['career_turnovers']!,
+          _careerTurnoversMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_teams')) {
+      context.handle(
+        _careerTeamsMeta,
+        careerTeams.isAcceptableOrUnknown(
+          data['career_teams']!,
+          _careerTeamsMeta,
         ),
       );
     }
@@ -988,9 +1270,65 @@ class $PlayersTable extends Players with TableInfo<$PlayersTable, Player> {
         DriftSqlType.double,
         data['${effectivePrefix}bpg'],
       )!,
+      mpg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}mpg'],
+      )!,
+      topg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}topg'],
+      )!,
+      fgPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fg_pct'],
+      )!,
+      fg3Pct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fg3_pct'],
+      )!,
+      ftPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ft_pct'],
+      )!,
       photoWebpPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}photo_webp_path'],
+      ),
+      careerPoints: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_points'],
+      )!,
+      careerRebounds: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_rebounds'],
+      )!,
+      careerAssists: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_assists'],
+      )!,
+      careerSteals: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_steals'],
+      )!,
+      careerBlocks: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_blocks'],
+      )!,
+      careerGames: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_games'],
+      )!,
+      careerStarts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_starts'],
+      )!,
+      careerTurnovers: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}career_turnovers'],
+      )!,
+      careerTeams: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}career_teams'],
       ),
       cachedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -1023,7 +1361,21 @@ class Player extends DataClass implements Insertable<Player> {
   final double apg;
   final double spg;
   final double bpg;
+  final double mpg;
+  final double topg;
+  final double fgPct;
+  final double fg3Pct;
+  final double ftPct;
   final String? photoWebpPath;
+  final int careerPoints;
+  final int careerRebounds;
+  final int careerAssists;
+  final int careerSteals;
+  final int careerBlocks;
+  final int careerGames;
+  final int careerStarts;
+  final int careerTurnovers;
+  final String? careerTeams;
   final DateTime cachedAt;
   const Player({
     required this.playerId,
@@ -1043,7 +1395,21 @@ class Player extends DataClass implements Insertable<Player> {
     required this.apg,
     required this.spg,
     required this.bpg,
+    required this.mpg,
+    required this.topg,
+    required this.fgPct,
+    required this.fg3Pct,
+    required this.ftPct,
     this.photoWebpPath,
+    required this.careerPoints,
+    required this.careerRebounds,
+    required this.careerAssists,
+    required this.careerSteals,
+    required this.careerBlocks,
+    required this.careerGames,
+    required this.careerStarts,
+    required this.careerTurnovers,
+    this.careerTeams,
     required this.cachedAt,
   });
   @override
@@ -1084,8 +1450,24 @@ class Player extends DataClass implements Insertable<Player> {
     map['apg'] = Variable<double>(apg);
     map['spg'] = Variable<double>(spg);
     map['bpg'] = Variable<double>(bpg);
+    map['mpg'] = Variable<double>(mpg);
+    map['topg'] = Variable<double>(topg);
+    map['fg_pct'] = Variable<double>(fgPct);
+    map['fg3_pct'] = Variable<double>(fg3Pct);
+    map['ft_pct'] = Variable<double>(ftPct);
     if (!nullToAbsent || photoWebpPath != null) {
       map['photo_webp_path'] = Variable<String>(photoWebpPath);
+    }
+    map['career_points'] = Variable<int>(careerPoints);
+    map['career_rebounds'] = Variable<int>(careerRebounds);
+    map['career_assists'] = Variable<int>(careerAssists);
+    map['career_steals'] = Variable<int>(careerSteals);
+    map['career_blocks'] = Variable<int>(careerBlocks);
+    map['career_games'] = Variable<int>(careerGames);
+    map['career_starts'] = Variable<int>(careerStarts);
+    map['career_turnovers'] = Variable<int>(careerTurnovers);
+    if (!nullToAbsent || careerTeams != null) {
+      map['career_teams'] = Variable<String>(careerTeams);
     }
     map['cached_at'] = Variable<DateTime>(cachedAt);
     return map;
@@ -1128,9 +1510,25 @@ class Player extends DataClass implements Insertable<Player> {
       apg: Value(apg),
       spg: Value(spg),
       bpg: Value(bpg),
+      mpg: Value(mpg),
+      topg: Value(topg),
+      fgPct: Value(fgPct),
+      fg3Pct: Value(fg3Pct),
+      ftPct: Value(ftPct),
       photoWebpPath: photoWebpPath == null && nullToAbsent
           ? const Value.absent()
           : Value(photoWebpPath),
+      careerPoints: Value(careerPoints),
+      careerRebounds: Value(careerRebounds),
+      careerAssists: Value(careerAssists),
+      careerSteals: Value(careerSteals),
+      careerBlocks: Value(careerBlocks),
+      careerGames: Value(careerGames),
+      careerStarts: Value(careerStarts),
+      careerTurnovers: Value(careerTurnovers),
+      careerTeams: careerTeams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(careerTeams),
       cachedAt: Value(cachedAt),
     );
   }
@@ -1158,7 +1556,21 @@ class Player extends DataClass implements Insertable<Player> {
       apg: serializer.fromJson<double>(json['apg']),
       spg: serializer.fromJson<double>(json['spg']),
       bpg: serializer.fromJson<double>(json['bpg']),
+      mpg: serializer.fromJson<double>(json['mpg']),
+      topg: serializer.fromJson<double>(json['topg']),
+      fgPct: serializer.fromJson<double>(json['fgPct']),
+      fg3Pct: serializer.fromJson<double>(json['fg3Pct']),
+      ftPct: serializer.fromJson<double>(json['ftPct']),
       photoWebpPath: serializer.fromJson<String?>(json['photoWebpPath']),
+      careerPoints: serializer.fromJson<int>(json['careerPoints']),
+      careerRebounds: serializer.fromJson<int>(json['careerRebounds']),
+      careerAssists: serializer.fromJson<int>(json['careerAssists']),
+      careerSteals: serializer.fromJson<int>(json['careerSteals']),
+      careerBlocks: serializer.fromJson<int>(json['careerBlocks']),
+      careerGames: serializer.fromJson<int>(json['careerGames']),
+      careerStarts: serializer.fromJson<int>(json['careerStarts']),
+      careerTurnovers: serializer.fromJson<int>(json['careerTurnovers']),
+      careerTeams: serializer.fromJson<String?>(json['careerTeams']),
       cachedAt: serializer.fromJson<DateTime>(json['cachedAt']),
     );
   }
@@ -1183,7 +1595,21 @@ class Player extends DataClass implements Insertable<Player> {
       'apg': serializer.toJson<double>(apg),
       'spg': serializer.toJson<double>(spg),
       'bpg': serializer.toJson<double>(bpg),
+      'mpg': serializer.toJson<double>(mpg),
+      'topg': serializer.toJson<double>(topg),
+      'fgPct': serializer.toJson<double>(fgPct),
+      'fg3Pct': serializer.toJson<double>(fg3Pct),
+      'ftPct': serializer.toJson<double>(ftPct),
       'photoWebpPath': serializer.toJson<String?>(photoWebpPath),
+      'careerPoints': serializer.toJson<int>(careerPoints),
+      'careerRebounds': serializer.toJson<int>(careerRebounds),
+      'careerAssists': serializer.toJson<int>(careerAssists),
+      'careerSteals': serializer.toJson<int>(careerSteals),
+      'careerBlocks': serializer.toJson<int>(careerBlocks),
+      'careerGames': serializer.toJson<int>(careerGames),
+      'careerStarts': serializer.toJson<int>(careerStarts),
+      'careerTurnovers': serializer.toJson<int>(careerTurnovers),
+      'careerTeams': serializer.toJson<String?>(careerTeams),
       'cachedAt': serializer.toJson<DateTime>(cachedAt),
     };
   }
@@ -1206,7 +1632,21 @@ class Player extends DataClass implements Insertable<Player> {
     double? apg,
     double? spg,
     double? bpg,
+    double? mpg,
+    double? topg,
+    double? fgPct,
+    double? fg3Pct,
+    double? ftPct,
     Value<String?> photoWebpPath = const Value.absent(),
+    int? careerPoints,
+    int? careerRebounds,
+    int? careerAssists,
+    int? careerSteals,
+    int? careerBlocks,
+    int? careerGames,
+    int? careerStarts,
+    int? careerTurnovers,
+    Value<String?> careerTeams = const Value.absent(),
     DateTime? cachedAt,
   }) => Player(
     playerId: playerId ?? this.playerId,
@@ -1228,9 +1668,23 @@ class Player extends DataClass implements Insertable<Player> {
     apg: apg ?? this.apg,
     spg: spg ?? this.spg,
     bpg: bpg ?? this.bpg,
+    mpg: mpg ?? this.mpg,
+    topg: topg ?? this.topg,
+    fgPct: fgPct ?? this.fgPct,
+    fg3Pct: fg3Pct ?? this.fg3Pct,
+    ftPct: ftPct ?? this.ftPct,
     photoWebpPath: photoWebpPath.present
         ? photoWebpPath.value
         : this.photoWebpPath,
+    careerPoints: careerPoints ?? this.careerPoints,
+    careerRebounds: careerRebounds ?? this.careerRebounds,
+    careerAssists: careerAssists ?? this.careerAssists,
+    careerSteals: careerSteals ?? this.careerSteals,
+    careerBlocks: careerBlocks ?? this.careerBlocks,
+    careerGames: careerGames ?? this.careerGames,
+    careerStarts: careerStarts ?? this.careerStarts,
+    careerTurnovers: careerTurnovers ?? this.careerTurnovers,
+    careerTeams: careerTeams.present ? careerTeams.value : this.careerTeams,
     cachedAt: cachedAt ?? this.cachedAt,
   );
   Player copyWithCompanion(PlayersCompanion data) {
@@ -1260,9 +1714,41 @@ class Player extends DataClass implements Insertable<Player> {
       apg: data.apg.present ? data.apg.value : this.apg,
       spg: data.spg.present ? data.spg.value : this.spg,
       bpg: data.bpg.present ? data.bpg.value : this.bpg,
+      mpg: data.mpg.present ? data.mpg.value : this.mpg,
+      topg: data.topg.present ? data.topg.value : this.topg,
+      fgPct: data.fgPct.present ? data.fgPct.value : this.fgPct,
+      fg3Pct: data.fg3Pct.present ? data.fg3Pct.value : this.fg3Pct,
+      ftPct: data.ftPct.present ? data.ftPct.value : this.ftPct,
       photoWebpPath: data.photoWebpPath.present
           ? data.photoWebpPath.value
           : this.photoWebpPath,
+      careerPoints: data.careerPoints.present
+          ? data.careerPoints.value
+          : this.careerPoints,
+      careerRebounds: data.careerRebounds.present
+          ? data.careerRebounds.value
+          : this.careerRebounds,
+      careerAssists: data.careerAssists.present
+          ? data.careerAssists.value
+          : this.careerAssists,
+      careerSteals: data.careerSteals.present
+          ? data.careerSteals.value
+          : this.careerSteals,
+      careerBlocks: data.careerBlocks.present
+          ? data.careerBlocks.value
+          : this.careerBlocks,
+      careerGames: data.careerGames.present
+          ? data.careerGames.value
+          : this.careerGames,
+      careerStarts: data.careerStarts.present
+          ? data.careerStarts.value
+          : this.careerStarts,
+      careerTurnovers: data.careerTurnovers.present
+          ? data.careerTurnovers.value
+          : this.careerTurnovers,
+      careerTeams: data.careerTeams.present
+          ? data.careerTeams.value
+          : this.careerTeams,
       cachedAt: data.cachedAt.present ? data.cachedAt.value : this.cachedAt,
     );
   }
@@ -1287,14 +1773,28 @@ class Player extends DataClass implements Insertable<Player> {
           ..write('apg: $apg, ')
           ..write('spg: $spg, ')
           ..write('bpg: $bpg, ')
+          ..write('mpg: $mpg, ')
+          ..write('topg: $topg, ')
+          ..write('fgPct: $fgPct, ')
+          ..write('fg3Pct: $fg3Pct, ')
+          ..write('ftPct: $ftPct, ')
           ..write('photoWebpPath: $photoWebpPath, ')
+          ..write('careerPoints: $careerPoints, ')
+          ..write('careerRebounds: $careerRebounds, ')
+          ..write('careerAssists: $careerAssists, ')
+          ..write('careerSteals: $careerSteals, ')
+          ..write('careerBlocks: $careerBlocks, ')
+          ..write('careerGames: $careerGames, ')
+          ..write('careerStarts: $careerStarts, ')
+          ..write('careerTurnovers: $careerTurnovers, ')
+          ..write('careerTeams: $careerTeams, ')
           ..write('cachedAt: $cachedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     playerId,
     teamId,
     fullName,
@@ -1312,9 +1812,23 @@ class Player extends DataClass implements Insertable<Player> {
     apg,
     spg,
     bpg,
+    mpg,
+    topg,
+    fgPct,
+    fg3Pct,
+    ftPct,
     photoWebpPath,
+    careerPoints,
+    careerRebounds,
+    careerAssists,
+    careerSteals,
+    careerBlocks,
+    careerGames,
+    careerStarts,
+    careerTurnovers,
+    careerTeams,
     cachedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1336,7 +1850,21 @@ class Player extends DataClass implements Insertable<Player> {
           other.apg == this.apg &&
           other.spg == this.spg &&
           other.bpg == this.bpg &&
+          other.mpg == this.mpg &&
+          other.topg == this.topg &&
+          other.fgPct == this.fgPct &&
+          other.fg3Pct == this.fg3Pct &&
+          other.ftPct == this.ftPct &&
           other.photoWebpPath == this.photoWebpPath &&
+          other.careerPoints == this.careerPoints &&
+          other.careerRebounds == this.careerRebounds &&
+          other.careerAssists == this.careerAssists &&
+          other.careerSteals == this.careerSteals &&
+          other.careerBlocks == this.careerBlocks &&
+          other.careerGames == this.careerGames &&
+          other.careerStarts == this.careerStarts &&
+          other.careerTurnovers == this.careerTurnovers &&
+          other.careerTeams == this.careerTeams &&
           other.cachedAt == this.cachedAt);
 }
 
@@ -1358,7 +1886,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
   final Value<double> apg;
   final Value<double> spg;
   final Value<double> bpg;
+  final Value<double> mpg;
+  final Value<double> topg;
+  final Value<double> fgPct;
+  final Value<double> fg3Pct;
+  final Value<double> ftPct;
   final Value<String?> photoWebpPath;
+  final Value<int> careerPoints;
+  final Value<int> careerRebounds;
+  final Value<int> careerAssists;
+  final Value<int> careerSteals;
+  final Value<int> careerBlocks;
+  final Value<int> careerGames;
+  final Value<int> careerStarts;
+  final Value<int> careerTurnovers;
+  final Value<String?> careerTeams;
   final Value<DateTime> cachedAt;
   final Value<int> rowid;
   const PlayersCompanion({
@@ -1379,7 +1921,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.apg = const Value.absent(),
     this.spg = const Value.absent(),
     this.bpg = const Value.absent(),
+    this.mpg = const Value.absent(),
+    this.topg = const Value.absent(),
+    this.fgPct = const Value.absent(),
+    this.fg3Pct = const Value.absent(),
+    this.ftPct = const Value.absent(),
     this.photoWebpPath = const Value.absent(),
+    this.careerPoints = const Value.absent(),
+    this.careerRebounds = const Value.absent(),
+    this.careerAssists = const Value.absent(),
+    this.careerSteals = const Value.absent(),
+    this.careerBlocks = const Value.absent(),
+    this.careerGames = const Value.absent(),
+    this.careerStarts = const Value.absent(),
+    this.careerTurnovers = const Value.absent(),
+    this.careerTeams = const Value.absent(),
     this.cachedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1401,7 +1957,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     this.apg = const Value.absent(),
     this.spg = const Value.absent(),
     this.bpg = const Value.absent(),
+    this.mpg = const Value.absent(),
+    this.topg = const Value.absent(),
+    this.fgPct = const Value.absent(),
+    this.fg3Pct = const Value.absent(),
+    this.ftPct = const Value.absent(),
     this.photoWebpPath = const Value.absent(),
+    this.careerPoints = const Value.absent(),
+    this.careerRebounds = const Value.absent(),
+    this.careerAssists = const Value.absent(),
+    this.careerSteals = const Value.absent(),
+    this.careerBlocks = const Value.absent(),
+    this.careerGames = const Value.absent(),
+    this.careerStarts = const Value.absent(),
+    this.careerTurnovers = const Value.absent(),
+    this.careerTeams = const Value.absent(),
     this.cachedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : playerId = Value(playerId),
@@ -1425,7 +1995,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Expression<double>? apg,
     Expression<double>? spg,
     Expression<double>? bpg,
+    Expression<double>? mpg,
+    Expression<double>? topg,
+    Expression<double>? fgPct,
+    Expression<double>? fg3Pct,
+    Expression<double>? ftPct,
     Expression<String>? photoWebpPath,
+    Expression<int>? careerPoints,
+    Expression<int>? careerRebounds,
+    Expression<int>? careerAssists,
+    Expression<int>? careerSteals,
+    Expression<int>? careerBlocks,
+    Expression<int>? careerGames,
+    Expression<int>? careerStarts,
+    Expression<int>? careerTurnovers,
+    Expression<String>? careerTeams,
     Expression<DateTime>? cachedAt,
     Expression<int>? rowid,
   }) {
@@ -1447,7 +2031,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       if (apg != null) 'apg': apg,
       if (spg != null) 'spg': spg,
       if (bpg != null) 'bpg': bpg,
+      if (mpg != null) 'mpg': mpg,
+      if (topg != null) 'topg': topg,
+      if (fgPct != null) 'fg_pct': fgPct,
+      if (fg3Pct != null) 'fg3_pct': fg3Pct,
+      if (ftPct != null) 'ft_pct': ftPct,
       if (photoWebpPath != null) 'photo_webp_path': photoWebpPath,
+      if (careerPoints != null) 'career_points': careerPoints,
+      if (careerRebounds != null) 'career_rebounds': careerRebounds,
+      if (careerAssists != null) 'career_assists': careerAssists,
+      if (careerSteals != null) 'career_steals': careerSteals,
+      if (careerBlocks != null) 'career_blocks': careerBlocks,
+      if (careerGames != null) 'career_games': careerGames,
+      if (careerStarts != null) 'career_starts': careerStarts,
+      if (careerTurnovers != null) 'career_turnovers': careerTurnovers,
+      if (careerTeams != null) 'career_teams': careerTeams,
       if (cachedAt != null) 'cached_at': cachedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1471,7 +2069,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     Value<double>? apg,
     Value<double>? spg,
     Value<double>? bpg,
+    Value<double>? mpg,
+    Value<double>? topg,
+    Value<double>? fgPct,
+    Value<double>? fg3Pct,
+    Value<double>? ftPct,
     Value<String?>? photoWebpPath,
+    Value<int>? careerPoints,
+    Value<int>? careerRebounds,
+    Value<int>? careerAssists,
+    Value<int>? careerSteals,
+    Value<int>? careerBlocks,
+    Value<int>? careerGames,
+    Value<int>? careerStarts,
+    Value<int>? careerTurnovers,
+    Value<String?>? careerTeams,
     Value<DateTime>? cachedAt,
     Value<int>? rowid,
   }) {
@@ -1493,7 +2105,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
       apg: apg ?? this.apg,
       spg: spg ?? this.spg,
       bpg: bpg ?? this.bpg,
+      mpg: mpg ?? this.mpg,
+      topg: topg ?? this.topg,
+      fgPct: fgPct ?? this.fgPct,
+      fg3Pct: fg3Pct ?? this.fg3Pct,
+      ftPct: ftPct ?? this.ftPct,
       photoWebpPath: photoWebpPath ?? this.photoWebpPath,
+      careerPoints: careerPoints ?? this.careerPoints,
+      careerRebounds: careerRebounds ?? this.careerRebounds,
+      careerAssists: careerAssists ?? this.careerAssists,
+      careerSteals: careerSteals ?? this.careerSteals,
+      careerBlocks: careerBlocks ?? this.careerBlocks,
+      careerGames: careerGames ?? this.careerGames,
+      careerStarts: careerStarts ?? this.careerStarts,
+      careerTurnovers: careerTurnovers ?? this.careerTurnovers,
+      careerTeams: careerTeams ?? this.careerTeams,
       cachedAt: cachedAt ?? this.cachedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1553,8 +2179,50 @@ class PlayersCompanion extends UpdateCompanion<Player> {
     if (bpg.present) {
       map['bpg'] = Variable<double>(bpg.value);
     }
+    if (mpg.present) {
+      map['mpg'] = Variable<double>(mpg.value);
+    }
+    if (topg.present) {
+      map['topg'] = Variable<double>(topg.value);
+    }
+    if (fgPct.present) {
+      map['fg_pct'] = Variable<double>(fgPct.value);
+    }
+    if (fg3Pct.present) {
+      map['fg3_pct'] = Variable<double>(fg3Pct.value);
+    }
+    if (ftPct.present) {
+      map['ft_pct'] = Variable<double>(ftPct.value);
+    }
     if (photoWebpPath.present) {
       map['photo_webp_path'] = Variable<String>(photoWebpPath.value);
+    }
+    if (careerPoints.present) {
+      map['career_points'] = Variable<int>(careerPoints.value);
+    }
+    if (careerRebounds.present) {
+      map['career_rebounds'] = Variable<int>(careerRebounds.value);
+    }
+    if (careerAssists.present) {
+      map['career_assists'] = Variable<int>(careerAssists.value);
+    }
+    if (careerSteals.present) {
+      map['career_steals'] = Variable<int>(careerSteals.value);
+    }
+    if (careerBlocks.present) {
+      map['career_blocks'] = Variable<int>(careerBlocks.value);
+    }
+    if (careerGames.present) {
+      map['career_games'] = Variable<int>(careerGames.value);
+    }
+    if (careerStarts.present) {
+      map['career_starts'] = Variable<int>(careerStarts.value);
+    }
+    if (careerTurnovers.present) {
+      map['career_turnovers'] = Variable<int>(careerTurnovers.value);
+    }
+    if (careerTeams.present) {
+      map['career_teams'] = Variable<String>(careerTeams.value);
     }
     if (cachedAt.present) {
       map['cached_at'] = Variable<DateTime>(cachedAt.value);
@@ -1585,7 +2253,21 @@ class PlayersCompanion extends UpdateCompanion<Player> {
           ..write('apg: $apg, ')
           ..write('spg: $spg, ')
           ..write('bpg: $bpg, ')
+          ..write('mpg: $mpg, ')
+          ..write('topg: $topg, ')
+          ..write('fgPct: $fgPct, ')
+          ..write('fg3Pct: $fg3Pct, ')
+          ..write('ftPct: $ftPct, ')
           ..write('photoWebpPath: $photoWebpPath, ')
+          ..write('careerPoints: $careerPoints, ')
+          ..write('careerRebounds: $careerRebounds, ')
+          ..write('careerAssists: $careerAssists, ')
+          ..write('careerSteals: $careerSteals, ')
+          ..write('careerBlocks: $careerBlocks, ')
+          ..write('careerGames: $careerGames, ')
+          ..write('careerStarts: $careerStarts, ')
+          ..write('careerTurnovers: $careerTurnovers, ')
+          ..write('careerTeams: $careerTeams, ')
           ..write('cachedAt: $cachedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -3204,6 +3886,1015 @@ class ViewedHistoryCompanion extends UpdateCompanion<ViewedHistoryData> {
   }
 }
 
+class $PlayerSeasonsTable extends PlayerSeasons
+    with TableInfo<$PlayerSeasonsTable, PlayerSeason> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlayerSeasonsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _playerIdMeta = const VerificationMeta(
+    'playerId',
+  );
+  @override
+  late final GeneratedColumn<String> playerId = GeneratedColumn<String>(
+    'player_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES players (player_id)',
+    ),
+  );
+  static const VerificationMeta _seasonMeta = const VerificationMeta('season');
+  @override
+  late final GeneratedColumn<String> season = GeneratedColumn<String>(
+    'season',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _teamMeta = const VerificationMeta('team');
+  @override
+  late final GeneratedColumn<String> team = GeneratedColumn<String>(
+    'team',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _gpMeta = const VerificationMeta('gp');
+  @override
+  late final GeneratedColumn<int> gp = GeneratedColumn<int>(
+    'gp',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _gsMeta = const VerificationMeta('gs');
+  @override
+  late final GeneratedColumn<int> gs = GeneratedColumn<int>(
+    'gs',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _mpgMeta = const VerificationMeta('mpg');
+  @override
+  late final GeneratedColumn<double> mpg = GeneratedColumn<double>(
+    'mpg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _ppgMeta = const VerificationMeta('ppg');
+  @override
+  late final GeneratedColumn<double> ppg = GeneratedColumn<double>(
+    'ppg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _rpgMeta = const VerificationMeta('rpg');
+  @override
+  late final GeneratedColumn<double> rpg = GeneratedColumn<double>(
+    'rpg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _apgMeta = const VerificationMeta('apg');
+  @override
+  late final GeneratedColumn<double> apg = GeneratedColumn<double>(
+    'apg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _spgMeta = const VerificationMeta('spg');
+  @override
+  late final GeneratedColumn<double> spg = GeneratedColumn<double>(
+    'spg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _bpgMeta = const VerificationMeta('bpg');
+  @override
+  late final GeneratedColumn<double> bpg = GeneratedColumn<double>(
+    'bpg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _topgMeta = const VerificationMeta('topg');
+  @override
+  late final GeneratedColumn<double> topg = GeneratedColumn<double>(
+    'topg',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _fgPctMeta = const VerificationMeta('fgPct');
+  @override
+  late final GeneratedColumn<double> fgPct = GeneratedColumn<double>(
+    'fg_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _fg3PctMeta = const VerificationMeta('fg3Pct');
+  @override
+  late final GeneratedColumn<double> fg3Pct = GeneratedColumn<double>(
+    'fg3_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _ftPctMeta = const VerificationMeta('ftPct');
+  @override
+  late final GeneratedColumn<double> ftPct = GeneratedColumn<double>(
+    'ft_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _perMeta = const VerificationMeta('per');
+  @override
+  late final GeneratedColumn<double> per = GeneratedColumn<double>(
+    'per',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _tsPctMeta = const VerificationMeta('tsPct');
+  @override
+  late final GeneratedColumn<double> tsPct = GeneratedColumn<double>(
+    'ts_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _usgPctMeta = const VerificationMeta('usgPct');
+  @override
+  late final GeneratedColumn<double> usgPct = GeneratedColumn<double>(
+    'usg_pct',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    playerId,
+    season,
+    team,
+    gp,
+    gs,
+    mpg,
+    ppg,
+    rpg,
+    apg,
+    spg,
+    bpg,
+    topg,
+    fgPct,
+    fg3Pct,
+    ftPct,
+    per,
+    tsPct,
+    usgPct,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'player_seasons';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlayerSeason> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('player_id')) {
+      context.handle(
+        _playerIdMeta,
+        playerId.isAcceptableOrUnknown(data['player_id']!, _playerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playerIdMeta);
+    }
+    if (data.containsKey('season')) {
+      context.handle(
+        _seasonMeta,
+        season.isAcceptableOrUnknown(data['season']!, _seasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_seasonMeta);
+    }
+    if (data.containsKey('team')) {
+      context.handle(
+        _teamMeta,
+        team.isAcceptableOrUnknown(data['team']!, _teamMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_teamMeta);
+    }
+    if (data.containsKey('gp')) {
+      context.handle(_gpMeta, gp.isAcceptableOrUnknown(data['gp']!, _gpMeta));
+    }
+    if (data.containsKey('gs')) {
+      context.handle(_gsMeta, gs.isAcceptableOrUnknown(data['gs']!, _gsMeta));
+    }
+    if (data.containsKey('mpg')) {
+      context.handle(
+        _mpgMeta,
+        mpg.isAcceptableOrUnknown(data['mpg']!, _mpgMeta),
+      );
+    }
+    if (data.containsKey('ppg')) {
+      context.handle(
+        _ppgMeta,
+        ppg.isAcceptableOrUnknown(data['ppg']!, _ppgMeta),
+      );
+    }
+    if (data.containsKey('rpg')) {
+      context.handle(
+        _rpgMeta,
+        rpg.isAcceptableOrUnknown(data['rpg']!, _rpgMeta),
+      );
+    }
+    if (data.containsKey('apg')) {
+      context.handle(
+        _apgMeta,
+        apg.isAcceptableOrUnknown(data['apg']!, _apgMeta),
+      );
+    }
+    if (data.containsKey('spg')) {
+      context.handle(
+        _spgMeta,
+        spg.isAcceptableOrUnknown(data['spg']!, _spgMeta),
+      );
+    }
+    if (data.containsKey('bpg')) {
+      context.handle(
+        _bpgMeta,
+        bpg.isAcceptableOrUnknown(data['bpg']!, _bpgMeta),
+      );
+    }
+    if (data.containsKey('topg')) {
+      context.handle(
+        _topgMeta,
+        topg.isAcceptableOrUnknown(data['topg']!, _topgMeta),
+      );
+    }
+    if (data.containsKey('fg_pct')) {
+      context.handle(
+        _fgPctMeta,
+        fgPct.isAcceptableOrUnknown(data['fg_pct']!, _fgPctMeta),
+      );
+    }
+    if (data.containsKey('fg3_pct')) {
+      context.handle(
+        _fg3PctMeta,
+        fg3Pct.isAcceptableOrUnknown(data['fg3_pct']!, _fg3PctMeta),
+      );
+    }
+    if (data.containsKey('ft_pct')) {
+      context.handle(
+        _ftPctMeta,
+        ftPct.isAcceptableOrUnknown(data['ft_pct']!, _ftPctMeta),
+      );
+    }
+    if (data.containsKey('per')) {
+      context.handle(
+        _perMeta,
+        per.isAcceptableOrUnknown(data['per']!, _perMeta),
+      );
+    }
+    if (data.containsKey('ts_pct')) {
+      context.handle(
+        _tsPctMeta,
+        tsPct.isAcceptableOrUnknown(data['ts_pct']!, _tsPctMeta),
+      );
+    }
+    if (data.containsKey('usg_pct')) {
+      context.handle(
+        _usgPctMeta,
+        usgPct.isAcceptableOrUnknown(data['usg_pct']!, _usgPctMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlayerSeason map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlayerSeason(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      playerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}player_id'],
+      )!,
+      season: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}season'],
+      )!,
+      team: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}team'],
+      )!,
+      gp: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gp'],
+      )!,
+      gs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}gs'],
+      )!,
+      mpg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}mpg'],
+      )!,
+      ppg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ppg'],
+      )!,
+      rpg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}rpg'],
+      )!,
+      apg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}apg'],
+      )!,
+      spg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}spg'],
+      )!,
+      bpg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}bpg'],
+      )!,
+      topg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}topg'],
+      )!,
+      fgPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fg_pct'],
+      )!,
+      fg3Pct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fg3_pct'],
+      )!,
+      ftPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ft_pct'],
+      )!,
+      per: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}per'],
+      )!,
+      tsPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}ts_pct'],
+      )!,
+      usgPct: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}usg_pct'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $PlayerSeasonsTable createAlias(String alias) {
+    return $PlayerSeasonsTable(attachedDatabase, alias);
+  }
+}
+
+class PlayerSeason extends DataClass implements Insertable<PlayerSeason> {
+  final int id;
+  final String playerId;
+  final String season;
+  final String team;
+  final int gp;
+  final int gs;
+  final double mpg;
+  final double ppg;
+  final double rpg;
+  final double apg;
+  final double spg;
+  final double bpg;
+  final double topg;
+  final double fgPct;
+  final double fg3Pct;
+  final double ftPct;
+  final double per;
+  final double tsPct;
+  final double usgPct;
+  final DateTime createdAt;
+  const PlayerSeason({
+    required this.id,
+    required this.playerId,
+    required this.season,
+    required this.team,
+    required this.gp,
+    required this.gs,
+    required this.mpg,
+    required this.ppg,
+    required this.rpg,
+    required this.apg,
+    required this.spg,
+    required this.bpg,
+    required this.topg,
+    required this.fgPct,
+    required this.fg3Pct,
+    required this.ftPct,
+    required this.per,
+    required this.tsPct,
+    required this.usgPct,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['player_id'] = Variable<String>(playerId);
+    map['season'] = Variable<String>(season);
+    map['team'] = Variable<String>(team);
+    map['gp'] = Variable<int>(gp);
+    map['gs'] = Variable<int>(gs);
+    map['mpg'] = Variable<double>(mpg);
+    map['ppg'] = Variable<double>(ppg);
+    map['rpg'] = Variable<double>(rpg);
+    map['apg'] = Variable<double>(apg);
+    map['spg'] = Variable<double>(spg);
+    map['bpg'] = Variable<double>(bpg);
+    map['topg'] = Variable<double>(topg);
+    map['fg_pct'] = Variable<double>(fgPct);
+    map['fg3_pct'] = Variable<double>(fg3Pct);
+    map['ft_pct'] = Variable<double>(ftPct);
+    map['per'] = Variable<double>(per);
+    map['ts_pct'] = Variable<double>(tsPct);
+    map['usg_pct'] = Variable<double>(usgPct);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  PlayerSeasonsCompanion toCompanion(bool nullToAbsent) {
+    return PlayerSeasonsCompanion(
+      id: Value(id),
+      playerId: Value(playerId),
+      season: Value(season),
+      team: Value(team),
+      gp: Value(gp),
+      gs: Value(gs),
+      mpg: Value(mpg),
+      ppg: Value(ppg),
+      rpg: Value(rpg),
+      apg: Value(apg),
+      spg: Value(spg),
+      bpg: Value(bpg),
+      topg: Value(topg),
+      fgPct: Value(fgPct),
+      fg3Pct: Value(fg3Pct),
+      ftPct: Value(ftPct),
+      per: Value(per),
+      tsPct: Value(tsPct),
+      usgPct: Value(usgPct),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PlayerSeason.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlayerSeason(
+      id: serializer.fromJson<int>(json['id']),
+      playerId: serializer.fromJson<String>(json['playerId']),
+      season: serializer.fromJson<String>(json['season']),
+      team: serializer.fromJson<String>(json['team']),
+      gp: serializer.fromJson<int>(json['gp']),
+      gs: serializer.fromJson<int>(json['gs']),
+      mpg: serializer.fromJson<double>(json['mpg']),
+      ppg: serializer.fromJson<double>(json['ppg']),
+      rpg: serializer.fromJson<double>(json['rpg']),
+      apg: serializer.fromJson<double>(json['apg']),
+      spg: serializer.fromJson<double>(json['spg']),
+      bpg: serializer.fromJson<double>(json['bpg']),
+      topg: serializer.fromJson<double>(json['topg']),
+      fgPct: serializer.fromJson<double>(json['fgPct']),
+      fg3Pct: serializer.fromJson<double>(json['fg3Pct']),
+      ftPct: serializer.fromJson<double>(json['ftPct']),
+      per: serializer.fromJson<double>(json['per']),
+      tsPct: serializer.fromJson<double>(json['tsPct']),
+      usgPct: serializer.fromJson<double>(json['usgPct']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'playerId': serializer.toJson<String>(playerId),
+      'season': serializer.toJson<String>(season),
+      'team': serializer.toJson<String>(team),
+      'gp': serializer.toJson<int>(gp),
+      'gs': serializer.toJson<int>(gs),
+      'mpg': serializer.toJson<double>(mpg),
+      'ppg': serializer.toJson<double>(ppg),
+      'rpg': serializer.toJson<double>(rpg),
+      'apg': serializer.toJson<double>(apg),
+      'spg': serializer.toJson<double>(spg),
+      'bpg': serializer.toJson<double>(bpg),
+      'topg': serializer.toJson<double>(topg),
+      'fgPct': serializer.toJson<double>(fgPct),
+      'fg3Pct': serializer.toJson<double>(fg3Pct),
+      'ftPct': serializer.toJson<double>(ftPct),
+      'per': serializer.toJson<double>(per),
+      'tsPct': serializer.toJson<double>(tsPct),
+      'usgPct': serializer.toJson<double>(usgPct),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PlayerSeason copyWith({
+    int? id,
+    String? playerId,
+    String? season,
+    String? team,
+    int? gp,
+    int? gs,
+    double? mpg,
+    double? ppg,
+    double? rpg,
+    double? apg,
+    double? spg,
+    double? bpg,
+    double? topg,
+    double? fgPct,
+    double? fg3Pct,
+    double? ftPct,
+    double? per,
+    double? tsPct,
+    double? usgPct,
+    DateTime? createdAt,
+  }) => PlayerSeason(
+    id: id ?? this.id,
+    playerId: playerId ?? this.playerId,
+    season: season ?? this.season,
+    team: team ?? this.team,
+    gp: gp ?? this.gp,
+    gs: gs ?? this.gs,
+    mpg: mpg ?? this.mpg,
+    ppg: ppg ?? this.ppg,
+    rpg: rpg ?? this.rpg,
+    apg: apg ?? this.apg,
+    spg: spg ?? this.spg,
+    bpg: bpg ?? this.bpg,
+    topg: topg ?? this.topg,
+    fgPct: fgPct ?? this.fgPct,
+    fg3Pct: fg3Pct ?? this.fg3Pct,
+    ftPct: ftPct ?? this.ftPct,
+    per: per ?? this.per,
+    tsPct: tsPct ?? this.tsPct,
+    usgPct: usgPct ?? this.usgPct,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  PlayerSeason copyWithCompanion(PlayerSeasonsCompanion data) {
+    return PlayerSeason(
+      id: data.id.present ? data.id.value : this.id,
+      playerId: data.playerId.present ? data.playerId.value : this.playerId,
+      season: data.season.present ? data.season.value : this.season,
+      team: data.team.present ? data.team.value : this.team,
+      gp: data.gp.present ? data.gp.value : this.gp,
+      gs: data.gs.present ? data.gs.value : this.gs,
+      mpg: data.mpg.present ? data.mpg.value : this.mpg,
+      ppg: data.ppg.present ? data.ppg.value : this.ppg,
+      rpg: data.rpg.present ? data.rpg.value : this.rpg,
+      apg: data.apg.present ? data.apg.value : this.apg,
+      spg: data.spg.present ? data.spg.value : this.spg,
+      bpg: data.bpg.present ? data.bpg.value : this.bpg,
+      topg: data.topg.present ? data.topg.value : this.topg,
+      fgPct: data.fgPct.present ? data.fgPct.value : this.fgPct,
+      fg3Pct: data.fg3Pct.present ? data.fg3Pct.value : this.fg3Pct,
+      ftPct: data.ftPct.present ? data.ftPct.value : this.ftPct,
+      per: data.per.present ? data.per.value : this.per,
+      tsPct: data.tsPct.present ? data.tsPct.value : this.tsPct,
+      usgPct: data.usgPct.present ? data.usgPct.value : this.usgPct,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlayerSeason(')
+          ..write('id: $id, ')
+          ..write('playerId: $playerId, ')
+          ..write('season: $season, ')
+          ..write('team: $team, ')
+          ..write('gp: $gp, ')
+          ..write('gs: $gs, ')
+          ..write('mpg: $mpg, ')
+          ..write('ppg: $ppg, ')
+          ..write('rpg: $rpg, ')
+          ..write('apg: $apg, ')
+          ..write('spg: $spg, ')
+          ..write('bpg: $bpg, ')
+          ..write('topg: $topg, ')
+          ..write('fgPct: $fgPct, ')
+          ..write('fg3Pct: $fg3Pct, ')
+          ..write('ftPct: $ftPct, ')
+          ..write('per: $per, ')
+          ..write('tsPct: $tsPct, ')
+          ..write('usgPct: $usgPct, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    playerId,
+    season,
+    team,
+    gp,
+    gs,
+    mpg,
+    ppg,
+    rpg,
+    apg,
+    spg,
+    bpg,
+    topg,
+    fgPct,
+    fg3Pct,
+    ftPct,
+    per,
+    tsPct,
+    usgPct,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlayerSeason &&
+          other.id == this.id &&
+          other.playerId == this.playerId &&
+          other.season == this.season &&
+          other.team == this.team &&
+          other.gp == this.gp &&
+          other.gs == this.gs &&
+          other.mpg == this.mpg &&
+          other.ppg == this.ppg &&
+          other.rpg == this.rpg &&
+          other.apg == this.apg &&
+          other.spg == this.spg &&
+          other.bpg == this.bpg &&
+          other.topg == this.topg &&
+          other.fgPct == this.fgPct &&
+          other.fg3Pct == this.fg3Pct &&
+          other.ftPct == this.ftPct &&
+          other.per == this.per &&
+          other.tsPct == this.tsPct &&
+          other.usgPct == this.usgPct &&
+          other.createdAt == this.createdAt);
+}
+
+class PlayerSeasonsCompanion extends UpdateCompanion<PlayerSeason> {
+  final Value<int> id;
+  final Value<String> playerId;
+  final Value<String> season;
+  final Value<String> team;
+  final Value<int> gp;
+  final Value<int> gs;
+  final Value<double> mpg;
+  final Value<double> ppg;
+  final Value<double> rpg;
+  final Value<double> apg;
+  final Value<double> spg;
+  final Value<double> bpg;
+  final Value<double> topg;
+  final Value<double> fgPct;
+  final Value<double> fg3Pct;
+  final Value<double> ftPct;
+  final Value<double> per;
+  final Value<double> tsPct;
+  final Value<double> usgPct;
+  final Value<DateTime> createdAt;
+  const PlayerSeasonsCompanion({
+    this.id = const Value.absent(),
+    this.playerId = const Value.absent(),
+    this.season = const Value.absent(),
+    this.team = const Value.absent(),
+    this.gp = const Value.absent(),
+    this.gs = const Value.absent(),
+    this.mpg = const Value.absent(),
+    this.ppg = const Value.absent(),
+    this.rpg = const Value.absent(),
+    this.apg = const Value.absent(),
+    this.spg = const Value.absent(),
+    this.bpg = const Value.absent(),
+    this.topg = const Value.absent(),
+    this.fgPct = const Value.absent(),
+    this.fg3Pct = const Value.absent(),
+    this.ftPct = const Value.absent(),
+    this.per = const Value.absent(),
+    this.tsPct = const Value.absent(),
+    this.usgPct = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  PlayerSeasonsCompanion.insert({
+    this.id = const Value.absent(),
+    required String playerId,
+    required String season,
+    required String team,
+    this.gp = const Value.absent(),
+    this.gs = const Value.absent(),
+    this.mpg = const Value.absent(),
+    this.ppg = const Value.absent(),
+    this.rpg = const Value.absent(),
+    this.apg = const Value.absent(),
+    this.spg = const Value.absent(),
+    this.bpg = const Value.absent(),
+    this.topg = const Value.absent(),
+    this.fgPct = const Value.absent(),
+    this.fg3Pct = const Value.absent(),
+    this.ftPct = const Value.absent(),
+    this.per = const Value.absent(),
+    this.tsPct = const Value.absent(),
+    this.usgPct = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : playerId = Value(playerId),
+       season = Value(season),
+       team = Value(team);
+  static Insertable<PlayerSeason> custom({
+    Expression<int>? id,
+    Expression<String>? playerId,
+    Expression<String>? season,
+    Expression<String>? team,
+    Expression<int>? gp,
+    Expression<int>? gs,
+    Expression<double>? mpg,
+    Expression<double>? ppg,
+    Expression<double>? rpg,
+    Expression<double>? apg,
+    Expression<double>? spg,
+    Expression<double>? bpg,
+    Expression<double>? topg,
+    Expression<double>? fgPct,
+    Expression<double>? fg3Pct,
+    Expression<double>? ftPct,
+    Expression<double>? per,
+    Expression<double>? tsPct,
+    Expression<double>? usgPct,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (playerId != null) 'player_id': playerId,
+      if (season != null) 'season': season,
+      if (team != null) 'team': team,
+      if (gp != null) 'gp': gp,
+      if (gs != null) 'gs': gs,
+      if (mpg != null) 'mpg': mpg,
+      if (ppg != null) 'ppg': ppg,
+      if (rpg != null) 'rpg': rpg,
+      if (apg != null) 'apg': apg,
+      if (spg != null) 'spg': spg,
+      if (bpg != null) 'bpg': bpg,
+      if (topg != null) 'topg': topg,
+      if (fgPct != null) 'fg_pct': fgPct,
+      if (fg3Pct != null) 'fg3_pct': fg3Pct,
+      if (ftPct != null) 'ft_pct': ftPct,
+      if (per != null) 'per': per,
+      if (tsPct != null) 'ts_pct': tsPct,
+      if (usgPct != null) 'usg_pct': usgPct,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  PlayerSeasonsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? playerId,
+    Value<String>? season,
+    Value<String>? team,
+    Value<int>? gp,
+    Value<int>? gs,
+    Value<double>? mpg,
+    Value<double>? ppg,
+    Value<double>? rpg,
+    Value<double>? apg,
+    Value<double>? spg,
+    Value<double>? bpg,
+    Value<double>? topg,
+    Value<double>? fgPct,
+    Value<double>? fg3Pct,
+    Value<double>? ftPct,
+    Value<double>? per,
+    Value<double>? tsPct,
+    Value<double>? usgPct,
+    Value<DateTime>? createdAt,
+  }) {
+    return PlayerSeasonsCompanion(
+      id: id ?? this.id,
+      playerId: playerId ?? this.playerId,
+      season: season ?? this.season,
+      team: team ?? this.team,
+      gp: gp ?? this.gp,
+      gs: gs ?? this.gs,
+      mpg: mpg ?? this.mpg,
+      ppg: ppg ?? this.ppg,
+      rpg: rpg ?? this.rpg,
+      apg: apg ?? this.apg,
+      spg: spg ?? this.spg,
+      bpg: bpg ?? this.bpg,
+      topg: topg ?? this.topg,
+      fgPct: fgPct ?? this.fgPct,
+      fg3Pct: fg3Pct ?? this.fg3Pct,
+      ftPct: ftPct ?? this.ftPct,
+      per: per ?? this.per,
+      tsPct: tsPct ?? this.tsPct,
+      usgPct: usgPct ?? this.usgPct,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (playerId.present) {
+      map['player_id'] = Variable<String>(playerId.value);
+    }
+    if (season.present) {
+      map['season'] = Variable<String>(season.value);
+    }
+    if (team.present) {
+      map['team'] = Variable<String>(team.value);
+    }
+    if (gp.present) {
+      map['gp'] = Variable<int>(gp.value);
+    }
+    if (gs.present) {
+      map['gs'] = Variable<int>(gs.value);
+    }
+    if (mpg.present) {
+      map['mpg'] = Variable<double>(mpg.value);
+    }
+    if (ppg.present) {
+      map['ppg'] = Variable<double>(ppg.value);
+    }
+    if (rpg.present) {
+      map['rpg'] = Variable<double>(rpg.value);
+    }
+    if (apg.present) {
+      map['apg'] = Variable<double>(apg.value);
+    }
+    if (spg.present) {
+      map['spg'] = Variable<double>(spg.value);
+    }
+    if (bpg.present) {
+      map['bpg'] = Variable<double>(bpg.value);
+    }
+    if (topg.present) {
+      map['topg'] = Variable<double>(topg.value);
+    }
+    if (fgPct.present) {
+      map['fg_pct'] = Variable<double>(fgPct.value);
+    }
+    if (fg3Pct.present) {
+      map['fg3_pct'] = Variable<double>(fg3Pct.value);
+    }
+    if (ftPct.present) {
+      map['ft_pct'] = Variable<double>(ftPct.value);
+    }
+    if (per.present) {
+      map['per'] = Variable<double>(per.value);
+    }
+    if (tsPct.present) {
+      map['ts_pct'] = Variable<double>(tsPct.value);
+    }
+    if (usgPct.present) {
+      map['usg_pct'] = Variable<double>(usgPct.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlayerSeasonsCompanion(')
+          ..write('id: $id, ')
+          ..write('playerId: $playerId, ')
+          ..write('season: $season, ')
+          ..write('team: $team, ')
+          ..write('gp: $gp, ')
+          ..write('gs: $gs, ')
+          ..write('mpg: $mpg, ')
+          ..write('ppg: $ppg, ')
+          ..write('rpg: $rpg, ')
+          ..write('apg: $apg, ')
+          ..write('spg: $spg, ')
+          ..write('bpg: $bpg, ')
+          ..write('topg: $topg, ')
+          ..write('fgPct: $fgPct, ')
+          ..write('fg3Pct: $fg3Pct, ')
+          ..write('ftPct: $ftPct, ')
+          ..write('per: $per, ')
+          ..write('tsPct: $tsPct, ')
+          ..write('usgPct: $usgPct, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3214,6 +4905,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $ViewedHistoryTable viewedHistory = $ViewedHistoryTable(this);
+  late final $PlayerSeasonsTable playerSeasons = $PlayerSeasonsTable(this);
   late final TeamsDao teamsDao = TeamsDao(this as AppDatabase);
   late final PlayersDao playersDao = PlayersDao(this as AppDatabase);
   late final GamesDao gamesDao = GamesDao(this as AppDatabase);
@@ -3231,6 +4923,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     cachedGames,
     userPreferences,
     viewedHistory,
+    playerSeasons,
   ];
 }
 
@@ -3721,7 +5414,21 @@ typedef $$PlayersTableCreateCompanionBuilder =
       Value<double> apg,
       Value<double> spg,
       Value<double> bpg,
+      Value<double> mpg,
+      Value<double> topg,
+      Value<double> fgPct,
+      Value<double> fg3Pct,
+      Value<double> ftPct,
       Value<String?> photoWebpPath,
+      Value<int> careerPoints,
+      Value<int> careerRebounds,
+      Value<int> careerAssists,
+      Value<int> careerSteals,
+      Value<int> careerBlocks,
+      Value<int> careerGames,
+      Value<int> careerStarts,
+      Value<int> careerTurnovers,
+      Value<String?> careerTeams,
       Value<DateTime> cachedAt,
       Value<int> rowid,
     });
@@ -3744,7 +5451,21 @@ typedef $$PlayersTableUpdateCompanionBuilder =
       Value<double> apg,
       Value<double> spg,
       Value<double> bpg,
+      Value<double> mpg,
+      Value<double> topg,
+      Value<double> fgPct,
+      Value<double> fg3Pct,
+      Value<double> ftPct,
       Value<String?> photoWebpPath,
+      Value<int> careerPoints,
+      Value<int> careerRebounds,
+      Value<int> careerAssists,
+      Value<int> careerSteals,
+      Value<int> careerBlocks,
+      Value<int> careerGames,
+      Value<int> careerStarts,
+      Value<int> careerTurnovers,
+      Value<String?> careerTeams,
       Value<DateTime> cachedAt,
       Value<int> rowid,
     });
@@ -3767,6 +5488,28 @@ final class $$PlayersTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$PlayerSeasonsTable, List<PlayerSeason>>
+  _playerSeasonsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.playerSeasons,
+    aliasName: $_aliasNameGenerator(
+      db.players.playerId,
+      db.playerSeasons.playerId,
+    ),
+  );
+
+  $$PlayerSeasonsTableProcessedTableManager get playerSeasonsRefs {
+    final manager = $$PlayerSeasonsTableTableManager($_db, $_db.playerSeasons)
+        .filter(
+          (f) =>
+              f.playerId.playerId.sqlEquals($_itemColumn<String>('player_id')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_playerSeasonsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 }
@@ -3860,8 +5603,78 @@ class $$PlayersTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get mpg => $composableBuilder(
+    column: $table.mpg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get topg => $composableBuilder(
+    column: $table.topg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fgPct => $composableBuilder(
+    column: $table.fgPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fg3Pct => $composableBuilder(
+    column: $table.fg3Pct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ftPct => $composableBuilder(
+    column: $table.ftPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get photoWebpPath => $composableBuilder(
     column: $table.photoWebpPath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerPoints => $composableBuilder(
+    column: $table.careerPoints,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerRebounds => $composableBuilder(
+    column: $table.careerRebounds,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerAssists => $composableBuilder(
+    column: $table.careerAssists,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerSteals => $composableBuilder(
+    column: $table.careerSteals,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerBlocks => $composableBuilder(
+    column: $table.careerBlocks,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerGames => $composableBuilder(
+    column: $table.careerGames,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerStarts => $composableBuilder(
+    column: $table.careerStarts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get careerTurnovers => $composableBuilder(
+    column: $table.careerTurnovers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3891,6 +5704,31 @@ class $$PlayersTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> playerSeasonsRefs(
+    Expression<bool> Function($$PlayerSeasonsTableFilterComposer f) f,
+  ) {
+    final $$PlayerSeasonsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.playerSeasons,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayerSeasonsTableFilterComposer(
+            $db: $db,
+            $table: $db.playerSeasons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -3983,8 +5821,78 @@ class $$PlayersTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get mpg => $composableBuilder(
+    column: $table.mpg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get topg => $composableBuilder(
+    column: $table.topg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get fgPct => $composableBuilder(
+    column: $table.fgPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get fg3Pct => $composableBuilder(
+    column: $table.fg3Pct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ftPct => $composableBuilder(
+    column: $table.ftPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get photoWebpPath => $composableBuilder(
     column: $table.photoWebpPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerPoints => $composableBuilder(
+    column: $table.careerPoints,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerRebounds => $composableBuilder(
+    column: $table.careerRebounds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerAssists => $composableBuilder(
+    column: $table.careerAssists,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerSteals => $composableBuilder(
+    column: $table.careerSteals,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerBlocks => $composableBuilder(
+    column: $table.careerBlocks,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerGames => $composableBuilder(
+    column: $table.careerGames,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerStarts => $composableBuilder(
+    column: $table.careerStarts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get careerTurnovers => $composableBuilder(
+    column: $table.careerTurnovers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -4082,8 +5990,68 @@ class $$PlayersTableAnnotationComposer
   GeneratedColumn<double> get bpg =>
       $composableBuilder(column: $table.bpg, builder: (column) => column);
 
+  GeneratedColumn<double> get mpg =>
+      $composableBuilder(column: $table.mpg, builder: (column) => column);
+
+  GeneratedColumn<double> get topg =>
+      $composableBuilder(column: $table.topg, builder: (column) => column);
+
+  GeneratedColumn<double> get fgPct =>
+      $composableBuilder(column: $table.fgPct, builder: (column) => column);
+
+  GeneratedColumn<double> get fg3Pct =>
+      $composableBuilder(column: $table.fg3Pct, builder: (column) => column);
+
+  GeneratedColumn<double> get ftPct =>
+      $composableBuilder(column: $table.ftPct, builder: (column) => column);
+
   GeneratedColumn<String> get photoWebpPath => $composableBuilder(
     column: $table.photoWebpPath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerPoints => $composableBuilder(
+    column: $table.careerPoints,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerRebounds => $composableBuilder(
+    column: $table.careerRebounds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerAssists => $composableBuilder(
+    column: $table.careerAssists,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerSteals => $composableBuilder(
+    column: $table.careerSteals,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerBlocks => $composableBuilder(
+    column: $table.careerBlocks,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerGames => $composableBuilder(
+    column: $table.careerGames,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerStarts => $composableBuilder(
+    column: $table.careerStarts,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get careerTurnovers => $composableBuilder(
+    column: $table.careerTurnovers,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
     builder: (column) => column,
   );
 
@@ -4112,6 +6080,31 @@ class $$PlayersTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> playerSeasonsRefs<T extends Object>(
+    Expression<T> Function($$PlayerSeasonsTableAnnotationComposer a) f,
+  ) {
+    final $$PlayerSeasonsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.playerSeasons,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayerSeasonsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.playerSeasons,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PlayersTableTableManager
@@ -4127,7 +6120,7 @@ class $$PlayersTableTableManager
           $$PlayersTableUpdateCompanionBuilder,
           (Player, $$PlayersTableReferences),
           Player,
-          PrefetchHooks Function({bool teamId})
+          PrefetchHooks Function({bool teamId, bool playerSeasonsRefs})
         > {
   $$PlayersTableTableManager(_$AppDatabase db, $PlayersTable table)
     : super(
@@ -4159,7 +6152,21 @@ class $$PlayersTableTableManager
                 Value<double> apg = const Value.absent(),
                 Value<double> spg = const Value.absent(),
                 Value<double> bpg = const Value.absent(),
+                Value<double> mpg = const Value.absent(),
+                Value<double> topg = const Value.absent(),
+                Value<double> fgPct = const Value.absent(),
+                Value<double> fg3Pct = const Value.absent(),
+                Value<double> ftPct = const Value.absent(),
                 Value<String?> photoWebpPath = const Value.absent(),
+                Value<int> careerPoints = const Value.absent(),
+                Value<int> careerRebounds = const Value.absent(),
+                Value<int> careerAssists = const Value.absent(),
+                Value<int> careerSteals = const Value.absent(),
+                Value<int> careerBlocks = const Value.absent(),
+                Value<int> careerGames = const Value.absent(),
+                Value<int> careerStarts = const Value.absent(),
+                Value<int> careerTurnovers = const Value.absent(),
+                Value<String?> careerTeams = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlayersCompanion(
@@ -4180,7 +6187,21 @@ class $$PlayersTableTableManager
                 apg: apg,
                 spg: spg,
                 bpg: bpg,
+                mpg: mpg,
+                topg: topg,
+                fgPct: fgPct,
+                fg3Pct: fg3Pct,
+                ftPct: ftPct,
                 photoWebpPath: photoWebpPath,
+                careerPoints: careerPoints,
+                careerRebounds: careerRebounds,
+                careerAssists: careerAssists,
+                careerSteals: careerSteals,
+                careerBlocks: careerBlocks,
+                careerGames: careerGames,
+                careerStarts: careerStarts,
+                careerTurnovers: careerTurnovers,
+                careerTeams: careerTeams,
                 cachedAt: cachedAt,
                 rowid: rowid,
               ),
@@ -4203,7 +6224,21 @@ class $$PlayersTableTableManager
                 Value<double> apg = const Value.absent(),
                 Value<double> spg = const Value.absent(),
                 Value<double> bpg = const Value.absent(),
+                Value<double> mpg = const Value.absent(),
+                Value<double> topg = const Value.absent(),
+                Value<double> fgPct = const Value.absent(),
+                Value<double> fg3Pct = const Value.absent(),
+                Value<double> ftPct = const Value.absent(),
                 Value<String?> photoWebpPath = const Value.absent(),
+                Value<int> careerPoints = const Value.absent(),
+                Value<int> careerRebounds = const Value.absent(),
+                Value<int> careerAssists = const Value.absent(),
+                Value<int> careerSteals = const Value.absent(),
+                Value<int> careerBlocks = const Value.absent(),
+                Value<int> careerGames = const Value.absent(),
+                Value<int> careerStarts = const Value.absent(),
+                Value<int> careerTurnovers = const Value.absent(),
+                Value<String?> careerTeams = const Value.absent(),
                 Value<DateTime> cachedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PlayersCompanion.insert(
@@ -4224,7 +6259,21 @@ class $$PlayersTableTableManager
                 apg: apg,
                 spg: spg,
                 bpg: bpg,
+                mpg: mpg,
+                topg: topg,
+                fgPct: fgPct,
+                fg3Pct: fg3Pct,
+                ftPct: ftPct,
                 photoWebpPath: photoWebpPath,
+                careerPoints: careerPoints,
+                careerRebounds: careerRebounds,
+                careerAssists: careerAssists,
+                careerSteals: careerSteals,
+                careerBlocks: careerBlocks,
+                careerGames: careerGames,
+                careerStarts: careerStarts,
+                careerTurnovers: careerTurnovers,
+                careerTeams: careerTeams,
                 cachedAt: cachedAt,
                 rowid: rowid,
               ),
@@ -4236,10 +6285,12 @@ class $$PlayersTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({teamId = false}) {
+          prefetchHooksCallback: ({teamId = false, playerSeasonsRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [],
+              explicitlyWatchedTables: [
+                if (playerSeasonsRefs) db.playerSeasons,
+              ],
               addJoins:
                   <
                     T extends TableManagerState<
@@ -4273,7 +6324,28 @@ class $$PlayersTableTableManager
                     return state;
                   },
               getPrefetchedDataCallback: (items) async {
-                return [];
+                return [
+                  if (playerSeasonsRefs)
+                    await $_getPrefetchedData<
+                      Player,
+                      $PlayersTable,
+                      PlayerSeason
+                    >(
+                      currentTable: table,
+                      referencedTable: $$PlayersTableReferences
+                          ._playerSeasonsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$PlayersTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).playerSeasonsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.playerId == item.playerId,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
               },
             );
           },
@@ -4293,7 +6365,7 @@ typedef $$PlayersTableProcessedTableManager =
       $$PlayersTableUpdateCompanionBuilder,
       (Player, $$PlayersTableReferences),
       Player,
-      PrefetchHooks Function({bool teamId})
+      PrefetchHooks Function({bool teamId, bool playerSeasonsRefs})
     >;
 typedef $$CachedGamesTableCreateCompanionBuilder =
     CachedGamesCompanion Function({
@@ -5431,6 +7503,608 @@ typedef $$ViewedHistoryTableProcessedTableManager =
       ViewedHistoryData,
       PrefetchHooks Function()
     >;
+typedef $$PlayerSeasonsTableCreateCompanionBuilder =
+    PlayerSeasonsCompanion Function({
+      Value<int> id,
+      required String playerId,
+      required String season,
+      required String team,
+      Value<int> gp,
+      Value<int> gs,
+      Value<double> mpg,
+      Value<double> ppg,
+      Value<double> rpg,
+      Value<double> apg,
+      Value<double> spg,
+      Value<double> bpg,
+      Value<double> topg,
+      Value<double> fgPct,
+      Value<double> fg3Pct,
+      Value<double> ftPct,
+      Value<double> per,
+      Value<double> tsPct,
+      Value<double> usgPct,
+      Value<DateTime> createdAt,
+    });
+typedef $$PlayerSeasonsTableUpdateCompanionBuilder =
+    PlayerSeasonsCompanion Function({
+      Value<int> id,
+      Value<String> playerId,
+      Value<String> season,
+      Value<String> team,
+      Value<int> gp,
+      Value<int> gs,
+      Value<double> mpg,
+      Value<double> ppg,
+      Value<double> rpg,
+      Value<double> apg,
+      Value<double> spg,
+      Value<double> bpg,
+      Value<double> topg,
+      Value<double> fgPct,
+      Value<double> fg3Pct,
+      Value<double> ftPct,
+      Value<double> per,
+      Value<double> tsPct,
+      Value<double> usgPct,
+      Value<DateTime> createdAt,
+    });
+
+final class $$PlayerSeasonsTableReferences
+    extends BaseReferences<_$AppDatabase, $PlayerSeasonsTable, PlayerSeason> {
+  $$PlayerSeasonsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $PlayersTable _playerIdTable(_$AppDatabase db) =>
+      db.players.createAlias(
+        $_aliasNameGenerator(db.playerSeasons.playerId, db.players.playerId),
+      );
+
+  $$PlayersTableProcessedTableManager get playerId {
+    final $_column = $_itemColumn<String>('player_id')!;
+
+    final manager = $$PlayersTableTableManager(
+      $_db,
+      $_db.players,
+    ).filter((f) => f.playerId.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_playerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlayerSeasonsTableFilterComposer
+    extends Composer<_$AppDatabase, $PlayerSeasonsTable> {
+  $$PlayerSeasonsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get season => $composableBuilder(
+    column: $table.season,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get team => $composableBuilder(
+    column: $table.team,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get gp => $composableBuilder(
+    column: $table.gp,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get gs => $composableBuilder(
+    column: $table.gs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get mpg => $composableBuilder(
+    column: $table.mpg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ppg => $composableBuilder(
+    column: $table.ppg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get rpg => $composableBuilder(
+    column: $table.rpg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get apg => $composableBuilder(
+    column: $table.apg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get spg => $composableBuilder(
+    column: $table.spg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get bpg => $composableBuilder(
+    column: $table.bpg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get topg => $composableBuilder(
+    column: $table.topg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fgPct => $composableBuilder(
+    column: $table.fgPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fg3Pct => $composableBuilder(
+    column: $table.fg3Pct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get ftPct => $composableBuilder(
+    column: $table.ftPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get per => $composableBuilder(
+    column: $table.per,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get tsPct => $composableBuilder(
+    column: $table.tsPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get usgPct => $composableBuilder(
+    column: $table.usgPct,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PlayersTableFilterComposer get playerId {
+    final $$PlayersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableFilterComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlayerSeasonsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlayerSeasonsTable> {
+  $$PlayerSeasonsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get season => $composableBuilder(
+    column: $table.season,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get team => $composableBuilder(
+    column: $table.team,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get gp => $composableBuilder(
+    column: $table.gp,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get gs => $composableBuilder(
+    column: $table.gs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get mpg => $composableBuilder(
+    column: $table.mpg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ppg => $composableBuilder(
+    column: $table.ppg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get rpg => $composableBuilder(
+    column: $table.rpg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get apg => $composableBuilder(
+    column: $table.apg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get spg => $composableBuilder(
+    column: $table.spg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get bpg => $composableBuilder(
+    column: $table.bpg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get topg => $composableBuilder(
+    column: $table.topg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get fgPct => $composableBuilder(
+    column: $table.fgPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get fg3Pct => $composableBuilder(
+    column: $table.fg3Pct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get ftPct => $composableBuilder(
+    column: $table.ftPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get per => $composableBuilder(
+    column: $table.per,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get tsPct => $composableBuilder(
+    column: $table.tsPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get usgPct => $composableBuilder(
+    column: $table.usgPct,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PlayersTableOrderingComposer get playerId {
+    final $$PlayersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableOrderingComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlayerSeasonsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlayerSeasonsTable> {
+  $$PlayerSeasonsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get season =>
+      $composableBuilder(column: $table.season, builder: (column) => column);
+
+  GeneratedColumn<String> get team =>
+      $composableBuilder(column: $table.team, builder: (column) => column);
+
+  GeneratedColumn<int> get gp =>
+      $composableBuilder(column: $table.gp, builder: (column) => column);
+
+  GeneratedColumn<int> get gs =>
+      $composableBuilder(column: $table.gs, builder: (column) => column);
+
+  GeneratedColumn<double> get mpg =>
+      $composableBuilder(column: $table.mpg, builder: (column) => column);
+
+  GeneratedColumn<double> get ppg =>
+      $composableBuilder(column: $table.ppg, builder: (column) => column);
+
+  GeneratedColumn<double> get rpg =>
+      $composableBuilder(column: $table.rpg, builder: (column) => column);
+
+  GeneratedColumn<double> get apg =>
+      $composableBuilder(column: $table.apg, builder: (column) => column);
+
+  GeneratedColumn<double> get spg =>
+      $composableBuilder(column: $table.spg, builder: (column) => column);
+
+  GeneratedColumn<double> get bpg =>
+      $composableBuilder(column: $table.bpg, builder: (column) => column);
+
+  GeneratedColumn<double> get topg =>
+      $composableBuilder(column: $table.topg, builder: (column) => column);
+
+  GeneratedColumn<double> get fgPct =>
+      $composableBuilder(column: $table.fgPct, builder: (column) => column);
+
+  GeneratedColumn<double> get fg3Pct =>
+      $composableBuilder(column: $table.fg3Pct, builder: (column) => column);
+
+  GeneratedColumn<double> get ftPct =>
+      $composableBuilder(column: $table.ftPct, builder: (column) => column);
+
+  GeneratedColumn<double> get per =>
+      $composableBuilder(column: $table.per, builder: (column) => column);
+
+  GeneratedColumn<double> get tsPct =>
+      $composableBuilder(column: $table.tsPct, builder: (column) => column);
+
+  GeneratedColumn<double> get usgPct =>
+      $composableBuilder(column: $table.usgPct, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$PlayersTableAnnotationComposer get playerId {
+    final $$PlayersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.playerId,
+      referencedTable: $db.players,
+      getReferencedColumn: (t) => t.playerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlayersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.players,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlayerSeasonsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlayerSeasonsTable,
+          PlayerSeason,
+          $$PlayerSeasonsTableFilterComposer,
+          $$PlayerSeasonsTableOrderingComposer,
+          $$PlayerSeasonsTableAnnotationComposer,
+          $$PlayerSeasonsTableCreateCompanionBuilder,
+          $$PlayerSeasonsTableUpdateCompanionBuilder,
+          (PlayerSeason, $$PlayerSeasonsTableReferences),
+          PlayerSeason,
+          PrefetchHooks Function({bool playerId})
+        > {
+  $$PlayerSeasonsTableTableManager(_$AppDatabase db, $PlayerSeasonsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlayerSeasonsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlayerSeasonsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlayerSeasonsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> playerId = const Value.absent(),
+                Value<String> season = const Value.absent(),
+                Value<String> team = const Value.absent(),
+                Value<int> gp = const Value.absent(),
+                Value<int> gs = const Value.absent(),
+                Value<double> mpg = const Value.absent(),
+                Value<double> ppg = const Value.absent(),
+                Value<double> rpg = const Value.absent(),
+                Value<double> apg = const Value.absent(),
+                Value<double> spg = const Value.absent(),
+                Value<double> bpg = const Value.absent(),
+                Value<double> topg = const Value.absent(),
+                Value<double> fgPct = const Value.absent(),
+                Value<double> fg3Pct = const Value.absent(),
+                Value<double> ftPct = const Value.absent(),
+                Value<double> per = const Value.absent(),
+                Value<double> tsPct = const Value.absent(),
+                Value<double> usgPct = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => PlayerSeasonsCompanion(
+                id: id,
+                playerId: playerId,
+                season: season,
+                team: team,
+                gp: gp,
+                gs: gs,
+                mpg: mpg,
+                ppg: ppg,
+                rpg: rpg,
+                apg: apg,
+                spg: spg,
+                bpg: bpg,
+                topg: topg,
+                fgPct: fgPct,
+                fg3Pct: fg3Pct,
+                ftPct: ftPct,
+                per: per,
+                tsPct: tsPct,
+                usgPct: usgPct,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String playerId,
+                required String season,
+                required String team,
+                Value<int> gp = const Value.absent(),
+                Value<int> gs = const Value.absent(),
+                Value<double> mpg = const Value.absent(),
+                Value<double> ppg = const Value.absent(),
+                Value<double> rpg = const Value.absent(),
+                Value<double> apg = const Value.absent(),
+                Value<double> spg = const Value.absent(),
+                Value<double> bpg = const Value.absent(),
+                Value<double> topg = const Value.absent(),
+                Value<double> fgPct = const Value.absent(),
+                Value<double> fg3Pct = const Value.absent(),
+                Value<double> ftPct = const Value.absent(),
+                Value<double> per = const Value.absent(),
+                Value<double> tsPct = const Value.absent(),
+                Value<double> usgPct = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => PlayerSeasonsCompanion.insert(
+                id: id,
+                playerId: playerId,
+                season: season,
+                team: team,
+                gp: gp,
+                gs: gs,
+                mpg: mpg,
+                ppg: ppg,
+                rpg: rpg,
+                apg: apg,
+                spg: spg,
+                bpg: bpg,
+                topg: topg,
+                fgPct: fgPct,
+                fg3Pct: fg3Pct,
+                ftPct: ftPct,
+                per: per,
+                tsPct: tsPct,
+                usgPct: usgPct,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlayerSeasonsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({playerId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (playerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.playerId,
+                                referencedTable: $$PlayerSeasonsTableReferences
+                                    ._playerIdTable(db),
+                                referencedColumn: $$PlayerSeasonsTableReferences
+                                    ._playerIdTable(db)
+                                    .playerId,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlayerSeasonsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlayerSeasonsTable,
+      PlayerSeason,
+      $$PlayerSeasonsTableFilterComposer,
+      $$PlayerSeasonsTableOrderingComposer,
+      $$PlayerSeasonsTableAnnotationComposer,
+      $$PlayerSeasonsTableCreateCompanionBuilder,
+      $$PlayerSeasonsTableUpdateCompanionBuilder,
+      (PlayerSeason, $$PlayerSeasonsTableReferences),
+      PlayerSeason,
+      PrefetchHooks Function({bool playerId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5445,4 +8119,6 @@ class $AppDatabaseManager {
       $$UserPreferencesTableTableManager(_db, _db.userPreferences);
   $$ViewedHistoryTableTableManager get viewedHistory =>
       $$ViewedHistoryTableTableManager(_db, _db.viewedHistory);
+  $$PlayerSeasonsTableTableManager get playerSeasons =>
+      $$PlayerSeasonsTableTableManager(_db, _db.playerSeasons);
 }

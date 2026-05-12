@@ -6,6 +6,7 @@ part of 'players_dao.dart';
 mixin _$PlayersDaoMixin on DatabaseAccessor<AppDatabase> {
   $NbaTeamsTable get nbaTeams => attachedDatabase.nbaTeams;
   $PlayersTable get players => attachedDatabase.players;
+  $PlayerSeasonsTable get playerSeasons => attachedDatabase.playerSeasons;
   PlayersDaoManager get managers => PlayersDaoManager(this);
 }
 
@@ -16,4 +17,6 @@ class PlayersDaoManager {
       $$NbaTeamsTableTableManager(_db.attachedDatabase, _db.nbaTeams);
   $$PlayersTableTableManager get players =>
       $$PlayersTableTableManager(_db.attachedDatabase, _db.players);
+  $$PlayerSeasonsTableTableManager get playerSeasons =>
+      $$PlayerSeasonsTableTableManager(_db.attachedDatabase, _db.playerSeasons);
 }

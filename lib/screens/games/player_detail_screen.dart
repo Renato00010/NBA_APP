@@ -3,6 +3,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../db/app_database.dart';
 import '../../main.dart';
+import '../../services/basketball_reference_service.dart';
+import '../../services/player_stats_seed.dart';
+import '../../services/player_stats_web_sync.dart';
 import '../../widgets/team_logo.dart';
 
 class PlayerDetailScreen extends StatefulWidget {
@@ -14,32 +17,228 @@ class PlayerDetailScreen extends StatefulWidget {
 }
 
 class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
-  Map<String, dynamic>? _stats;
+  final BasketballReferenceService _basketballReferenceService =
+      BasketballReferenceService();
+  late Player _player;
+  PlayerStatsProfile? _manualStats;
+  List<String> _careerTeamIds = [];
+  String? _selectedSeason;
   bool _loading = true;
+  bool _syncing = false;
   String _teamName = '';
 
   @override
   void initState() {
     super.initState();
+    _player = widget.player;
     _loadData();
   }
 
   Future<void> _loadData() async {
-    final teamName = repository.getTeamName(widget.player.teamId);
-    final stats = await repository.getPlayerStats(
-      int.parse(widget.player.playerId),
-    );
     setState(() {
-      _stats = stats;
-      _teamName = teamName;
-      _loading = false;
+      _loading = true;
     });
+
+    // Atualiza jogador da BD caso tenha mudado em background
+    final latest = await database.playersDao.getPlayerById(_player.playerId);
+    if (latest != null) {
+      _player = latest;
+    }
+
+    final teamName = repository.getTeamName(_player.teamId);
+    PlayerStatsProfile? externalStats;
+    bool isRealData = false;
+
+    // 1. Tenta busca online
+    try {
+      externalStats = await _basketballReferenceService.getPlayerProfile(
+        _player.fullName,
+      );
+      if (externalStats == null) {
+        if (_player.displayName != null &&
+            _player.displayName != _player.fullName) {
+          externalStats = await _basketballReferenceService.getPlayerProfile(
+            _player.displayName!,
+          );
+        }
+      }
+      if (externalStats != null) isRealData = true;
+    } catch (e) {
+      externalStats = null;
+    }
+
+    // 2. Se falhou online, tenta dados locais reais da BD
+    if (externalStats == null) {
+      final localSeasons = await database.playersDao.getPlayerSeasons(_player.playerId);
+      if (localSeasons.isNotEmpty || _player.careerGames > 0) {
+        final seasons = localSeasons.map((s) => SeasonStats(
+          season: s.season,
+          team: s.team,
+          gp: s.gp,
+          gs: s.gs,
+          mpg: s.mpg,
+          ppg: s.ppg,
+          rpg: s.rpg,
+          apg: s.apg,
+          spg: s.spg,
+          bpg: s.bpg,
+          topg: s.topg,
+          fgPct: s.fgPct,
+          fg3Pct: s.fg3Pct,
+          ftPct: s.ftPct,
+          per: s.per,
+          tsPct: s.tsPct,
+          usgPct: s.usgPct,
+          impactMetric: 0,
+          impactMetricLabel: '-',
+          offensiveRating: 0,
+          defensiveRating: 0,
+        )).toList();
+
+        seasons.sort((a, b) => b.season.compareTo(a.season));
+
+        if (seasons.isNotEmpty || _player.careerGames > 0) {
+          externalStats = PlayerStatsProfile(
+            currentSeason: seasons.isNotEmpty ? seasons.first : SeasonStats(
+              season: 'Atual',
+              team: teamName,
+              gp: 0, gs: 0, mpg: _player.mpg, ppg: _player.ppg,
+              rpg: _player.rpg, apg: _player.apg, spg: _player.spg,
+              bpg: _player.bpg, topg: _player.topg,
+              fgPct: _player.fgPct, fg3Pct: _player.fg3Pct, ftPct: _player.ftPct,
+              per: 0, tsPct: 0, usgPct: 0, impactMetric: 0, impactMetricLabel: '-',
+              offensiveRating: 0, defensiveRating: 0,
+            ),
+            seasons: seasons,
+            career: CareerTotals(
+              games: _player.careerGames,
+              starts: _player.careerStarts,
+              points: _player.careerPoints,
+              rebounds: _player.careerRebounds,
+              assists: _player.careerAssists,
+              steals: _player.careerSteals,
+              blocks: _player.careerBlocks,
+              turnovers: _player.careerTurnovers,
+            ),
+            careerHighs: const CareerHighs(points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0),
+            recentGames: const [],
+            awards: const [],
+            health: const HealthStatus(status: 'Offline', injuryDescription: '-', expectedReturn: '-'),
+          );
+          if (localSeasons.isNotEmpty) isRealData = true;
+        }
+      }
+    }
+
+    // 3. Named seed (dados reais para jogadores específicos: LeBron, Curry, etc.)
+    // Usamos para trajetória porque têm times reais, ao contrário do seed estimado
+    bool isNamedSeed = false;
+    if (externalStats == null) {
+      final namedSeed = PlayerStatsSeed.forName(_player.fullName) ??
+          PlayerStatsSeed.forName(_player.displayName ?? '');
+      if (namedSeed != null) {
+        externalStats = namedSeed;
+        isNamedSeed = true;
+      }
+    }
+
+    // 4. Computa trajetória — real data (web/BD) OU named seed (times históricos reais)
+    final careerTeamIds = _computeCareerTeamIds(externalStats, isRealData || isNamedSeed);
+
+    // 5. Seed estimado como último fallback apenas para estatísticas (nunca para trajetória)
+    externalStats ??= PlayerStatsSeed.estimatedProfileForRosterGap(
+      fullName: _player.fullName,
+      position: _player.position,
+      teamName: teamName,
+    );
+
+    if (mounted) {
+      setState(() {
+        _manualStats = externalStats;
+        _careerTeamIds = careerTeamIds;
+        _selectedSeason = externalStats?.currentSeason.season;
+        _teamName = teamName;
+        _loading = false;
+      });
+
+      // Sincronização automática em background sempre que não tivermos dados reais da web/BD
+      if (!isRealData) {
+        _manualSync(silent: true);
+      }
+    }
+  }
+
+  /// Computa a trajetória a partir de dados REAIS apenas.
+  /// NUNCA usa seed data (que tem times fictícios gerados aleatoriamente).
+  List<String> _computeCareerTeamIds(PlayerStatsProfile? profile, bool isRealData) {
+    final out = <String>[];
+
+    // 1. Seasons do perfil real (web ou BD local) — ordena do mais antigo ao mais recente
+    if (profile != null && isRealData && profile.seasons.isNotEmpty) {
+      final sorted = profile.seasons.toList()
+        ..sort((a, b) => a.season.compareTo(b.season));
+      for (final s in sorted) {
+        final teamId = _teamIdFromAbbreviation(s.team);
+        if (teamId == null) continue;
+        if (out.isEmpty || out.last != teamId) out.add(teamId);
+      }
+      if (out.isNotEmpty) {
+        // Garante que o time atual aparece no fim
+        if (out.last != _player.teamId) out.add(_player.teamId);
+        return out;
+      }
+    }
+
+    // 2. Fallback: careerTeams guardado na BD após sync (ordem cronológica)
+    if (_player.careerTeams != null && _player.careerTeams!.isNotEmpty) {
+      for (final t in _player.careerTeams!.split(',')) {
+        final tid = _teamIdFromAbbreviation(t);
+        if (tid != null && (out.isEmpty || out.last != tid)) out.add(tid);
+      }
+      if (out.isNotEmpty) {
+        if (out.last != _player.teamId) out.add(_player.teamId);
+        return out;
+      }
+    }
+
+    // 3. Último recurso: só o time atual
+    return [_player.teamId];
+  }
+
+  Future<void> _manualSync({bool silent = false}) async {
+    if (_syncing) return;
+    if (mounted) setState(() => _syncing = true);
+
+    final success = await PlayerStatsWebSync(database.playersDao).syncSinglePlayer(_player);
+    
+    if (success) {
+      final updatedPlayer = await database.playersDao.getPlayerById(_player.playerId);
+      if (updatedPlayer != null && mounted) {
+        setState(() {
+          _player = updatedPlayer;
+        });
+        await _loadData();
+      }
+      if (mounted && !silent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sincronização concluída com sucesso!')),
+        );
+      }
+    } else {
+      if (mounted && !silent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Falha na sincronização. Tente mais tarde.')),
+        );
+      }
+    }
+    
+    if (mounted) setState(() => _syncing = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final player = widget.player;
+    final player = _player;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
@@ -101,7 +300,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Estatísticas 2024-25',
+                    'Estatisticas',
                     style: TextStyle(
                       color: theme.colorScheme.tertiary,
                       fontSize: 16,
@@ -109,7 +308,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  _statsContent(theme),
+                  _statsHub(theme),
                 ],
               ),
             ),
@@ -187,6 +386,71 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
               ),
             ],
           ),
+          if (player.ppg > 0 ||
+              player.rpg > 0 ||
+              player.apg > 0 ||
+              player.mpg > 0) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _metricTile(
+                    'PPG',
+                    player.ppg.toStringAsFixed(1),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _metricTile(
+                    'RPG',
+                    player.rpg.toStringAsFixed(1),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _metricTile(
+                    'APG',
+                    player.apg.toStringAsFixed(1),
+                  ),
+                ),
+              ],
+            ),
+            if (player.mpg > 0 ||
+                player.fgPct > 0 ||
+                player.topg > 0 ||
+                player.spg > 0 ||
+                player.bpg > 0) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _metricTile(
+                      'MPG',
+                      player.mpg.toStringAsFixed(1),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _metricTile(
+                      'FG%',
+                      player.fgPct > 0
+                          ? '${player.fgPct.toStringAsFixed(1)}%'
+                          : '-',
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _metricTile(
+                      'TOPG',
+                      player.topg > 0
+                          ? player.topg.toStringAsFixed(1)
+                          : '-',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ],
       ),
     );
@@ -217,7 +481,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     String measurementUnit,
     ThemeData theme,
   ) {
-    final teamLabel = _teamName.isNotEmpty ? _teamName : player.teamId;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -226,94 +489,695 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 42,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Row(
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final currentPlayer = _player;
+            final teamLabel = _teamName.isNotEmpty ? _teamName : currentPlayer.teamId;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      _miniLogo(player),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              player.displayName ?? player.fullName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '$teamLabel • ${player.position ?? '-'}',
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
+                      Center(
+                        child: Container(
+                          width: 42,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
                         ),
                       ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          _miniLogo(currentPlayer),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  currentPlayer.displayName ?? currentPlayer.fullName,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '$teamLabel • ${currentPlayer.position ?? '-'}',
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      _sheetSectionTitle('Biografia'),
+                      _sheetRow('Nome completo', currentPlayer.fullName),
+                      _sheetRow('Número', currentPlayer.jerseyNumber ?? '-'),
+                      _sheetRow('País', currentPlayer.country ?? '-'),
+                      _sheetRow('Nascimento', _formatDateOrDash(currentPlayer.birthDate)),
+                      _sheetRow('Idade', _formatAge(currentPlayer.birthDate)),
+                      _sheetRow(
+                        'Altura',
+                        _formatHeight(currentPlayer.heightCm, measurementUnit),
+                      ),
+                      _sheetRow(
+                        'Peso',
+                        _formatWeight(currentPlayer.weightKg, measurementUnit),
+                      ),
+                      const SizedBox(height: 18),
+                      _sheetSectionTitle('Carreira'),
+                      _sheetRow(
+                        _previousTeamLabel(currentPlayer.previousTeam),
+                        currentPlayer.previousTeam ?? '-',
+                      ),
+                      _sheetRow(
+                        'Experiência NBA',
+                        currentPlayer.experienceYears != null
+                            ? '${currentPlayer.experienceYears} anos'
+                            : '-',
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const Spacer(),
+                          TextButton.icon(
+                            onPressed: _syncing
+                                ? null
+                                : () async {
+                                    setModalState(() {}); // Atualiza o spinner no modal
+                                    await _manualSync();
+                                    setModalState(() {}); // Atualiza os dados no modal
+                                  },
+                            icon: _syncing
+                                ? const SizedBox(
+                                    width: 14,
+                                    height: 14,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white70,
+                                    ),
+                                  )
+                                : const Icon(Icons.sync, size: 16),
+                            label: Text(
+                              _syncing ? 'Sincronizando...' : 'Sincronizar Dados Reais',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFFFFC72C),
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                      _sheetCareerPath(),
                     ],
                   ),
-                  const SizedBox(height: 18),
-                  _sheetSectionTitle('Biografia'),
-                  _sheetRow('Nome completo', player.fullName),
-                  _sheetRow('Número', player.jerseyNumber ?? '-'),
-                  _sheetRow('País', player.country ?? '-'),
-                  _sheetRow('Nascimento', _formatDateOrDash(player.birthDate)),
-                  _sheetRow('Idade', _formatAge(player.birthDate)),
-                  _sheetRow(
-                    'Altura',
-                    _formatHeight(player.heightCm, measurementUnit),
-                  ),
-                  _sheetRow(
-                    'Peso',
-                    _formatWeight(player.weightKg, measurementUnit),
-                  ),
-                  const SizedBox(height: 18),
-                  _sheetSectionTitle('Carreira'),
-                  _sheetRow(
-                    _previousTeamLabel(player.previousTeam),
-                    player.previousTeam ?? '-',
-                  ),
-                  _sheetRow(
-                    'Experiência NBA',
-                    player.experienceYears != null
-                        ? '${player.experienceYears} anos'
-                        : '-',
-                  ),
-                  _sheetCareerPath(player, teamLabel, theme),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  bool _hasLocalCareerStats(Player p) => p.careerGames > 0;
+
+  Widget _statsHub(ThemeData theme) {
+    final profile = _manualStats;
+    final player = _player;
+    if (_loading) return const Center(child: CircularProgressIndicator());
+
+    // Se temos profile completo, mostramos tudo.
+    if (profile != null) {
+      final selectedStats = _selectedSeasonStats(profile);
+      return DefaultTabController(
+        length: 5,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _seasonSelector(profile),
+            const SizedBox(height: 12),
+            Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF101010),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: [
+                  Tab(text: 'Temporada'),
+                  Tab(text: 'Carreira'),
+                  Tab(text: 'Avancadas'),
+                  Tab(text: 'Logs'),
+                  Tab(text: 'Saude'),
                 ],
               ),
             ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 520,
+              child: TabBarView(
+                children: [
+                  _seasonStatsTab(
+                    selectedStats,
+                    _allSeasonsForProfile(profile),
+                    theme,
+                  ),
+                  _careerStatsTab(profile: profile),
+                  _advancedStatsTab(selectedStats, theme),
+                  _gameLogsTab(profile.recentGames),
+                  _healthTab(profile.health, profile.awards),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Fallback: se nao temos profile mas temos dados locais de temporada ou carreira.
+    if (_hasLocalSeasonStats(player) || _hasLocalCareerStats(player)) {
+      return DefaultTabController(
+        length: 2,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: const Color(0xFF101010),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const TabBar(
+                isScrollable: false,
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: [
+                  Tab(text: 'Temporada'),
+                  Tab(text: 'Carreira'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 400,
+              child: TabBarView(
+                children: [
+                  SingleChildScrollView(child: _localDbStatsContent(player, theme)),
+                  _careerStatsTab(player: player),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            const _InfoNote(
+              text: 'Dados locais. Conecte-se para ver historico completo e avancadas.',
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _localDbStatsContent(player, theme),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.cloud_off, color: Colors.white24, size: 32),
+              const SizedBox(height: 12),
+              const Text(
+                'Não foi possível carregar estatísticas detalhadas online.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _loadData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  icon: const Icon(Icons.refresh, size: 18),
+                  label: const Text('Tentar novamente'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Temporada atual + historico, sem duplicar (ex.: LeBron 2024-25 na lista).
+  List<SeasonStats> _allSeasonsForProfile(PlayerStatsProfile profile) {
+    final byKey = <String, SeasonStats>{};
+    for (final s in profile.seasons) {
+      byKey[s.season] = s;
+    }
+    byKey[profile.currentSeason.season] = profile.currentSeason;
+    final out = byKey.values.toList();
+    out.sort((a, b) => b.season.compareTo(a.season));
+    return out;
+  }
+
+  SeasonStats _selectedSeasonStats(PlayerStatsProfile profile) {
+    final all = _allSeasonsForProfile(profile);
+    for (final s in all) {
+      if (s.season == _selectedSeason) return s;
+    }
+    return profile.currentSeason;
+  }
+
+  Widget _seasonSelector(PlayerStatsProfile profile) {
+    final seasons = _allSeasonsForProfile(profile);
+    final selected = seasons.any((season) => season.season == _selectedSeason)
+        ? _selectedSeason
+        : seasons.first.season;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: selected,
+          dropdownColor: const Color(0xFF1A1A1A),
+          iconEnabledColor: Colors.white70,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+          items: seasons
+              .map(
+                (season) => DropdownMenuItem<String>(
+                  value: season.season,
+                  child: Text('${season.season} - ${season.team}'),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            setState(() => _selectedSeason = value);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _seasonStatsTab(
+    SeasonStats current,
+    List<SeasonStats> seasons,
+    ThemeData theme,
+  ) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _seasonHeader(current),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              _statCard(
+                'PPG',
+                current.ppg.toStringAsFixed(1),
+                theme,
+                isMain: true,
+              ),
+              const SizedBox(width: 10),
+              _statCard(
+                'RPG',
+                current.rpg.toStringAsFixed(1),
+                theme,
+                isMain: true,
+              ),
+              const SizedBox(width: 10),
+              _statCard(
+                'APG',
+                current.apg.toStringAsFixed(1),
+                theme,
+                isMain: true,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _statGrid([
+            _StatItem('GP', '${current.gp}'),
+            _StatItem('GS', '${current.gs}'),
+            _StatItem('MPG', current.mpg.toStringAsFixed(1)),
+            _StatItem('ORB', current.orb.toStringAsFixed(1)),
+            _StatItem('DRB', current.drb.toStringAsFixed(1)),
+            _StatItem('PF', current.pf.toStringAsFixed(1)),
+            _StatItem('SPG', current.spg.toStringAsFixed(1)),
+            _StatItem('BPG', current.bpg.toStringAsFixed(1)),
+            _StatItem('TOPG', current.topg.toStringAsFixed(1)),
+            _StatItem('FG%', _pct(current.fgPct)),
+            _StatItem('3P%', _pct(current.fg3Pct)),
+            _StatItem('FT%', _pct(current.ftPct)),
+          ]),
+          if (seasons.isNotEmpty) ...[
+            const SizedBox(height: 16),
+            _subHeader('Historico por temporada'),
+            const SizedBox(height: 8),
+            ...seasons.map(_seasonRow),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _careerStatsTab({PlayerStatsProfile? profile, Player? player}) {
+    if (profile != null) {
+      final career = profile.career;
+      final highs = profile.careerHighs;
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            _statGrid([
+              _StatItem('Jogos', '${career.games}'),
+              _StatItem('Titular', '${career.starts}'),
+              _StatItem('Pontos', _compactInt(career.points)),
+              _StatItem('Rebotes', _compactInt(career.rebounds)),
+              _StatItem('Assist.', _compactInt(career.assists)),
+              _StatItem('Roubos', _compactInt(career.steals)),
+              _StatItem('Tocos', _compactInt(career.blocks)),
+              _StatItem('Turnovers', _compactInt(career.turnovers)),
+            ]),
+            const SizedBox(height: 16),
+            _subHeader('Recordes pessoais'),
+            const SizedBox(height: 8),
+            _statGrid([
+              _StatItem('PTS', '${highs.points}'),
+              _StatItem('REB', '${highs.rebounds}'),
+              _StatItem('AST', '${highs.assists}'),
+              _StatItem('STL', '${highs.steals}'),
+              _StatItem('BLK', '${highs.blocks}'),
+            ]),
+            const SizedBox(height: 16),
+            _subHeader('Premiacoes'),
+            const SizedBox(height: 8),
+            ...profile.awards.map((award) => _awardRow(award.label)),
+          ],
+        ),
+      );
+    } else if (player != null) {
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            _statGrid([
+              _StatItem('Jogos', '${player.careerGames}'),
+              _StatItem('Titular', '${player.careerStarts}'),
+              _StatItem('Pontos', _compactInt(player.careerPoints)),
+              _StatItem('Rebotes', _compactInt(player.careerRebounds)),
+              _StatItem('Assist.', _compactInt(player.careerAssists)),
+              _StatItem('Roubos', _compactInt(player.careerSteals)),
+              _StatItem('Tocos', _compactInt(player.careerBlocks)),
+              _StatItem('Turnovers', _compactInt(player.careerTurnovers)),
+            ]),
+            const SizedBox(height: 16),
+            const _InfoNote(text: 'Recordes e premios requerem conexao.'),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _advancedStatsTab(SeasonStats stats, ThemeData theme) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              _statCard(
+                'PER',
+                stats.per.toStringAsFixed(1),
+                theme,
+                isMain: true,
+              ),
+              const SizedBox(width: 10),
+              _statCard('TS%', _pct(stats.tsPct), theme, isMain: true),
+              const SizedBox(width: 10),
+              _statCard('USG%', _pct(stats.usgPct), theme, isMain: true),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _statGrid([
+            _StatItem(
+              stats.impactMetricLabel,
+              stats.impactMetric.toStringAsFixed(1),
+            ),
+            _StatItem('OffRtg', stats.offensiveRating.toStringAsFixed(1)),
+            _StatItem('DefRtg', stats.defensiveRating.toStringAsFixed(1)),
+          ]),
+          const SizedBox(height: 12),
+          const _InfoNote(
+            text:
+                'PER, TS%, USG% e ratings ajudam a medir eficiencia, volume e impacto por posse.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _gameLogsTab(List<GameLog> logs) {
+    if (logs.isEmpty) {
+      return const _InfoNote(text: 'Sem logs manuais para este jogador.');
+    }
+    return ListView.builder(
+      itemCount: logs.length,
+      itemBuilder: (context, index) {
+        final log = logs[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 58,
+                child: Text(
+                  '${log.result} ${log.opponent}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  '${log.pts} PTS  ${log.reb} REB  ${log.ast} AST',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ),
+              Text(
+                '${log.minutes}m',
+                style: const TextStyle(color: Colors.white54, fontSize: 12),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _statsContent(ThemeData theme) {
+  Widget _healthTab(HealthStatus health, List<AwardItem> awards) {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _sheetRow('Status', health.status),
+          _sheetRow('Lesao', health.injuryDescription),
+          _sheetRow('Retorno', health.expectedReturn),
+          const SizedBox(height: 14),
+          _subHeader('Premiacoes'),
+          const SizedBox(height: 8),
+          ...awards.map((award) => _awardRow(award.label)),
+        ],
+      ),
+    );
+  }
+
+  Widget _seasonHeader(SeasonStats stats) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        '${stats.season}  -  ${stats.team}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _seasonRow(SeasonStats stats) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              stats.season,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+          Text(
+            '${stats.ppg.toStringAsFixed(1)} PPG  ${stats.rpg.toStringAsFixed(1)} RPG  ${stats.apg.toStringAsFixed(1)} APG',
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statGrid(List<_StatItem> items) {
+    return GridView.count(
+      crossAxisCount: 3,
+      childAspectRatio: 1.5,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      children: items
+          .map((item) => _smallStatTile(item.label, item.value))
+          .toList(),
+    );
+  }
+
+  Widget _smallStatTile(String label, String value) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white54, fontSize: 10),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _subHeader(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 14,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  Widget _awardRow(String label) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  String _pct(double value) => '${value.toStringAsFixed(1)}%';
+
+  String _compactInt(int value) {
+    if (value >= 1000) {
+      final compact = value / 1000;
+      return '${compact.toStringAsFixed(compact >= 10 ? 1 : 2)}k';
+    }
+    return '$value';
+  }
+
+  bool _hasLocalSeasonStats(Player p) =>
+      p.ppg > 0.001 || p.mpg > 0.001 || p.rpg > 0.001;
+
+  /// Medias guardadas na BD (vindas da sincronizacao com basketball-reference.com).
+  Widget _localDbStatsContent(Player player, ThemeData theme) {
     if (_loading) return const Center(child: CircularProgressIndicator());
-    if (_stats == null) {
+    if (!_hasLocalSeasonStats(player)) {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -322,7 +1186,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
         ),
         child: const Center(
           child: Text(
-            'Sem estatísticas disponíveis',
+            'Sem medias na base de dados ainda',
             style: TextStyle(color: Colors.white54),
           ),
         ),
@@ -333,43 +1197,65 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       children: [
         Row(
           children: [
-            _statCard('PTS', _fmt(_stats!['pts']), theme, isMain: true),
+            _statCard('PTS', player.ppg.toStringAsFixed(1), theme, isMain: true),
             const SizedBox(width: 10),
-            _statCard('REB', _fmt(_stats!['reb']), theme, isMain: true),
+            _statCard('REB', player.rpg.toStringAsFixed(1), theme, isMain: true),
             const SizedBox(width: 10),
-            _statCard('AST', _fmt(_stats!['ast']), theme, isMain: true),
+            _statCard('AST', player.apg.toStringAsFixed(1), theme, isMain: true),
           ],
         ),
         const SizedBox(height: 10),
         Row(
           children: [
-            _statCard('STL', _fmt(_stats!['stl']), theme),
+            _statCard('STL', player.spg.toStringAsFixed(1), theme),
             const SizedBox(width: 10),
-            _statCard('BLK', _fmt(_stats!['blk']), theme),
+            _statCard('BLK', player.bpg.toStringAsFixed(1), theme),
             const SizedBox(width: 10),
-            _statCard('MIN', _stats!['min']?.toString() ?? '0', theme),
+            _statCard('MIN', player.mpg.toStringAsFixed(1), theme),
           ],
         ),
         const SizedBox(height: 10),
         Row(
           children: [
-            _statCard('FG%', _fmtPct(_stats!['fg_pct']), theme),
+            _statCard(
+              'FG%',
+              player.fgPct > 0
+                  ? '${player.fgPct.toStringAsFixed(1)}%'
+                  : '-',
+              theme,
+            ),
             const SizedBox(width: 10),
-            _statCard('3P%', _fmtPct(_stats!['fg3_pct']), theme),
+            _statCard(
+              '3P%',
+              player.fg3Pct > 0
+                  ? '${player.fg3Pct.toStringAsFixed(1)}%'
+                  : '-',
+              theme,
+            ),
             const SizedBox(width: 10),
-            _statCard('FT%', _fmtPct(_stats!['ft_pct']), theme),
+            _statCard(
+              'FT%',
+              player.ftPct > 0
+                  ? '${player.ftPct.toStringAsFixed(1)}%'
+                  : '-',
+              theme,
+            ),
           ],
         ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            _statCard('TO', _fmt(_stats!['turnover']), theme),
-            const SizedBox(width: 10),
-            _statCard('PF', _fmt(_stats!['pf']), theme),
-            const SizedBox(width: 10),
-            _statCard('GP', _stats!['games_played']?.toString() ?? '0', theme),
-          ],
-        ),
+        if (player.topg > 0.001) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: _statCard(
+                  'TOPG',
+                  player.topg.toStringAsFixed(1),
+                  theme,
+                ),
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -496,52 +1382,166 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     );
   }
 
-  Widget _sheetCareerPath(Player player, String teamLabel, ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 10),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF101010),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-      ),
-      child: Row(
-        children: [
-          _miniLogo(player),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Caminho na NBA',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  teamLabel,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Histórico completo por equipas ainda precisa de fonte por época.',
-                  style: TextStyle(color: Colors.white38, fontSize: 11),
-                ),
-              ],
+  Widget _sheetCareerPath() {
+    final timelineTeamIds = _careerTeamIds;
+    if (timelineTeamIds.isEmpty) {
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF101010),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: const Text(
+          'Histórico de clubes indisponível.',
+          style: TextStyle(color: Colors.white54, fontSize: 12),
+        ),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 16),
+        _sheetSectionTitle('Trajetória'),
+        const SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF101010),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(timelineTeamIds.length, (index) {
+                final teamId = timelineTeamIds[index];
+                final isLast = index == timelineTeamIds.length - 1;
+                final teamAbbr = _abbrFromTeamId(teamId);
+
+                return Row(
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white24, width: 1),
+                          ),
+                          child: TeamLogo(
+                            teamId: teamId,
+                            size: 32,
+                            fallbackColor: Colors.white38,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          teamAbbr,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!isLast)
+                      Container(
+                        width: 30,
+                        height: 2,
+                        margin: const EdgeInsets.only(bottom: 16), // Alinhado com o centro do logo
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white24,
+                              Colors.white.withValues(alpha: 0.05),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              }),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  String _abbrFromTeamId(String teamId) {
+    const reverseMap = <String, String>{
+      '1': 'ATL', '2': 'BOS', '3': 'BKN', '4': 'CHA', '5': 'CHI',
+      '6': 'CLE', '7': 'DAL', '8': 'DEN', '9': 'DET', '10': 'GSW',
+      '11': 'HOU', '12': 'IND', '13': 'LAC', '14': 'LAL', '15': 'MEM',
+      '16': 'MIA', '17': 'MIL', '18': 'MIN', '19': 'NOP', '20': 'NYK',
+      '21': 'OKC', '22': 'ORL', '23': 'PHI', '24': 'PHX', '25': 'POR',
+      '26': 'SAC', '27': 'SAS', '28': 'TOR', '29': 'UTA', '30': 'WAS',
+    };
+    return reverseMap[teamId] ?? 'NBA';
+  }
+
+
+
+  String? _teamIdFromAbbreviation(String value) {
+    final team = value.trim().toUpperCase();
+    if (team.isEmpty || team == 'TOT') return null;
+    const map = <String, String>{
+      'ATL': '1',
+      'BOS': '2',
+      'BRK': '3',
+      'BKN': '3',
+      'NJN': '3',
+      'CHA': '4',
+      'CHO': '4',
+      'CHH': '4',
+      'CHI': '5',
+      'CLE': '6',
+      'DAL': '7',
+      'DEN': '8',
+      'DET': '9',
+      'GSW': '10',
+      'GS': '10',
+      'HOU': '11',
+      'IND': '12',
+      'LAC': '13',
+      'LAL': '14',
+      'MEM': '15',
+      'VAN': '15',
+      'MIA': '16',
+      'MIL': '17',
+      'MIN': '18',
+      'NOH': '19',
+      'NOK': '19',
+      'NOP': '19',
+      'NYK': '20',
+      'NY': '20',
+      'OKC': '21',
+      'SEA': '21',
+      'ORL': '22',
+      'PHI': '23',
+      'PHO': '24',
+      'PHX': '24',
+      'POR': '25',
+      'SAC': '26',
+      'KCK': '26',
+      'SAS': '27',
+      'SA': '27',
+      'TOR': '28',
+      'UTA': '29',
+      'WAS': '30',
+      'WSH': '30',
+      'WSB': '30',
+
+    };
+    return map[team];
   }
 
   Widget _sheetSectionTitle(String title) {
@@ -650,14 +1650,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     return '$day/$month/${date.year}';
   }
 
-  String _fmt(dynamic value) =>
-      value != null ? value.toStringAsFixed(1) : '0.0';
-
-  String _fmtPct(dynamic value) {
-    if (value == null) return '0%';
-    return '${(value * 100).toStringAsFixed(1)}%';
-  }
-
   Widget _statCard(
     String label,
     String value,
@@ -699,6 +1691,37 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _StatItem {
+  final String label;
+  final String value;
+
+  const _StatItem(this.label, this.value);
+}
+
+class _InfoNote extends StatelessWidget {
+  final String text;
+
+  const _InfoNote({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A1A),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(color: Colors.white54, fontSize: 12),
       ),
     );
   }

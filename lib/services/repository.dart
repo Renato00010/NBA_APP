@@ -3,6 +3,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import '../db/app_database.dart';
 import 'nba_api_service.dart';
 import 'package:drift/drift.dart';
+import '../models/standing.dart';
 
 class NbaRepository {
   final AppDatabase _db;
@@ -132,30 +133,41 @@ class NbaRepository {
   }
 
   Future<List<CachedGame>> getGamesByDate(DateTime date) async {
-    final dateStr =
-        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
     if (await _hasInternet()) {
       try {
-        final data = await _api.getGamesByDate(dateStr);
-        final companions = data
-            .map(
-              (g) => CachedGamesCompanion(
-                gameId: Value(g['id'].toString()),
-                homeTeamId: Value(g['home_team']['id'].toString()),
-                awayTeamId: Value(g['visitor_team']['id'].toString()),
-                scoreHome: Value(g['home_team_score'] ?? 0),
-                scoreAway: Value(g['visitor_team_score'] ?? 0),
-                status: Value(g['status'] ?? ''),
-                gameDate: Value(DateTime.parse(g['date'])),
-              ),
-            )
-            .toList();
-        await _db.gamesDao.upsertAllGames(companions);
+        // Vamos buscar um intervalo para garantir que temos ontem, hoje e amanhã
+        // (importante para fusos horários e para ter "resultados" reais)
+        final daysToSync = [-1, 0, 1];
+        for (final offset in daysToSync) {
+          final targetDate = date.add(Duration(days: offset));
+          final dateStr = '${targetDate.year}-${targetDate.month.toString().padLeft(2, '0')}-${targetDate.day.toString().padLeft(2, '0')}';
+          
+          final data = await _api.getGamesByDate(dateStr);
+          final companions = data.map((g) => CachedGamesCompanion(
+            gameId: Value(g['id'].toString()),
+            homeTeamId: Value(g['home_team']['id'].toString()),
+            awayTeamId: Value(g['visitor_team']['id'].toString()),
+            scoreHome: Value(g['home_team_score'] ?? 0),
+            scoreAway: Value(g['visitor_team_score'] ?? 0),
+            status: Value(g['status'] ?? ''),
+            gameDate: Value(DateTime.parse(g['date'])),
+          )).toList();
+          
+          await _db.gamesDao.upsertAllGames(companions);
+        }
       } catch (e) {
-        debugPrint('Erro getGamesByDate: $e');
+        debugPrint('Erro getGamesByDate range: $e');
       }
     }
-    return _db.gamesDao.getAllGames();
+    // Retorna apenas os jogos do dia solicitado
+    return _db.gamesDao.getGamesByDate(date);
+  }
+
+  /// Retorna jogos recentes para a aba de resultados
+  Future<List<CachedGame>> getRecentResults() async {
+    final today = DateTime.now();
+    final start = today.subtract(const Duration(days: 7));
+    return _db.gamesDao.getGamesInDateRange(start, today);
   }
 
   Future<List<Player>> getPlayers({String? search}) async {
@@ -194,15 +206,15 @@ class NbaRepository {
     return _db.playersDao.getAllPlayers();
   }
 
-  Future<Map<String, dynamic>?> getPlayerStats(int playerId) async {
+  Future<List<Standing>> getStandings() async {
     if (await _hasInternet()) {
       try {
-        final data = await _api.getPlayerStats(playerId);
-        if (data.isNotEmpty) return data.first as Map<String, dynamic>;
+        final data = await _api.getStandings();
+        return data.map((json) => Standing.fromJson(json)).toList();
       } catch (e) {
-        debugPrint('Erro getPlayerStats: $e');
+        debugPrint('Erro getStandings: $e');
       }
     }
-    return null;
+    return []; // Fallback for offline (optional: could add DB caching)
   }
 }

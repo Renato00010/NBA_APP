@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
+import '../teams/team_detail_screen.dart';
 import '../../widgets/team_logo.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -42,6 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() => _loadingGames = false);
     }
+  }
+
+  void _openTeam(String teamId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TeamDetailScreen(teamId: teamId)),
+    );
   }
 
   @override
@@ -93,41 +101,55 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemCount: _teams.length,
                         itemBuilder: (context, index) {
                           final team = _teams[index];
-                          return Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.15,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: theme.colorScheme.primary.withValues(
-                                  alpha: 0.4,
-                                ),
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TeamLogo(
-                                  teamId: team.teamId,
-                                  size: 40,
-                                  fallbackColor: theme.colorScheme.primary,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  team.name.split(' ').last,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                          return InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TeamDetailScreen(
+                                    teamId: team.teamId,
+                                    initialTeam: team,
                                   ),
                                 ),
-                              ],
+                              );
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(
+                                  alpha: 0.15,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TeamLogo(
+                                    teamId: team.teamId,
+                                    size: 40,
+                                    fallbackColor: theme.colorScheme.primary,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    team.name.split(' ').last,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         },
@@ -221,30 +243,34 @@ class _HomeScreenState extends State<HomeScreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        TeamLogo(
-                                          teamId: game.homeTeamId,
-                                          size: 36,
-                                          fallbackColor: Colors.white38,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          homeCity,
-                                          style: const TextStyle(
-                                            color: Colors.white54,
-                                            fontSize: 10,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(10),
+                                      onTap: () => _openTeam(game.homeTeamId),
+                                      child: Column(
+                                        children: [
+                                          TeamLogo(
+                                            teamId: game.homeTeamId,
+                                            size: 36,
+                                            fallbackColor: Colors.white38,
                                           ),
-                                        ),
-                                        Text(
-                                          homeName.split(' ').last,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700,
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            homeCity,
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 10,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            homeName.split(' ').last,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                   Column(
@@ -267,30 +293,34 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                   Expanded(
-                                    child: Column(
-                                      children: [
-                                        TeamLogo(
-                                          teamId: game.awayTeamId,
-                                          size: 36,
-                                          fallbackColor: Colors.white38,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          awayCity,
-                                          style: const TextStyle(
-                                            color: Colors.white54,
-                                            fontSize: 10,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(10),
+                                      onTap: () => _openTeam(game.awayTeamId),
+                                      child: Column(
+                                        children: [
+                                          TeamLogo(
+                                            teamId: game.awayTeamId,
+                                            size: 36,
+                                            fallbackColor: Colors.white38,
                                           ),
-                                        ),
-                                        Text(
-                                          awayName.split(' ').last,
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w700,
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            awayCity,
+                                            style: const TextStyle(
+                                              color: Colors.white54,
+                                              fontSize: 10,
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                          Text(
+                                            awayName.split(' ').last,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -41,6 +41,22 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <script>
+    (function () {
+      if (typeof window.initSqlJs !== 'function') return;
+      const originalInitSqlJs = window.initSqlJs;
+      window.initSqlJs = function (config) {
+        const safeConfig = config || {};
+        if (!safeConfig.locateFile) {
+          safeConfig.locateFile = function (file) {
+            return 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/' + file;
+          };
+        }
+        return originalInitSqlJs(safeConfig);
+      };
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

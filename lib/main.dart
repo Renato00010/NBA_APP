@@ -1,21 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'db/app_database.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/games/games_screen.dart';
 import 'screens/news/news_screen.dart';
-import 'screens/store/store_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'services/theme_service.dart';
 import 'services/nba_api_service.dart';
 import 'services/repository.dart';
 import 'services/data_seed_service.dart';
+import 'services/player_stats_web_sync.dart';
+import 'services/player_stats_seed.dart';
+import 'screens/standings/standings_screen.dart';
 
 late AppDatabase database;
 late NbaRepository repository;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PlayerStatsSeed.init();
   database = AppDatabase();
   final apiService = NbaApiService();
   await DataSeedService(
@@ -24,6 +29,12 @@ void main() async {
     database.teamsDao,
   ).seedDatabase();
   repository = NbaRepository(database, apiService);
+  unawaited(
+    PlayerStatsWebSync(database.playersDao).syncFromBasketballReference(
+      passes: 3,
+      perPlayerRetries: 2,
+    ),
+  );
   runApp(const NbaApp());
 }
 
@@ -136,8 +147,8 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = const [
     HomeScreen(),
     GamesScreen(),
+    StandingsScreen(),
     NewsScreen(),
-    StoreScreen(),
     ProfileScreen(),
   ];
 
@@ -164,14 +175,14 @@ class _MainNavigationState extends State<MainNavigation> {
             label: 'Jogos',
           ),
           NavigationDestination(
+            icon: Icon(Icons.table_chart_outlined, color: Colors.white70),
+            selectedIcon: Icon(Icons.table_chart, color: Colors.white),
+            label: 'Tabela',
+          ),
+          NavigationDestination(
             icon: Icon(Icons.newspaper_outlined, color: Colors.white70),
             selectedIcon: Icon(Icons.newspaper, color: Colors.white),
             label: 'Notícias',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.store_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.store, color: Colors.white),
-            label: 'Loja',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline, color: Colors.white70),

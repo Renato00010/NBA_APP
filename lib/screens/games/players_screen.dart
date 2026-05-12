@@ -207,6 +207,38 @@ class _PlayersScreenState extends State<PlayersScreen> {
                                         fontSize: 12,
                                       ),
                                     ),
+                                    if (player.ppg > 0 ||
+                                        player.rpg > 0 ||
+                                        player.apg > 0) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        '${player.ppg.toStringAsFixed(1)} PPG · '
+                                        '${player.rpg.toStringAsFixed(1)} RPG · '
+                                        '${player.apg.toStringAsFixed(1)} APG',
+                                        style: TextStyle(
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.tertiary,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      if (player.mpg > 0 ||
+                                          player.fgPct > 0) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${player.mpg.toStringAsFixed(1)} MIN · '
+                                          '${player.spg.toStringAsFixed(1)} STL · '
+                                          '${player.bpg.toStringAsFixed(1)} BLK'
+                                          '${player.fgPct > 0 ? ' · ${player.fgPct.toStringAsFixed(1)} FG%' : ''}',
+                                          style: const TextStyle(
+                                            color: Colors.white54,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
                                   ],
                                 ),
                               ),

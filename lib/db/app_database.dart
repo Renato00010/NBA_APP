@@ -1,31 +1,30 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
 
 import 'tables/nba_teams_table.dart';
 import 'tables/players_table.dart';
 import 'tables/cached_games_table.dart';
 import 'tables/user_preferences_table.dart';
 import 'tables/viewed_history_table.dart';
+import 'tables/player_seasons_table.dart';
+
 import 'daos/teams_dao.dart';
 import 'daos/players_dao.dart';
 import 'daos/games_dao.dart';
 import 'daos/preferences_dao.dart';
 import 'daos/history_dao.dart';
+import 'database_connection/connection.dart';
 
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [NbaTeams, Players, CachedGames, UserPreferences, ViewedHistory],
+  tables: [NbaTeams, Players, CachedGames, UserPreferences, ViewedHistory, PlayerSeasons],
   daos: [TeamsDao, PlayersDao, GamesDao, PreferencesDao, HistoryDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -54,14 +53,30 @@ class AppDatabase extends _$AppDatabase {
         await m.addColumn(players, players.previousTeam);
         await m.addColumn(players, players.experienceYears);
       }
+      if (from < 6) {
+        await m.addColumn(players, players.mpg);
+        await m.addColumn(players, players.topg);
+        await m.addColumn(players, players.fgPct);
+        await m.addColumn(players, players.fg3Pct);
+        await m.addColumn(players, players.ftPct);
+      }
+      if (from < 7) {
+        await m.addColumn(players, players.careerPoints);
+        await m.addColumn(players, players.careerRebounds);
+        await m.addColumn(players, players.careerAssists);
+        await m.addColumn(players, players.careerSteals);
+        await m.addColumn(players, players.careerBlocks);
+        await m.addColumn(players, players.careerGames);
+        await m.addColumn(players, players.careerStarts);
+        await m.addColumn(players, players.careerTurnovers);
+        await m.addColumn(players, players.careerTeams);
+      }
+      if (from < 8) {
+        await m.createTable(playerSeasons);
+      }
+
     },
   );
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'nba_app.db'));
-    return NativeDatabase.createInBackground(file);
-  });
-}
+QueryExecutor _openConnection() => connect();

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../db/app_database.dart';
@@ -7,7 +7,8 @@ import '../../services/basketball_reference_service.dart';
 import '../../services/player_stats_seed.dart';
 import '../../services/player_stats_web_sync.dart';
 import '../../widgets/team_logo.dart';
-
+import '../../widgets/player_evolution_chart.dart';
+import '../../models/player_season_stats.dart';
 class PlayerDetailScreen extends StatefulWidget {
   final Player player;
   const PlayerDetailScreen({super.key, required this.player});
@@ -243,72 +244,22 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
-          SliverAppBar(
-            expandedHeight: 280,
-            pinned: true,
-            backgroundColor: theme.colorScheme.primary,
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                player.displayName ?? player.fullName,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Container(color: theme.colorScheme.primary),
-                  _playerPhoto(player),
-                  Positioned(top: 54, right: 16, child: _teamLogo(player)),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 100,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                          colors: [
-                            theme.colorScheme.primary,
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildMinimalHeader(player, theme),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  StreamBuilder<UserPreference?>(
-                    stream: database.preferencesDao.watchPreferences(),
-                    builder: (context, snapshot) {
-                      final unit = snapshot.data?.measurementUnit ?? 'metric';
-                      return _playerSummaryCard(player, unit, theme);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Estatisticas',
-                    style: TextStyle(
-                      color: theme.colorScheme.tertiary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 32),
+                  _buildQuickStats(player, theme),
+                  const SizedBox(height: 40),
+                  _buildSectionTitle('Performance', theme),
+                  const SizedBox(height: 16),
                   _statsHub(theme),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
@@ -318,141 +269,187 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     );
   }
 
-  Widget _playerSummaryCard(
-    Player player,
-    String measurementUnit,
-    ThemeData theme,
-  ) {
-    final teamLabel = _teamName.isNotEmpty ? _teamName : player.teamId;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1A1A1A),
-        borderRadius: BorderRadius.circular(12),
+  bool get _hasEnoughSeasonsForChart {
+    if (_manualStats != null) {
+      return _allSeasonsForProfile(_manualStats!).length > 1;
+    }
+    return false;
+  }
+
+  Widget _buildMinimalHeader(Player player, ThemeData theme) {
+    return SliverAppBar(
+      expandedHeight: 400,
+      pinned: true,
+      backgroundColor: const Color(0xFF0A0A0A),
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+        onPressed: () => Navigator.pop(context),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      player.displayName ?? player.fullName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        _summaryChip(player.position ?? '-'),
-                        _summaryChip(player.country ?? '-'),
-                        _summaryChip(teamLabel),
-                      ],
-                    ),
+      actions: [
+        if (_hasEnoughSeasonsForChart)
+          IconButton(
+            icon: const Icon(Icons.show_chart, color: Colors.white70),
+            onPressed: () => _showEvolutionChart(context),
+          ),
+        IconButton(
+          icon: const Icon(Icons.info_outline, color: Colors.white70),
+          onPressed: () => _showPlayerInfoSheet(player, 'metric', theme),
+        ),
+        const SizedBox(width: 8),
+      ],
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Imagem do Jogador com Gradiente
+            _playerPhoto(player),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  stops: const [0.0, 0.4, 0.7],
+                  colors: [
+                    const Color(0xFF0A0A0A),
+                    const Color(0xFF0A0A0A).withValues(alpha: 0.7),
+                    Colors.transparent,
                   ],
                 ),
               ),
-              _careerInfoButton(player, measurementUnit, theme),
-            ],
-          ),
-          const SizedBox(height: 18),
-          Row(
-            children: [
-              Expanded(
-                child: _metricTile('Número', player.jerseyNumber ?? '-'),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _metricTile(
-                  'Altura',
-                  _formatHeight(player.heightCm, measurementUnit),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _metricTile(
-                  'Peso',
-                  _formatWeight(player.weightKg, measurementUnit),
-                ),
-              ),
-            ],
-          ),
-          if (player.ppg > 0 ||
-              player.rpg > 0 ||
-              player.apg > 0 ||
-              player.mpg > 0) ...[
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: _metricTile(
-                    'PPG',
-                    player.ppg.toStringAsFixed(1),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _metricTile(
-                    'RPG',
-                    player.rpg.toStringAsFixed(1),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _metricTile(
-                    'APG',
-                    player.apg.toStringAsFixed(1),
-                  ),
-                ),
-              ],
             ),
-            if (player.mpg > 0 ||
-                player.fgPct > 0 ||
-                player.topg > 0 ||
-                player.spg > 0 ||
-                player.bpg > 0) ...[
-              const SizedBox(height: 10),
-              Row(
+            // Nome e Número (Fundo)
+            Positioned(
+              bottom: 40,
+              left: 24,
+              right: 24,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: _metricTile(
-                      'MPG',
-                      player.mpg.toStringAsFixed(1),
+                  Text(
+                    '#${player.jerseyNumber ?? '00'}',
+                    style: TextStyle(
+                      color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                      fontSize: 42,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -2,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _metricTile(
-                      'FG%',
-                      player.fgPct > 0
-                          ? '${player.fgPct.toStringAsFixed(1)}%'
-                          : '-',
+                  Text(
+                    player.fullName.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      height: 0.9,
+                      letterSpacing: -1,
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _metricTile(
-                      'TOPG',
-                      player.topg > 0
-                          ? player.topg.toStringAsFixed(1)
-                          : '-',
-                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        _teamName.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 4,
+                        height: 4,
+                        decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        (player.position ?? '-').toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ],
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildQuickStats(Player player, ThemeData theme) {
+    // Dá prioridade aos dados do perfil completo (web/seed) sobre a BD local
+    final stats = _manualStats?.currentSeason;
+    final ppg = stats != null && stats.ppg > 0 ? stats.ppg : player.ppg;
+    final rpg = stats != null && stats.rpg > 0 ? stats.rpg : player.rpg;
+    final apg = stats != null && stats.apg > 0 ? stats.apg : player.apg;
+    final mpg = stats != null && stats.mpg > 0 ? stats.mpg : player.mpg;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildMinimalStatItem('PTS', ppg.toStringAsFixed(1), theme),
+        _buildMinimalStatItem('REB', rpg.toStringAsFixed(1), theme),
+        _buildMinimalStatItem('AST', apg.toStringAsFixed(1), theme),
+        _buildMinimalStatItem('MPG', mpg.toStringAsFixed(1), theme),
+      ],
+    );
+  }
+
+  Widget _buildMinimalStatItem(String label, String value, ThemeData theme) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: theme.colorScheme.primary.withValues(alpha: 0.7),
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSectionTitle(String title, ThemeData theme) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          title.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
     );
   }
 
@@ -616,6 +613,65 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
   bool _hasLocalCareerStats(Player p) => p.careerGames > 0;
 
+  void _showEvolutionChart(BuildContext context) async {
+    List<PlayerSeasonStats> seasons = [];
+    if (_manualStats != null) {
+      final all = _allSeasonsForProfile(_manualStats!);
+      if (all.isNotEmpty) {
+        seasons = all.map((s) => PlayerSeasonStats(
+          season: s.season,
+          ppg: s.ppg,
+          rpg: s.rpg,
+          apg: s.apg,
+          per: s.per,
+          tsPct: s.tsPct,
+        )).toList();
+      }
+    }
+    
+    if (seasons.isEmpty) {
+      seasons = await repository.getPlayerSeasonStats(_player.playerId);
+    }
+
+    if (seasons.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nenhum dado de temporada encontrado.')),
+      );
+      return;
+    }
+    if (!mounted) return;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 24),
+              PlayerEvolutionChart(seasons: seasons),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _statsHub(ThemeData theme) {
     final profile = _manualStats;
     final player = _player;
@@ -637,16 +693,20 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                 color: const Color(0xFF101010),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const TabBar(
+              child: TabBar(
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
-                indicatorSize: TabBarIndicatorSize.tab,
-                tabs: [
-                  Tab(text: 'Temporada'),
-                  Tab(text: 'Carreira'),
-                  Tab(text: 'Avancadas'),
-                  Tab(text: 'Logs'),
-                  Tab(text: 'Saude'),
+                indicatorSize: TabBarIndicatorSize.label,
+                indicatorColor: theme.colorScheme.primary,
+                dividerColor: Colors.transparent,
+                labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1),
+                unselectedLabelColor: Colors.white24,
+                tabs: const [
+                  Tab(text: 'SEASON'),
+                  Tab(text: 'CAREER'),
+                  Tab(text: 'ADVANCED'),
+                  Tab(text: 'LOGS'),
+                  Tab(text: 'HEALTH'),
                 ],
               ),
             ),
@@ -1282,13 +1342,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       );
     }
 
-    final photoFile = File(photoPath);
-    if (!photoFile.existsSync()) return _photoFallback();
-    return Image.file(
-      photoFile,
-      fit: BoxFit.contain,
-      alignment: Alignment.center,
-    );
+    return _photoFallback();
   }
 
   Widget _photoFallback() {
@@ -1344,40 +1398,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-      ),
-    );
-  }
-
-  Widget _metricTile(String label, String value) {
-    return Container(
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFF101010),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white54, fontSize: 11),
-          ),
-        ],
       ),
     );
   }
@@ -1650,6 +1670,32 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     return '$day/$month/${date.year}';
   }
 
+  Widget _metricTile(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.white24,
+            fontSize: 9,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _statCard(
     String label,
     String value,
@@ -1658,35 +1704,36 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isMain
-              ? theme.colorScheme.primary.withValues(alpha: 0.2)
-              : const Color(0xFF1A1A1A),
-          borderRadius: BorderRadius.circular(10),
-          border: isMain
-              ? Border.all(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.4),
-                )
-              : null,
+              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+              : const Color(0xFF151515),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isMain
+                ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.05),
+          ),
         ),
         child: Column(
           children: [
             Text(
               value,
               style: TextStyle(
-                color: isMain ? theme.colorScheme.tertiary : Colors.white,
-                fontSize: isMain ? 22 : 16,
-                fontWeight: FontWeight.w800,
+                color: isMain ? theme.colorScheme.primary : Colors.white,
+                fontSize: isMain ? 24 : 18,
+                fontWeight: FontWeight.w900,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              label,
+              label.toUpperCase(),
               style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
+                color: Colors.white38,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
               ),
             ),
           ],

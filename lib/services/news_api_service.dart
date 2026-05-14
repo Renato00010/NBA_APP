@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'news_seed.dart';
 
 class NewsApiService {
   static const String _baseUrl = 'https://newsapi.org/v2';
@@ -22,16 +23,19 @@ class NewsApiService {
       final response = await _dio.get(
         '/everything',
         queryParameters: {
-          'q': 'NBA',
+          'q': 'NBA basketball',
           'language': 'en',
           'sortBy': 'publishedAt',
           'page': page,
           'pageSize': 20,
         },
       );
-      return response.data['articles'] as List<dynamic>;
-    } on DioException catch (e) {
-      throw Exception('Erro ao buscar notícias: ${e.message}');
+      final articles = response.data['articles'] as List<dynamic>;
+      if (articles.isEmpty) return NewsSeed.fallbackNews;
+      return articles;
+    } catch (e) {
+      // Em caso de erro (limite de API, etc), devolve os dados de seed
+      return NewsSeed.fallbackNews;
     }
   }
 

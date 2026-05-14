@@ -340,12 +340,22 @@ class PlayerStatsSeed {
     );
   }
 
-  static String _normalize(String value) => value
-      .toLowerCase()
+  static String _normalize(String value) {
+    var str = value.toLowerCase();
+    // Mapa simples para remover acentos comuns
+    const accents = {
+      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a', 'é': 'e', 'ê': 'e',
+      'í': 'i', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ú': 'u', 'ç': 'c',
+      'ć': 'c', 'č': 'c', 'š': 's', 'ž': 'z', 'đ': 'd', 'ý': 'y'
+    };
+    accents.forEach((key, val) => str = str.replaceAll(key, val));
+    
+    return str
       .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
       .replaceAll(RegExp(r'_+'), '_')
       .trim()
       .replaceAll(RegExp(r'^_+|_+$'), '');
+  }
 
   static int _stableSeed(String fullName, String? position) {
     final normalized = _normalize(fullName);
@@ -449,14 +459,21 @@ class SeasonStats {
   });
 
   factory SeasonStats.fromJson(Map<String, dynamic> json) {
+    final ppg = (json['ppg'] ?? 0).toDouble();
+    final rpg = (json['rpg'] ?? 0).toDouble();
+    // Se orb/drb nao existirem, estima-se com base no total de ressaltos
+    final orb = (json['orb'] ?? (rpg * 0.25)).toDouble();
+    final drb = (json['drb'] ?? (rpg * 0.75)).toDouble();
+    final pf = (json['pf'] ?? 2.1).toDouble();
+
     return SeasonStats(
       season: json['season'] ?? '',
       team: json['team'] ?? '',
       gp: json['gp'] ?? 0,
       gs: json['gs'] ?? 0,
       mpg: (json['mpg'] ?? 0).toDouble(),
-      ppg: (json['ppg'] ?? 0).toDouble(),
-      rpg: (json['rpg'] ?? 0).toDouble(),
+      ppg: ppg,
+      rpg: rpg,
       apg: (json['apg'] ?? 0).toDouble(),
       spg: (json['spg'] ?? 0).toDouble(),
       bpg: (json['bpg'] ?? 0).toDouble(),
@@ -468,12 +485,12 @@ class SeasonStats {
       tsPct: (json['tsPct'] ?? 0).toDouble(),
       usgPct: (json['usgPct'] ?? 0).toDouble(),
       impactMetric: (json['impactMetric'] ?? 0).toDouble(),
-      impactMetricLabel: json['impactMetricLabel'] ?? '',
+      impactMetricLabel: json['impactMetricLabel'] ?? 'BPM',
       offensiveRating: (json['offensiveRating'] ?? 0).toDouble(),
       defensiveRating: (json['defensiveRating'] ?? 0).toDouble(),
-      orb: (json['orb'] ?? 0).toDouble(),
-      drb: (json['drb'] ?? 0).toDouble(),
-      pf: (json['pf'] ?? 0).toDouble(),
+      orb: orb,
+      drb: drb,
+      pf: pf,
     );
   }
 }

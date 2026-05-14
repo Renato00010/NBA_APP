@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -611,8 +611,8 @@ class _PlayerAvatar extends StatelessWidget {
         provider = AssetImage(photoPath);
       } else if (photoPath.startsWith('http')) {
         provider = CachedNetworkImageProvider(photoPath);
-      } else if (File(photoPath).existsSync()) {
-        provider = FileImage(File(photoPath));
+      } else if (!kIsWeb) {
+        provider = AssetImage(photoPath);
       }
     }
 

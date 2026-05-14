@@ -31,5 +31,9 @@ class TeamsDao extends DatabaseAccessor<AppDatabase> with _$TeamsDaoMixin {
   }
 
   // Apagar todas as equipas
-  Future<void> deleteAllTeams() => delete(nbaTeams).go();
+  Future<List<NbaTeam>> searchTeams(String query) => (select(nbaTeams)
+        ..where((t) =>
+            t.name.lower().contains(query.toLowerCase()) |
+            t.city.lower().contains(query.toLowerCase())))
+      .get();
 }

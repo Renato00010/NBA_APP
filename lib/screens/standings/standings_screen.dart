@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../models/standing.dart';
 import '../../services/repository.dart';
+import '../../widgets/playoff_bracket_widget.dart';
 
 class StandingsScreen extends StatefulWidget {
   const StandingsScreen({super.key});
@@ -14,21 +15,30 @@ class _StandingsScreenState extends State<StandingsScreen> with SingleTickerProv
   late TabController _tabController;
   List<Standing> _standings = [];
   bool _loading = true;
+  int _selectedSeason = 2026;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _loadStandings();
   }
 
   Future<void> _loadStandings() async {
-    final standings = await repository.getStandings();
-    if (mounted) {
-      setState(() {
-        _standings = standings;
-        _loading = false;
-      });
+    try {
+      final standings = await repository.getStandings(season: _selectedSeason);
+      if (mounted) {
+        setState(() {
+          _standings = standings;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     }
   }
 
@@ -39,10 +49,41 @@ class _StandingsScreenState extends State<StandingsScreen> with SingleTickerProv
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.primary, // Cor dinâmica
+        elevation: 4,
         title: const Text(
-          'Classificação',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          'STANDINGS',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
+          ),
         ),
+        actions: [
+          DropdownButton<int>(
+            value: _selectedSeason,
+            items: [2023, 2024, 2025, 2026]
+                .map((year) => DropdownMenuItem(
+                  value: year, 
+                  child: Text('${year - 1}/${year.toString().substring(2)}')
+                ))
+                .toList(),
+            onChanged: (val) {
+              if (val != null && val != _selectedSeason) {
+                setState(() {
+                  _selectedSeason = val;
+                  _loading = true;
+                  _standings = [];
+                });
+                _loadStandings();
+              }
+            },
+            underline: Container(),
+            dropdownColor: const Color(0xFF0A0A0A),
+            iconEnabledColor: Colors.white,
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: theme.colorScheme.primary,
@@ -51,16 +92,19 @@ class _StandingsScreenState extends State<StandingsScreen> with SingleTickerProv
           tabs: const [
             Tab(text: 'CONFERÊNCIA ESTE'),
             Tab(text: 'CONFERÊNCIA OESTE'),
+            Tab(text: 'PLAYOFFS'),
           ],
         ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : TabBarView(
+              key: ValueKey('standings_$_selectedSeason'),
               controller: _tabController,
               children: [
                 _buildConferenceTable('East'),
                 _buildConferenceTable('West'),
+                PlayoffBracketWidget(standings: _standings),
               ],
             ),
     );
@@ -81,7 +125,14 @@ class _StandingsScreenState extends State<StandingsScreen> with SingleTickerProv
           child: ListView.builder(
             itemCount: filtered.length,
             itemBuilder: (context, index) {
-              return _buildTeamRow(filtered[index], index + 1);
+              final standing = filtered[index];
+              return Column(
+                children: [
+                  if (index == 6) _buildDivisionLine(context, "PLAY-IN TOURNAMENT", Colors.blueAccent),
+                  if (index == 10) _buildDivisionLine(context, "ELIMINATION LINE", Colors.redAccent.withOpacity(0.5)),
+                  _buildTeamRow(standing, index + 1),
+                ],
+              );
             },
           ),
         ),
@@ -93,13 +144,46 @@ class _StandingsScreenState extends State<StandingsScreen> with SingleTickerProv
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: const Color(0xFF1A1A1A),
-      child: const Row(
+      child: const Column(
         children: [
-          SizedBox(width: 30, child: Text('POS', style: _headerStyle)),
-          Expanded(child: Text('EQUIPA', style: _headerStyle)),
-          SizedBox(width: 50, child: Text('V-D', textAlign: TextAlign.center, style: _headerStyle)),
-          SizedBox(width: 50, child: Text('%', textAlign: TextAlign.center, style: _headerStyle)),
-          SizedBox(width: 40, child: Text('STRK', textAlign: TextAlign.center, style: _headerStyle)),
+          Row(
+            children: [
+              SizedBox(width: 30, child: Text('POS', style: _headerStyle)),
+              Expanded(child: Text('EQUIPA', style: _headerStyle)),
+              SizedBox(width: 50, child: Text('V-D', textAlign: TextAlign.center, style: _headerStyle)),
+              SizedBox(width: 50, child: Text('%', textAlign: TextAlign.center, style: _headerStyle)),
+              SizedBox(width: 40, child: Text('STRK', textAlign: TextAlign.center, style: _headerStyle)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivisionLine(BuildContext context, String label, Color color) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        border: Border(
+          top: BorderSide(color: color.withOpacity(0.2), width: 0.5),
+          bottom: BorderSide(color: color.withOpacity(0.2), width: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.double_arrow, size: 12, color: color),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1,
+            ),
+          ),
         ],
       ),
     );

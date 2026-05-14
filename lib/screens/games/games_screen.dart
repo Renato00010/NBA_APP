@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
 import '../../widgets/team_logo.dart';
 import 'players_screen.dart';
 import '../teams/team_detail_screen.dart';
+import 'game_detail_screen.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -17,14 +19,27 @@ class _GamesScreenState extends State<GamesScreen> {
   List<CachedGame> _todayGames = [];
   List<CachedGame> _pastResults = [];
   bool _loading = true;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
     _loadGames();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _loadGames(isBackground: true);
+    });
   }
 
-  Future<void> _loadGames() async {
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _loadGames({bool isBackground = false}) async {
+    if (!isBackground && mounted) {
+      setState(() => _loading = true);
+    }
     try {
       await repository.getTeams();
       final today = DateTime.now();
@@ -35,14 +50,22 @@ class _GamesScreenState extends State<GamesScreen> {
       // Busca resultados recentes (últimos 7 dias)
       final recent = await repository.getRecentResults();
 
-      setState(() {
-        _liveGames = games.where((g) => g.status.toLowerCase().contains('qtr') || g.status.toLowerCase().contains('half') || g.status == 'live').toList();
-        _todayGames = games;
-        _pastResults = recent.where((g) => g.status == 'Final').toList();
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _liveGames = games.where((g) => 
+            g.status.toLowerCase().contains('qtr') || 
+            g.status.toLowerCase().contains('half') || 
+            g.status.toLowerCase().contains('end') || 
+            g.status.toLowerCase().contains('ot') || 
+            g.status.toLowerCase() == 'live'
+          ).toList();
+          _todayGames = games;
+          _pastResults = recent.where((g) => g.status == 'Final').toList();
+          _loading = false;
+        });
+      }
     } catch (e) {
-      setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -52,12 +75,15 @@ class _GamesScreenState extends State<GamesScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
+        backgroundColor: theme.colorScheme.primary, // Cor dinâmica
+        elevation: 4,
         title: const Text(
-          'Jogos',
+          'JOGOS',
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.5,
           ),
         ),
         actions: [
@@ -136,132 +162,70 @@ class _GamesScreenState extends State<GamesScreen> {
           final awayName = repository.getTeamName(game.awayTeamId);
           final homeCity = repository.getTeamCity(game.homeTeamId);
           final awayCity = repository.getTeamCity(game.awayTeamId);
-          return Container(
-            margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1A1A),
-              borderRadius: BorderRadius.circular(12),
-              border: isLive
-                  ? Border.all(color: theme.colorScheme.secondary, width: 1)
-                  : null,
-            ),
-            child: Column(
-              children: [
-                if (isLive)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Text(
-                      'AO VIVO',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GameDetailScreen(
+                    gameId: game.gameId,
+                    homeName: homeName,
+                    awayName: awayName,
                   ),
-                if (isLive) const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _openTeam(game.homeTeamId),
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 2),
-                            TeamLogo(
-                              teamId: game.homeTeamId,
-                              size: 42,
-                              fallbackColor: Colors.white38,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              homeCity,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 10,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              homeName.split(' ').last,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                ),
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF151515),
+                borderRadius: BorderRadius.circular(16),
+                border: isLive
+                    ? Border.all(color: theme.colorScheme.secondary, width: 1)
+                    : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+              ),
+              child: Column(
+                children: [
+                  if (isLive)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        'AO VIVO',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Text(
-                            '${game.scoreHome} - ${game.scoreAway}',
-                            style: TextStyle(
-                              color: theme.colorScheme.tertiary,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            game.status,
-                            style: const TextStyle(
-                              color: Colors.white54,
-                              fontSize: 11,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(10),
-                        onTap: () => _openTeam(game.awayTeamId),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Away Team (Left)
+                      Expanded(
                         child: Column(
                           children: [
-                            const SizedBox(height: 2),
                             TeamLogo(
                               teamId: game.awayTeamId,
-                              size: 42,
+                              size: 48,
                               fallbackColor: Colors.white38,
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Text(
-                              awayCity,
-                              style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 10,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              awayName.split(' ').last,
+                              awayName.split(' ').last.toUpperCase(),
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
@@ -270,10 +234,61 @@ class _GamesScreenState extends State<GamesScreen> {
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      // Score & Status (Center)
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text(
+                              '${game.scoreAway} - ${game.scoreHome}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              game.status.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Home Team (Right)
+                      Expanded(
+                        child: Column(
+                          children: [
+                            TeamLogo(
+                              teamId: game.homeTeamId,
+                              size: 48,
+                              fallbackColor: Colors.white38,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              homeName.split(' ').last.toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },

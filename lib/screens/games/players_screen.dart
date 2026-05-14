@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../main.dart';
@@ -63,12 +63,10 @@ class _PlayersScreenState extends State<PlayersScreen> {
   Widget _playerAvatar(Player player, ThemeData theme) {
     final photoPath = player.photoWebpPath;
     if (photoPath != null && photoPath.isNotEmpty) {
-      final imageProvider = photoPath.startsWith('assets/')
+      final ImageProvider? imageProvider = photoPath.startsWith('assets/')
           ? AssetImage(photoPath)
           : photoPath.startsWith('http')
           ? CachedNetworkImageProvider(photoPath)
-          : File(photoPath).existsSync()
-          ? FileImage(File(photoPath)) as ImageProvider
           : null;
 
       if (imageProvider == null) {

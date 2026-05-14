@@ -50,6 +50,8 @@ dependencies:
   printing: ^5.14.3
   bcrypt: ^1.2.0
   flutter_svg: ^2.3.0
+  url_launcher: ^6.3.2
+  fl_chart: ^0.68.0
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +81,11 @@ flutter:
   assets:
     - assets/player_photos/
     - assets/data/
+    - assets/data/standings/2022.json
+    - assets/data/standings/2023.json
+    - assets/data/standings/2024.json
+    - assets/data/standings/2025.json
+    - assets/store/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

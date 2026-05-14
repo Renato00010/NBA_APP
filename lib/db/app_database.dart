@@ -1,5 +1,8 @@
 import 'package:drift/drift.dart';
 
+// Exporting drift types so UI files can see 'Value', 'Insertable', etc.
+export 'package:drift/drift.dart' show Value, Insertable, Constant;
+
 import 'tables/nba_teams_table.dart';
 import 'tables/players_table.dart';
 import 'tables/cached_games_table.dart';
@@ -14,6 +17,11 @@ import 'daos/preferences_dao.dart';
 import 'daos/history_dao.dart';
 import 'database_connection/connection.dart';
 
+// Explicitly exporting DAOs so screens can use them
+export 'daos/teams_dao.dart';
+export 'daos/players_dao.dart';
+export 'daos/games_dao.dart';
+
 part 'app_database.g.dart';
 
 @DriftDatabase(
@@ -22,9 +30,22 @@ part 'app_database.g.dart';
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+  AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
   int get schemaVersion => 8;
+
+  // Manual DAO accessors to ensure visibility in UI
+  @override
+  late final TeamsDao teamsDao = TeamsDao(this);
+  @override
+  late final PlayersDao playersDao = PlayersDao(this);
+  @override
+  late final GamesDao gamesDao = GamesDao(this);
+  @override
+  late final PreferencesDao preferencesDao = PreferencesDao(this);
+  @override
+  late final HistoryDao historyDao = HistoryDao(this);
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -74,7 +95,6 @@ class AppDatabase extends _$AppDatabase {
       if (from < 8) {
         await m.createTable(playerSeasons);
       }
-
     },
   );
 }

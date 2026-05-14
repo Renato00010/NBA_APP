@@ -5,7 +5,7 @@ import 'db/app_database.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/games/games_screen.dart';
 import 'screens/news/news_screen.dart';
-import 'screens/profile/profile_screen.dart';
+import 'screens/store/store_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'services/theme_service.dart';
 import 'services/nba_api_service.dart';
@@ -149,7 +149,7 @@ class _MainNavigationState extends State<MainNavigation> {
     GamesScreen(),
     StandingsScreen(),
     NewsScreen(),
-    ProfileScreen(),
+    StoreScreen(),
   ];
 
   @override
@@ -185,9 +185,9 @@ class _MainNavigationState extends State<MainNavigation> {
             label: 'Notícias',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline, color: Colors.white70),
-            selectedIcon: Icon(Icons.person, color: Colors.white),
-            label: 'Perfil',
+            icon: Icon(Icons.shopping_bag_outlined, color: Colors.white70),
+            selectedIcon: Icon(Icons.shopping_bag, color: Colors.white),
+            label: 'Loja',
           ),
         ],
       ),

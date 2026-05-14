@@ -1,87 +1,41 @@
 import 'package:dio/dio.dart';
 
 class NbaApiService {
-  static const String _baseUrl = 'https://api.balldontlie.io/v1';
-  static const String _apiKey = 'f603e3e9-b7ce-4d29-89e1-1674009caee6';
-
-  final Dio _dio;
-
-  NbaApiService()
-    : _dio = Dio(
-        BaseOptions(
-          baseUrl: _baseUrl,
-          headers: {'Authorization': _apiKey},
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
-        ),
+  // Buscar jogos via ESPN (sem os limites agressivos da balldontlie)
+  Future<List<dynamic>> getEspnScoreboard(String dateYYYYMMDD) async {
+    try {
+      final response = await Dio().get(
+        'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+        queryParameters: {'dates': dateYYYYMMDD},
       );
-
-  // Buscar todas as equipas
-  Future<List<dynamic>> getTeams() async {
-    try {
-      final response = await _dio.get('/teams');
-      return response.data['data'] as List<dynamic>;
+      return response.data['events'] as List<dynamic>;
     } on DioException catch (e) {
-      throw Exception('Erro ao buscar equipas: ${e.message}');
+      throw Exception('Erro ao buscar placar da ESPN: ${e.message}');
     }
   }
 
-  // Buscar jogos por data
-  Future<List<dynamic>> getGamesByDate(String date) async {
+  // Buscar detalhes de um jogo específico (Odds, TV, Leaders)
+  Future<Map<String, dynamic>> getEspnGameSummary(String eventId) async {
     try {
-      final response = await _dio.get(
-        '/games',
-        queryParameters: {'dates[]': date},
+      final response = await Dio().get(
+        'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/summary',
+        queryParameters: {'event': eventId},
       );
-      return response.data['data'] as List<dynamic>;
+      return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      throw Exception('Erro ao buscar jogos: ${e.message}');
+      throw Exception('Erro ao buscar detalhes do jogo na ESPN: ${e.message}');
     }
   }
 
-  // Buscar jogos ao vivo
-  Future<List<dynamic>> getLiveGames() async {
+  // Buscar notícias da NBA via ESPN
+  Future<List<dynamic>> getEspnNews() async {
     try {
-      final response = await _dio.get('/games/live');
-      return response.data['data'] as List<dynamic>;
-    } on DioException catch (e) {
-      throw Exception('Erro ao buscar jogos ao vivo: ${e.message}');
-    }
-  }
-
-  // Buscar jogadores
-  Future<List<dynamic>> getPlayers({
-    String? search,
-    int page = 1,
-    List<int>? teamIds,
-  }) async {
-    try {
-      final Map<String, dynamic> queryParams = {
-        'page': page,
-        'per_page': 50, // Aumentado para obter mais jogadores de uma vez
-      };
-      if (search != null) queryParams['search'] = search;
-      if (teamIds != null && teamIds.isNotEmpty) {
-        queryParams['team_ids[]'] = teamIds;
-      }
-
-      final response = await _dio.get('/players', queryParameters: queryParams);
-      return response.data['data'] as List<dynamic>;
-    } on DioException catch (e) {
-      throw Exception('Erro ao buscar jogadores: ${e.message}');
-    }
-  }
-
-  // Buscar standings
-  Future<List<dynamic>> getStandings() async {
-    try {
-      final response = await _dio.get(
-        '/standings',
-        queryParameters: {'season': 2024},
+      final response = await Dio().get(
+        'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/news',
       );
-      return response.data['data'] as List<dynamic>;
+      return response.data['articles'] as List<dynamic>;
     } on DioException catch (e) {
-      throw Exception('Erro ao buscar standings: ${e.message}');
+      throw Exception('Erro ao buscar notícias na ESPN: ${e.message}');
     }
   }
 }

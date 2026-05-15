@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../db/app_database.dart';
 import '../../main.dart';
 import '../../services/theme_service.dart';
+import '../../services/season_report_service.dart';
 import '../../widgets/team_logo.dart';
 import '../games/player_detail_screen.dart';
 
@@ -109,6 +110,15 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                           _FavoriteTeamPanel(
                             teamId: widget.teamId,
                             teamName: teamName,
+                            accentColor: teamTheme.secondaryColor,
+                          ),
+                          const SizedBox(height: 16),
+                          _SeasonReportButton(
+                            teamId: widget.teamId,
+                            teamName: teamName,
+                            city: city,
+                            players: _players,
+                            games: _games,
                             accentColor: teamTheme.secondaryColor,
                           ),
                           const SizedBox(height: 16),
@@ -263,6 +273,94 @@ class _TeamHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SeasonReportButton extends StatelessWidget {
+  final String teamId;
+  final String teamName;
+  final String city;
+  final List<Player> players;
+  final List<CachedGame> games;
+  final Color accentColor;
+
+  const _SeasonReportButton({
+    required this.teamId,
+    required this.teamName,
+    required this.city,
+    required this.players,
+    required this.games,
+    required this.accentColor,
+  });
+
+  Future<void> _handleGenerateReport(BuildContext context) async {
+    try {
+      await SeasonReportService.generateAndPrintSeasonReport(
+        teamId: teamId,
+        teamName: teamName,
+        city: city,
+        players: players,
+        games: games,
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao gerar relatório: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            accentColor,
+            accentColor.withValues(alpha: 0.7),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: accentColor.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _handleGenerateReport(context),
+          borderRadius: BorderRadius.circular(16),
+          child: const Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.assessment_outlined, color: Colors.white, size: 24),
+                SizedBox(width: 12),
+                Text(
+                  'RELATÓRIO DE ÉPOCA',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -139,6 +139,18 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
     );
   }
 
+  Future<void> updateLanguageCode(String languageCode) async {
+    final prefs = await getPreferences();
+    if (prefs == null) return;
+
+    await (update(userPreferences)..where((p) => p.id.equals(prefs.id))).write(
+      UserPreferencesCompanion(
+        language: Value(languageCode),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   UserPreferencesCompanion buildCompanion({String? email}) {
     return UserPreferencesCompanion(
       email: Value(email),

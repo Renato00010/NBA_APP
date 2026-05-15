@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'db/app_database.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/games/games_screen.dart';
@@ -52,8 +54,10 @@ class NbaAppState extends State<NbaApp> {
   String? _favoriteTeamId;
   String? _userEmail;
   bool _loadingPrefs = true;
+  Locale _locale = const Locale('pt');
 
   String? get userEmail => _userEmail;
+  Locale get locale => _locale;
 
   @override
   void initState() {
@@ -69,6 +73,9 @@ class NbaAppState extends State<NbaApp> {
         _userEmail = prefs?.email;
         _loadingPrefs = false;
       });
+      if (prefs?.language != null) {
+        setState(() => _locale = Locale(prefs!.language));
+      }
     } catch (e) {
       setState(() => _loadingPrefs = false);
     }
@@ -108,6 +115,15 @@ class NbaAppState extends State<NbaApp> {
     }
   }
 
+  Future<void> setLocale(String languageCode) async {
+    setState(() => _locale = Locale(languageCode));
+    try {
+      await database.preferencesDao.updateLanguageCode(languageCode);
+    } catch (e) {
+      debugPrint('Erro ao guardar idioma: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loadingPrefs) {
@@ -126,6 +142,17 @@ class NbaAppState extends State<NbaApp> {
       title: 'NBA App',
       debugShowCheckedModeBanner: false,
       theme: ThemeService.buildTheme(teamTheme),
+      locale: _locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt'),
+        Locale('en'),
+      ],
       home: (_userEmail == null || _userEmail!.isEmpty)
           ? const LoginScreen()
           : MainNavigation(teamTheme: teamTheme),
@@ -154,6 +181,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: NavigationBar(
@@ -163,31 +191,31 @@ class _MainNavigationState extends State<MainNavigation> {
         onDestinationSelected: (index) {
           setState(() => _currentIndex = index);
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.home, color: Colors.white),
-            label: 'Início',
+            icon: const Icon(Icons.home_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.home, color: Colors.white),
+            label: l10n.home,
           ),
           NavigationDestination(
-            icon: Icon(Icons.sports_basketball_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.sports_basketball, color: Colors.white),
-            label: 'Jogos',
+            icon: const Icon(Icons.sports_basketball_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.sports_basketball, color: Colors.white),
+            label: l10n.games,
           ),
           NavigationDestination(
-            icon: Icon(Icons.table_chart_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.table_chart, color: Colors.white),
-            label: 'Tabela',
+            icon: const Icon(Icons.table_chart_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.table_chart, color: Colors.white),
+            label: l10n.standings,
           ),
           NavigationDestination(
-            icon: Icon(Icons.newspaper_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.newspaper, color: Colors.white),
-            label: 'Notícias',
+            icon: const Icon(Icons.newspaper_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.newspaper, color: Colors.white),
+            label: l10n.news,
           ),
           NavigationDestination(
-            icon: Icon(Icons.shopping_bag_outlined, color: Colors.white70),
-            selectedIcon: Icon(Icons.shopping_bag, color: Colors.white),
-            label: 'Loja',
+            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white70),
+            selectedIcon: const Icon(Icons.shopping_bag, color: Colors.white),
+            label: l10n.store,
           ),
         ],
       ),

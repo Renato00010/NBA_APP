@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../db/app_database.dart';
 import '../../main.dart';
 import '../../services/theme_service.dart';
@@ -14,14 +15,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final userEmail = NbaApp.of(context)?.userEmail ?? '';
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
-        title: const Text(
-          'Perfil',
-          style: TextStyle(
+        title: Text(
+          l10n.profile,
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w700,
@@ -38,9 +40,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: const Icon(Icons.person, size: 48, color: Colors.white),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Olá, seja bem vindo',
-              style: TextStyle(
+            Text(
+              l10n.hello,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -60,13 +62,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     _buildSection(
                       icon: Icons.favorite_outlined,
-                      title: 'Equipa favorita',
+                      title: l10n.favoriteTeam,
                       subtitle: _favoriteTeamLabel(prefs?.favoriteTeamId),
                       onTap: () => _showTeamPicker(context),
                     ),
                     _buildSection(
                       icon: Icons.straighten,
-                      title: 'Medidas',
+                      title: l10n.measurements,
                       subtitle: _measurementUnitLabel(
                         prefs?.measurementUnit ?? 'metric',
                       ),
@@ -74,22 +76,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     _buildSection(
                       icon: Icons.payments_outlined,
-                      title: 'Moeda',
+                      title: l10n.currency,
                       subtitle: _currencyLabel(prefs?.currencyCode ?? 'EUR'),
                       onTap: () => _showCurrencyPicker(context),
                     ),
+                    _buildSection(
+                      icon: Icons.language,
+                      title: l10n.language,
+                      subtitle: _languageLabel(prefs?.language ?? 'pt'),
+                      onTap: () => _showLanguagePicker(context),
+                    ),
                     _buildSwitchSection(
                       icon: Icons.sports_basketball_outlined,
-                      title: 'Alertas da equipa',
-                      subtitle: 'Jogos e notícias da equipa favorita',
+                      title: l10n.teamAlerts,
+                      subtitle: l10n.teamAlertsSubtitle,
                       value: prefs?.favoriteTeamAlerts ?? true,
                       onChanged:
                           database.preferencesDao.updateFavoriteTeamAlerts,
                     ),
                     _buildSwitchSection(
                       icon: Icons.notifications_outlined,
-                      title: 'Notificações',
-                      subtitle: 'Avisos gerais da app',
+                      title: l10n.notifications,
+                      subtitle: l10n.notificationsSubtitle,
                       value: prefs?.notificationsOn ?? true,
                       onChanged: database.preferencesDao.updateNotifications,
                     ),
@@ -99,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             _buildSection(
               icon: Icons.logout,
-              title: 'Terminar sessão',
+              title: l10n.logout,
               subtitle: '',
               onTap: () => NbaApp.of(context)?.logout(),
               isDestructive: true,
@@ -111,24 +119,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _favoriteTeamLabel(String? teamId) {
-    if (teamId == null || teamId.isEmpty) return 'Padrão NBA';
+    final l10n = AppLocalizations.of(context)!;
+    if (teamId == null || teamId.isEmpty) return l10n.defaultNBA;
     return ThemeService.teamThemes[teamId]?.teamName ?? 'Equipa $teamId';
   }
 
   String _measurementUnitLabel(String value) {
-    return value == 'imperial' ? 'Pounds e inches' : 'Kg e cm';
+    final l10n = AppLocalizations.of(context)!;
+    return value == 'imperial' ? l10n.poundsInches : l10n.kgCm;
   }
 
   String _currencyLabel(String value) {
+    final l10n = AppLocalizations.of(context)!;
     return switch (value) {
-      'USD' => 'Dólar americano (USD)',
-      'GBP' => 'Libra esterlina (GBP)',
-      'BRL' => 'Real brasileiro (BRL)',
-      _ => 'Euro (EUR)',
+      'USD' => l10n.usd,
+      'GBP' => l10n.gbp,
+      'BRL' => l10n.brl,
+      _ => l10n.euro,
     };
   }
 
+  String _languageLabel(String value) {
+    final l10n = AppLocalizations.of(context)!;
+    return value == 'en' ? l10n.english : l10n.portuguese;
+  }
+
   void _showTeamPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1A1A1A),
@@ -138,11 +155,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context) {
         return Column(
           children: [
-            const Padding(
-              padding: EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.all(16),
               child: Text(
-                'Escolhe a tua equipa',
-                style: TextStyle(
+                l10n.chooseTeam,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -161,9 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              title: const Text(
-                'Padrão NBA',
-                style: TextStyle(color: Colors.white),
+              title: Text(
+                l10n.defaultNBA,
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () {
                 NbaApp.of(context)?.updateTeam(null);
@@ -208,15 +225,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showMeasurementPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     _showOptionPicker(
       context,
-      title: 'Unidade de medida',
-      options: const [
-        _SettingsOption('metric', 'Kg e cm', 'Peso em kg e altura em cm'),
+      title: l10n.measurementUnit,
+      options: [
+        _SettingsOption('metric', l10n.kgCm, l10n.weightInKg + ' e ' + l10n.heightInCm),
         _SettingsOption(
           'imperial',
-          'Pounds e inches',
-          'Peso em lb e altura em in',
+          l10n.poundsInches,
+          l10n.weightInLb + ' e ' + l10n.heightInIn,
         ),
       ],
       onSelected: database.preferencesDao.updateMeasurementUnit,
@@ -224,16 +242,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showCurrencyPicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     _showOptionPicker(
       context,
-      title: 'Moeda',
-      options: const [
-        _SettingsOption('EUR', 'Euro (EUR)', 'Preços em euros'),
-        _SettingsOption('USD', 'Dólar americano (USD)', 'Preços em dólares'),
-        _SettingsOption('GBP', 'Libra esterlina (GBP)', 'Preços em libras'),
-        _SettingsOption('BRL', 'Real brasileiro (BRL)', 'Preços em reais'),
+      title: l10n.currencyPicker,
+      options: [
+        _SettingsOption('EUR', l10n.euro, l10n.pricesInEuros),
+        _SettingsOption('USD', l10n.usd, l10n.pricesInDollars),
+        _SettingsOption('GBP', l10n.gbp, l10n.pricesInPounds),
+        _SettingsOption('BRL', l10n.brl, l10n.pricesInReais),
       ],
       onSelected: database.preferencesDao.updateCurrencyCode,
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    _showOptionPicker(
+      context,
+      title: l10n.language,
+      options: [
+        _SettingsOption('pt', l10n.portuguese, ''),
+        _SettingsOption('en', l10n.english, ''),
+      ],
+      onSelected: (langCode) async {
+        await database.preferencesDao.updateLanguageCode(langCode);
+        NbaApp.of(context)?.setLocale(langCode);
+      },
     );
   }
 

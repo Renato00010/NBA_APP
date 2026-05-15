@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
+import '../../services/ticket_service.dart';
 
 class GameDetailScreen extends StatefulWidget {
   final String gameId;
@@ -309,6 +310,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   // Custom Game Result Header
                   _buildScoreHeader(),
                   const SizedBox(height: 24),
+                  // Buy Ticket Button
+                  _buildBuyTicketButton(),
+                  const SizedBox(height: 24),
                   // TV Channel info
                   _buildInfoRow('TV', _getTvChannels()),
                   const SizedBox(height: 8),
@@ -409,6 +413,81 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildBuyTicketButton() {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            theme.colorScheme.primary,
+            theme.colorScheme.secondary,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.primary.withOpacity(0.3),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: _handleBuyTicket,
+          borderRadius: BorderRadius.circular(16),
+          child: const Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 24),
+                SizedBox(width: 12),
+                Text(
+                  'COMPRAR BILHETE',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleBuyTicket() async {
+    try {
+      final venue = _getVenue();
+      final date = DateTime.now().toString().split(' ')[0];
+      final time = '19:00';
+      
+      await TicketService.generateAndPrintTicket(
+        gameId: widget.gameId,
+        homeTeam: widget.homeName,
+        awayTeam: widget.awayName,
+        venue: venue,
+        date: date,
+        time: time,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao gerar bilhete: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildLeaderCard(Map<String, String> leader, ThemeData theme) {

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../db/app_database.dart';
@@ -8,7 +7,12 @@ import '../../services/player_stats_seed.dart';
 import '../../services/player_stats_web_sync.dart';
 import '../../widgets/team_logo.dart';
 import '../../widgets/player_evolution_chart.dart';
+import '../comparator/player_comparator_screen.dart';
 import '../../models/player_season_stats.dart';
+
+bool _isEnglish(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'en';
+
 class PlayerDetailScreen extends StatefulWidget {
   final Player player;
   const PlayerDetailScreen({super.key, required this.player});
@@ -70,46 +74,67 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
     // 2. Se falhou online, tenta dados locais reais da BD
     if (externalStats == null) {
-      final localSeasons = await database.playersDao.getPlayerSeasons(_player.playerId);
+      final localSeasons = await database.playersDao.getPlayerSeasons(
+        _player.playerId,
+      );
       if (localSeasons.isNotEmpty || _player.careerGames > 0) {
-        final seasons = localSeasons.map((s) => SeasonStats(
-          season: s.season,
-          team: s.team,
-          gp: s.gp,
-          gs: s.gs,
-          mpg: s.mpg,
-          ppg: s.ppg,
-          rpg: s.rpg,
-          apg: s.apg,
-          spg: s.spg,
-          bpg: s.bpg,
-          topg: s.topg,
-          fgPct: s.fgPct,
-          fg3Pct: s.fg3Pct,
-          ftPct: s.ftPct,
-          per: s.per,
-          tsPct: s.tsPct,
-          usgPct: s.usgPct,
-          impactMetric: 0,
-          impactMetricLabel: '-',
-          offensiveRating: 0,
-          defensiveRating: 0,
-        )).toList();
+        final seasons = localSeasons
+            .map(
+              (s) => SeasonStats(
+                season: s.season,
+                team: s.team,
+                gp: s.gp,
+                gs: s.gs,
+                mpg: s.mpg,
+                ppg: s.ppg,
+                rpg: s.rpg,
+                apg: s.apg,
+                spg: s.spg,
+                bpg: s.bpg,
+                topg: s.topg,
+                fgPct: s.fgPct,
+                fg3Pct: s.fg3Pct,
+                ftPct: s.ftPct,
+                per: s.per,
+                tsPct: s.tsPct,
+                usgPct: s.usgPct,
+                impactMetric: 0,
+                impactMetricLabel: '-',
+                offensiveRating: 0,
+                defensiveRating: 0,
+              ),
+            )
+            .toList();
 
         seasons.sort((a, b) => b.season.compareTo(a.season));
 
         if (seasons.isNotEmpty || _player.careerGames > 0) {
           externalStats = PlayerStatsProfile(
-            currentSeason: seasons.isNotEmpty ? seasons.first : SeasonStats(
-              season: 'Atual',
-              team: teamName,
-              gp: 0, gs: 0, mpg: _player.mpg, ppg: _player.ppg,
-              rpg: _player.rpg, apg: _player.apg, spg: _player.spg,
-              bpg: _player.bpg, topg: _player.topg,
-              fgPct: _player.fgPct, fg3Pct: _player.fg3Pct, ftPct: _player.ftPct,
-              per: 0, tsPct: 0, usgPct: 0, impactMetric: 0, impactMetricLabel: '-',
-              offensiveRating: 0, defensiveRating: 0,
-            ),
+            currentSeason: seasons.isNotEmpty
+                ? seasons.first
+                : SeasonStats(
+                    season: 'Atual',
+                    team: teamName,
+                    gp: 0,
+                    gs: 0,
+                    mpg: _player.mpg,
+                    ppg: _player.ppg,
+                    rpg: _player.rpg,
+                    apg: _player.apg,
+                    spg: _player.spg,
+                    bpg: _player.bpg,
+                    topg: _player.topg,
+                    fgPct: _player.fgPct,
+                    fg3Pct: _player.fg3Pct,
+                    ftPct: _player.ftPct,
+                    per: 0,
+                    tsPct: 0,
+                    usgPct: 0,
+                    impactMetric: 0,
+                    impactMetricLabel: '-',
+                    offensiveRating: 0,
+                    defensiveRating: 0,
+                  ),
             seasons: seasons,
             career: CareerTotals(
               games: _player.careerGames,
@@ -121,10 +146,20 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
               blocks: _player.careerBlocks,
               turnovers: _player.careerTurnovers,
             ),
-            careerHighs: const CareerHighs(points: 0, rebounds: 0, assists: 0, steals: 0, blocks: 0),
+            careerHighs: const CareerHighs(
+              points: 0,
+              rebounds: 0,
+              assists: 0,
+              steals: 0,
+              blocks: 0,
+            ),
             recentGames: const [],
             awards: const [],
-            health: const HealthStatus(status: 'Offline', injuryDescription: '-', expectedReturn: '-'),
+            health: const HealthStatus(
+              status: 'Offline',
+              injuryDescription: '-',
+              expectedReturn: '-',
+            ),
           );
           if (localSeasons.isNotEmpty) isRealData = true;
         }
@@ -135,7 +170,8 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     // Usamos para trajetória porque têm times reais, ao contrário do seed estimado
     bool isNamedSeed = false;
     if (externalStats == null) {
-      final namedSeed = PlayerStatsSeed.forName(_player.fullName) ??
+      final namedSeed =
+          PlayerStatsSeed.forName(_player.fullName) ??
           PlayerStatsSeed.forName(_player.displayName ?? '');
       if (namedSeed != null) {
         externalStats = namedSeed;
@@ -144,7 +180,10 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     }
 
     // 4. Computa trajetória — real data (web/BD) OU named seed (times históricos reais)
-    final careerTeamIds = _computeCareerTeamIds(externalStats, isRealData || isNamedSeed);
+    final careerTeamIds = _computeCareerTeamIds(
+      externalStats,
+      isRealData || isNamedSeed,
+    );
 
     // 5. Seed estimado como último fallback apenas para estatísticas (nunca para trajetória)
     externalStats ??= PlayerStatsSeed.estimatedProfileForRosterGap(
@@ -171,7 +210,10 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
   /// Computa a trajetória a partir de dados REAIS apenas.
   /// NUNCA usa seed data (que tem times fictícios gerados aleatoriamente).
-  List<String> _computeCareerTeamIds(PlayerStatsProfile? profile, bool isRealData) {
+  List<String> _computeCareerTeamIds(
+    PlayerStatsProfile? profile,
+    bool isRealData,
+  ) {
     final out = <String>[];
 
     // 1. Seasons do perfil real (web ou BD local) — ordena do mais antigo ao mais recente
@@ -210,10 +252,14 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     if (_syncing) return;
     if (mounted) setState(() => _syncing = true);
 
-    final success = await PlayerStatsWebSync(database.playersDao).syncSinglePlayer(_player);
-    
+    final success = await PlayerStatsWebSync(
+      database.playersDao,
+    ).syncSinglePlayer(_player);
+
     if (success) {
-      final updatedPlayer = await database.playersDao.getPlayerById(_player.playerId);
+      final updatedPlayer = await database.playersDao.getPlayerById(
+        _player.playerId,
+      );
       if (updatedPlayer != null && mounted) {
         setState(() {
           _player = updatedPlayer;
@@ -228,11 +274,13 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     } else {
       if (mounted && !silent) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Falha na sincronização. Tente mais tarde.')),
+          const SnackBar(
+            content: Text('Falha na sincronização. Tente mais tarde.'),
+          ),
         );
       }
     }
-    
+
     if (mounted) setState(() => _syncing = false);
   }
 
@@ -283,18 +331,42 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       backgroundColor: const Color(0xFF0A0A0A),
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+        icon: const Icon(
+          Icons.arrow_back_ios_new,
+          color: Colors.white,
+          size: 20,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.compare_arrows, color: Colors.white70),
+          tooltip: _isEnglish(context) ? 'Compare player' : 'Comparar jogador',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    PlayerComparatorScreen(initialPlayer: player),
+              ),
+            );
+          },
+        ),
         if (_hasEnoughSeasonsForChart)
           IconButton(
             icon: const Icon(Icons.show_chart, color: Colors.white70),
             onPressed: () => _showEvolutionChart(context),
           ),
-        IconButton(
-          icon: const Icon(Icons.info_outline, color: Colors.white70),
-          onPressed: () => _showPlayerInfoSheet(player, 'metric', theme),
+        StreamBuilder<UserPreference?>(
+          stream: database.preferencesDao.watchPreferences(),
+          builder: (context, snapshot) {
+            final measurementUnit = snapshot.data?.measurementUnit ?? 'metric';
+            return IconButton(
+              icon: const Icon(Icons.info_outline, color: Colors.white70),
+              onPressed: () =>
+                  _showPlayerInfoSheet(player, measurementUnit, theme),
+            );
+          },
         ),
         const SizedBox(width: 8),
       ],
@@ -361,7 +433,10 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                       Container(
                         width: 4,
                         height: 4,
-                        decoration: const BoxDecoration(color: Colors.white24, shape: BoxShape.circle),
+                        decoration: const BoxDecoration(
+                          color: Colors.white24,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Text(
@@ -489,7 +564,9 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
         return StatefulBuilder(
           builder: (context, setModalState) {
             final currentPlayer = _player;
-            final teamLabel = _teamName.isNotEmpty ? _teamName : currentPlayer.teamId;
+            final teamLabel = _teamName.isNotEmpty
+                ? _teamName
+                : currentPlayer.teamId;
 
             return SafeArea(
               child: Padding(
@@ -519,7 +596,8 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  currentPlayer.displayName ?? currentPlayer.fullName,
+                                  currentPlayer.displayName ??
+                                      currentPlayer.fullName,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,
@@ -544,7 +622,10 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                       _sheetRow('Nome completo', currentPlayer.fullName),
                       _sheetRow('Número', currentPlayer.jerseyNumber ?? '-'),
                       _sheetRow('País', currentPlayer.country ?? '-'),
-                      _sheetRow('Nascimento', _formatDateOrDash(currentPlayer.birthDate)),
+                      _sheetRow(
+                        'Nascimento',
+                        _formatDateOrDash(currentPlayer.birthDate),
+                      ),
                       _sheetRow('Idade', _formatAge(currentPlayer.birthDate)),
                       _sheetRow(
                         'Altura',
@@ -574,9 +655,13 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                             onPressed: _syncing
                                 ? null
                                 : () async {
-                                    setModalState(() {}); // Atualiza o spinner no modal
+                                    setModalState(
+                                      () {},
+                                    ); // Atualiza o spinner no modal
                                     await _manualSync();
-                                    setModalState(() {}); // Atualiza os dados no modal
+                                    setModalState(
+                                      () {},
+                                    ); // Atualiza os dados no modal
                                   },
                             icon: _syncing
                                 ? const SizedBox(
@@ -589,12 +674,16 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                                   )
                                 : const Icon(Icons.sync, size: 16),
                             label: Text(
-                              _syncing ? 'Sincronizando...' : 'Sincronizar Dados Reais',
+                              _syncing
+                                  ? 'Sincronizando...'
+                                  : 'Sincronizar Dados Reais',
                               style: const TextStyle(fontSize: 12),
                             ),
                             style: TextButton.styleFrom(
                               foregroundColor: const Color(0xFFFFC72C),
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                           ),
                         ],
@@ -618,17 +707,21 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     if (_manualStats != null) {
       final all = _allSeasonsForProfile(_manualStats!);
       if (all.isNotEmpty) {
-        seasons = all.map((s) => PlayerSeasonStats(
-          season: s.season,
-          ppg: s.ppg,
-          rpg: s.rpg,
-          apg: s.apg,
-          per: s.per,
-          tsPct: s.tsPct,
-        )).toList();
+        seasons = all
+            .map(
+              (s) => PlayerSeasonStats(
+                season: s.season,
+                ppg: s.ppg,
+                rpg: s.rpg,
+                apg: s.apg,
+                per: s.per,
+                tsPct: s.tsPct,
+              ),
+            )
+            .toList();
       }
     }
-    
+
     if (seasons.isEmpty) {
       seasons = await repository.getPlayerSeasonStats(_player.playerId);
     }
@@ -699,7 +792,11 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                 indicatorSize: TabBarIndicatorSize.label,
                 indicatorColor: theme.colorScheme.primary,
                 dividerColor: Colors.transparent,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, letterSpacing: 1),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  letterSpacing: 1,
+                ),
                 unselectedLabelColor: Colors.white24,
                 tabs: const [
                   Tab(text: 'SEASON'),
@@ -759,14 +856,17 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
               height: 400,
               child: TabBarView(
                 children: [
-                  SingleChildScrollView(child: _localDbStatsContent(player, theme)),
+                  SingleChildScrollView(
+                    child: _localDbStatsContent(player, theme),
+                  ),
                   _careerStatsTab(player: player),
                 ],
               ),
             ),
             const SizedBox(height: 12),
             const _InfoNote(
-              text: 'Dados locais. Conecte-se para ver historico completo e avancadas.',
+              text:
+                  'Dados locais. Conecte-se para ver historico completo e avancadas.',
             ),
           ],
         ),
@@ -1257,11 +1357,26 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       children: [
         Row(
           children: [
-            _statCard('PTS', player.ppg.toStringAsFixed(1), theme, isMain: true),
+            _statCard(
+              'PTS',
+              player.ppg.toStringAsFixed(1),
+              theme,
+              isMain: true,
+            ),
             const SizedBox(width: 10),
-            _statCard('REB', player.rpg.toStringAsFixed(1), theme, isMain: true),
+            _statCard(
+              'REB',
+              player.rpg.toStringAsFixed(1),
+              theme,
+              isMain: true,
+            ),
             const SizedBox(width: 10),
-            _statCard('AST', player.apg.toStringAsFixed(1), theme, isMain: true),
+            _statCard(
+              'AST',
+              player.apg.toStringAsFixed(1),
+              theme,
+              isMain: true,
+            ),
           ],
         ),
         const SizedBox(height: 10),
@@ -1279,25 +1394,19 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
           children: [
             _statCard(
               'FG%',
-              player.fgPct > 0
-                  ? '${player.fgPct.toStringAsFixed(1)}%'
-                  : '-',
+              player.fgPct > 0 ? '${player.fgPct.toStringAsFixed(1)}%' : '-',
               theme,
             ),
             const SizedBox(width: 10),
             _statCard(
               '3P%',
-              player.fg3Pct > 0
-                  ? '${player.fg3Pct.toStringAsFixed(1)}%'
-                  : '-',
+              player.fg3Pct > 0 ? '${player.fg3Pct.toStringAsFixed(1)}%' : '-',
               theme,
             ),
             const SizedBox(width: 10),
             _statCard(
               'FT%',
-              player.ftPct > 0
-                  ? '${player.ftPct.toStringAsFixed(1)}%'
-                  : '-',
+              player.ftPct > 0 ? '${player.ftPct.toStringAsFixed(1)}%' : '-',
               theme,
             ),
           ],
@@ -1307,11 +1416,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
           Row(
             children: [
               Expanded(
-                child: _statCard(
-                  'TOPG',
-                  player.topg.toStringAsFixed(1),
-                  theme,
-                ),
+                child: _statCard('TOPG', player.topg.toStringAsFixed(1), theme),
               ),
             ],
           ),
@@ -1476,7 +1581,9 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                       Container(
                         width: 30,
                         height: 2,
-                        margin: const EdgeInsets.only(bottom: 16), // Alinhado com o centro do logo
+                        margin: const EdgeInsets.only(
+                          bottom: 16,
+                        ), // Alinhado com o centro do logo
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -1498,17 +1605,39 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
   String _abbrFromTeamId(String teamId) {
     const reverseMap = <String, String>{
-      '1': 'ATL', '2': 'BOS', '3': 'BKN', '4': 'CHA', '5': 'CHI',
-      '6': 'CLE', '7': 'DAL', '8': 'DEN', '9': 'DET', '10': 'GSW',
-      '11': 'HOU', '12': 'IND', '13': 'LAC', '14': 'LAL', '15': 'MEM',
-      '16': 'MIA', '17': 'MIL', '18': 'MIN', '19': 'NOP', '20': 'NYK',
-      '21': 'OKC', '22': 'ORL', '23': 'PHI', '24': 'PHX', '25': 'POR',
-      '26': 'SAC', '27': 'SAS', '28': 'TOR', '29': 'UTA', '30': 'WAS',
+      '1': 'ATL',
+      '2': 'BOS',
+      '3': 'BKN',
+      '4': 'CHA',
+      '5': 'CHI',
+      '6': 'CLE',
+      '7': 'DAL',
+      '8': 'DEN',
+      '9': 'DET',
+      '10': 'GSW',
+      '11': 'HOU',
+      '12': 'IND',
+      '13': 'LAC',
+      '14': 'LAL',
+      '15': 'MEM',
+      '16': 'MIA',
+      '17': 'MIL',
+      '18': 'MIN',
+      '19': 'NOP',
+      '20': 'NYK',
+      '21': 'OKC',
+      '22': 'ORL',
+      '23': 'PHI',
+      '24': 'PHX',
+      '25': 'POR',
+      '26': 'SAC',
+      '27': 'SAS',
+      '28': 'TOR',
+      '29': 'UTA',
+      '30': 'WAS',
     };
     return reverseMap[teamId] ?? 'NBA';
   }
-
-
 
   String? _teamIdFromAbbreviation(String value) {
     final team = value.trim().toUpperCase();
@@ -1559,7 +1688,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
       'WAS': '30',
       'WSH': '30',
       'WSB': '30',
-
     };
     return map[team];
   }

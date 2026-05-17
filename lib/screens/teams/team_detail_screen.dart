@@ -10,6 +10,12 @@ import '../../services/season_report_service.dart';
 import '../../widgets/team_logo.dart';
 import '../games/player_detail_screen.dart';
 
+bool _isEnglish(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'en';
+
+String _t(BuildContext context, String pt, String en) =>
+    _isEnglish(context) ? en : pt;
+
 class TeamDetailScreen extends StatefulWidget {
   final String teamId;
   final NbaTeam? initialTeam;
@@ -39,7 +45,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       await repository.getPlayers();
       final team = await database.teamsDao.getTeamById(widget.teamId);
       final players = await database.playersDao.getAllPlayers();
-      final games = await repository.getGamesByDate(DateTime.now());
+      final games = await repository.getTeamSeasonGames(widget.teamId);
       if (!mounted) return;
       setState(() {
         _team = team ?? widget.initialTeam;
@@ -125,13 +131,17 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                           _InfoGrid(team: _team, players: _players),
                           const SizedBox(height: 22),
                           _SectionHeader(
-                            title: 'Jogos da equipa',
+                            title: _t(context, 'Jogos da equipa', 'Team Games'),
                             trailing: '${_games.length}',
                           ),
                           const SizedBox(height: 10),
                           _games.isEmpty
-                              ? const _EmptyState(
-                                  text: 'Sem jogos guardados para esta equipa',
+                              ? _EmptyState(
+                                  text: _t(
+                                    context,
+                                    'Sem jogos guardados para esta equipa',
+                                    'No saved games for this team',
+                                  ),
                                 )
                               : Column(
                                   children: _games
@@ -147,14 +157,17 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                                 ),
                           const SizedBox(height: 22),
                           _SectionHeader(
-                            title: 'Plantel',
+                            title: _t(context, 'Plantel', 'Roster'),
                             trailing: '${_players.length}',
                           ),
                           const SizedBox(height: 10),
                           _players.isEmpty
-                              ? const _EmptyState(
-                                  text:
-                                      'Ainda não há jogadores guardados para esta equipa',
+                              ? _EmptyState(
+                                  text: _t(
+                                    context,
+                                    'Ainda nao ha jogadores guardados para esta equipa',
+                                    'No saved players for this team yet',
+                                  ),
                                 )
                               : Column(
                                   children: _players
@@ -303,12 +316,15 @@ class _SeasonReportButton extends StatelessWidget {
         city: city,
         players: players,
         games: games,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar relatório: $e'),
+            content: Text(
+              '${_t(context, 'Erro ao gerar relatorio', 'Error generating report')}: $e',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -323,15 +339,12 @@ class _SeasonReportButton extends StatelessWidget {
       height: 56,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            accentColor,
-            accentColor.withValues(alpha: 0.7),
-          ],
+          colors: [accentColor, accentColor.withValues(alpha: 0.7)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: accentColor.withOpacity(0.3),
+            color: accentColor.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -342,15 +355,19 @@ class _SeasonReportButton extends StatelessWidget {
         child: InkWell(
           onTap: () => _handleGenerateReport(context),
           borderRadius: BorderRadius.circular(16),
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assessment_outlined, color: Colors.white, size: 24),
-                SizedBox(width: 12),
+                const Icon(
+                  Icons.assessment_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
                 Text(
-                  'RELATÓRIO DE ÉPOCA',
-                  style: TextStyle(
+                  _t(context, 'RELATORIO DE EPOCA', 'SEASON REPORT'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -404,8 +421,16 @@ class _FavoriteTeamPanel extends StatelessWidget {
               Expanded(
                 child: Text(
                   isFavorite
-                      ? '$teamName é a tua equipa favorita'
-                      : 'Definir como equipa favorita',
+                      ? _t(
+                          context,
+                          '$teamName e a tua equipa favorita',
+                          '$teamName is your favorite team',
+                        )
+                      : _t(
+                          context,
+                          'Definir como equipa favorita',
+                          'Set as favorite team',
+                        ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -418,7 +443,11 @@ class _FavoriteTeamPanel extends StatelessWidget {
               TextButton(
                 onPressed: () =>
                     NbaApp.of(context)?.updateTeam(isFavorite ? null : teamId),
-                child: Text(isFavorite ? 'Remover' : 'Escolher'),
+                child: Text(
+                  isFavorite
+                      ? _t(context, 'Remover', 'Remove')
+                      : _t(context, 'Escolher', 'Choose'),
+                ),
               ),
             ],
           ),
@@ -454,11 +483,24 @@ class _InfoGrid extends StatelessWidget {
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       children: [
-        _InfoTile(label: 'Conferência', value: team?.conference ?? '-'),
-        _InfoTile(label: 'Divisão', value: team?.division ?? '-'),
-        _InfoTile(label: 'Plantel', value: '${players.length} jogadores'),
         _InfoTile(
-          label: 'Posições',
+          label: _t(context, 'Conferencia', 'Conference'),
+          value: team?.conference ?? '-',
+        ),
+        _InfoTile(
+          label: _t(context, 'Divisao', 'Division'),
+          value: team?.division ?? '-',
+        ),
+        _InfoTile(
+          label: _t(context, 'Plantel', 'Roster'),
+          value: _t(
+            context,
+            '${players.length} jogadores',
+            '${players.length} players',
+          ),
+        ),
+        _InfoTile(
+          label: _t(context, 'Posicoes', 'Positions'),
           value: '$guards G  $forwards F  $centers C',
         ),
       ],

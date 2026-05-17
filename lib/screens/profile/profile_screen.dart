@@ -3,6 +3,9 @@ import '../../l10n/app_localizations.dart';
 import '../../db/app_database.dart';
 import '../../main.dart';
 import '../../services/theme_service.dart';
+import '../../services/cart_service.dart';
+import '../../services/notification_service.dart';
+import '../../services/preferences_format_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -91,16 +94,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: l10n.teamAlerts,
                       subtitle: l10n.teamAlertsSubtitle,
                       value: prefs?.favoriteTeamAlerts ?? true,
-                      onChanged:
-                          database.preferencesDao.updateFavoriteTeamAlerts,
+                      onChanged: (enabled) async {
+                        await database.preferencesDao
+                            .updateFavoriteTeamAlerts(enabled);
+                        await NotificationService.instance
+                            .rescheduleFromPreferences();
+                      },
                     ),
                     _buildSwitchSection(
                       icon: Icons.notifications_outlined,
                       title: l10n.notifications,
                       subtitle: l10n.notificationsSubtitle,
                       value: prefs?.notificationsOn ?? true,
-                      onChanged: database.preferencesDao.updateNotifications,
+                      onChanged: (enabled) async {
+                        await database.preferencesDao
+                            .updateNotifications(enabled);
+                        await NotificationService.instance
+                            .rescheduleFromPreferences();
+                      },
                     ),
+                    _buildOrderHistorySection(prefs?.currencyCode ?? 'EUR'),
                   ],
                 );
               },
@@ -115,6 +128,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  String _t(BuildContext context, String pt, String en) {
+    return Localizations.localeOf(context).languageCode == 'en' ? en : pt;
+  }
+
+  Widget _buildOrderHistorySection(String currencyCode) {
+    return ListenableBuilder(
+      listenable: CartService.instance,
+      builder: (context, _) {
+        final orders = CartService.instance.orders;
+        if (orders.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 8),
+              child: Text(
+                _t(context, 'Encomendas', 'Orders'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            ...orders.take(5).map(
+              (order) => Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A1A),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: const Icon(Icons.receipt_long, color: Color(0xFFFFC72C)),
+                  title: Text(
+                    order.id,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                  subtitle: Text(
+                    '${order.items.length} ${_t(context, 'itens', 'items')} · '
+                    '${PreferencesFormatService.formatCurrency(order.totalEur, currencyCode: currencyCode)}',
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                  trailing: Text(
+                    order.status,
+                    style: const TextStyle(color: Colors.white38, fontSize: 11),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -210,9 +279,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       team.teamName,
                       style: const TextStyle(color: Colors.white),
                     ),
-                    onTap: () {
-                      NbaApp.of(context)?.updateTeam(team.teamId);
-                      Navigator.pop(context);
+                    onTap: () async {
+                      await NbaApp.of(context)?.updateTeam(team.teamId);
+                      if (context.mounted) Navigator.pop(context);
                     },
                   );
                 }).toList(),
@@ -230,11 +299,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context,
       title: l10n.measurementUnit,
       options: [
-        _SettingsOption('metric', l10n.kgCm, l10n.weightInKg + ' e ' + l10n.heightInCm),
+        _SettingsOption(
+          'metric',
+          l10n.kgCm,
+          '${l10n.weightInKg} e ${l10n.heightInCm}',
+        ),
         _SettingsOption(
           'imperial',
           l10n.poundsInches,
-          l10n.weightInLb + ' e ' + l10n.heightInIn,
+          '${l10n.weightInLb} e ${l10n.heightInIn}',
         ),
       ],
       onSelected: database.preferencesDao.updateMeasurementUnit,
@@ -266,8 +339,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _SettingsOption('en', l10n.english, ''),
       ],
       onSelected: (langCode) async {
+        final appState = NbaApp.of(context);
         await database.preferencesDao.updateLanguageCode(langCode);
-        NbaApp.of(context)?.setLocale(langCode);
+        await appState?.setLocale(langCode);
       },
     );
   }

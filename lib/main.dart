@@ -15,7 +15,11 @@ import 'services/repository.dart';
 import 'services/data_seed_service.dart';
 import 'services/player_stats_web_sync.dart';
 import 'services/player_stats_seed.dart';
+import 'services/cart_service.dart';
+import 'services/connectivity_service.dart';
+import 'services/notification_service.dart';
 import 'screens/standings/standings_screen.dart';
+import 'widgets/offline_status_banner.dart';
 
 late AppDatabase database;
 late NbaRepository repository;
@@ -31,11 +35,14 @@ void main() async {
     database.teamsDao,
   ).seedDatabase();
   repository = NbaRepository(database, apiService);
+  await CartService.instance.init(database);
+  await ConnectivityService.instance.init();
+  await NotificationService.instance.init();
+  unawaited(NotificationService.instance.rescheduleFromPreferences());
   unawaited(
-    PlayerStatsWebSync(database.playersDao).syncFromBasketballReference(
-      passes: 3,
-      perPlayerRetries: 2,
-    ),
+    PlayerStatsWebSync(
+      database.playersDao,
+    ).syncFromBasketballReference(passes: 3, perPlayerRetries: 2),
   );
   runApp(const NbaApp());
 }
@@ -85,6 +92,7 @@ class NbaAppState extends State<NbaApp> {
     setState(() => _favoriteTeamId = teamId);
     try {
       await database.preferencesDao.updateFavoriteTeam(teamId ?? '');
+      unawaited(NotificationService.instance.rescheduleFromPreferences());
     } catch (e) {
       debugPrint('Erro ao guardar equipa: $e');
     }
@@ -97,6 +105,7 @@ class NbaAppState extends State<NbaApp> {
       setState(() {
         _userEmail = prefs?.email ?? email;
         _favoriteTeamId = prefs?.favoriteTeamId;
+        _locale = Locale(prefs?.language ?? 'pt');
       });
     } catch (e) {
       debugPrint('Erro ao guardar login: $e');
@@ -149,10 +158,7 @@ class NbaAppState extends State<NbaApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('pt'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('pt'), Locale('en')],
       home: (_userEmail == null || _userEmail!.isEmpty)
           ? const LoginScreen()
           : MainNavigation(teamTheme: teamTheme),
@@ -183,7 +189,12 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: Column(
+        children: [
+          const OfflineStatusBanner(),
+          Expanded(child: _screens[_currentIndex]),
+        ],
+      ),
       bottomNavigationBar: NavigationBar(
         backgroundColor: widget.teamTheme.primaryColor,
         indicatorColor: widget.teamTheme.secondaryColor,
@@ -198,8 +209,14 @@ class _MainNavigationState extends State<MainNavigation> {
             label: l10n.home,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.sports_basketball_outlined, color: Colors.white70),
-            selectedIcon: const Icon(Icons.sports_basketball, color: Colors.white),
+            icon: const Icon(
+              Icons.sports_basketball_outlined,
+              color: Colors.white70,
+            ),
+            selectedIcon: const Icon(
+              Icons.sports_basketball,
+              color: Colors.white,
+            ),
             label: l10n.games,
           ),
           NavigationDestination(
@@ -213,7 +230,10 @@ class _MainNavigationState extends State<MainNavigation> {
             label: l10n.news,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.shopping_bag_outlined, color: Colors.white70),
+            icon: const Icon(
+              Icons.shopping_bag_outlined,
+              color: Colors.white70,
+            ),
             selectedIcon: const Icon(Icons.shopping_bag, color: Colors.white),
             label: l10n.store,
           ),

@@ -1,7 +1,10 @@
 // lib/screens/store/cart_screen.dart
-import 'package:flutter/material.dart';
-import '../../services/cart_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
+import '../../main.dart';
+import '../../services/cart_service.dart';
+import '../../services/preferences_format_service.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -38,28 +41,43 @@ class _CartScreenState extends State<CartScreen> {
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
         backgroundColor: theme.colorScheme.primary,
-        title: const Text(
-          'Carrinho',
-          style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
+        title: Text(
+          _t(context, 'Carrinho', 'Cart'),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+          ),
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.delete_forever, color: Colors.white),
-            onPressed: () {
-              _cart.clear();
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Carrinho esvaziado')));
+            onPressed: () async {
+              await _cart.clear();
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    _t(context, 'Carrinho esvaziado', 'Cart cleared'),
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: items.isEmpty
-          ? const Center(
-              child: Text('O carrinho está vazio.', style: TextStyle(color: Colors.white70, fontSize: 16)),
+          ? Center(
+              child: Text(
+                _t(context, 'O carrinho esta vazio.', 'Your cart is empty.'),
+                style: const TextStyle(color: Colors.white70, fontSize: 16),
+              ),
             )
           : ListView.separated(
               itemCount: items.length,
-              separatorBuilder: (_, __) => const Divider(color: Colors.white10, height: 1),
+              separatorBuilder: (context, index) =>
+                  const Divider(color: Colors.white10, height: 1),
               itemBuilder: (context, index) {
                 final product = items[index];
                 return ListTile(
@@ -69,8 +87,12 @@ class _CartScreenState extends State<CartScreen> {
                           width: 48,
                           height: 48,
                           fit: BoxFit.cover,
-                          placeholder: (_, __) => Container(color: Colors.grey[900]),
-                          errorWidget: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.white24),
+                          placeholder: (context, url) =>
+                              Container(color: Colors.grey[900]),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.image_not_supported,
+                            color: Colors.white24,
+                          ),
                         )
                       : Image.asset(
                           product['image'],
@@ -78,11 +100,28 @@ class _CartScreenState extends State<CartScreen> {
                           height: 48,
                           fit: BoxFit.cover,
                         ),
-                  title: Text(product['name'], style: const TextStyle(color: Colors.white)),
-                  subtitle: Text('€${product['price']}', style: const TextStyle(color: Colors.white70)),
+                  title: Text(
+                    product['name'],
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  subtitle: StreamBuilder(
+                    stream: database.preferencesDao.watchPreferences(),
+                    builder: (context, snapshot) {
+                      return Text(
+                        _priceAndSize(
+                          product,
+                          snapshot.data?.currencyCode ?? 'EUR',
+                        ),
+                        style: const TextStyle(color: Colors.white70),
+                      );
+                    },
+                  ),
                   trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle_outline, color: Colors.white70),
-                    onPressed: () => _cart.removeItem(index),
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () async => _cart.removeItem(index),
                   ),
                 );
               },
@@ -95,7 +134,21 @@ class _CartScreenState extends State<CartScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Total: €${_cart.total.toStringAsFixed(2)}', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  StreamBuilder(
+                    stream: database.preferencesDao.watchPreferences(),
+                    builder: (context, snapshot) {
+                      final currencyCode = snapshot.data?.currencyCode ?? 'EUR';
+                      return Text(
+                        '${_t(context, 'Total', 'Total')}: '
+                        '${PreferencesFormatService.formatCurrency(_cart.total, currencyCode: currencyCode)}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      );
+                    },
+                  ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.colorScheme.primary,
@@ -104,14 +157,31 @@ class _CartScreenState extends State<CartScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const CheckoutScreen(),
+                        ),
                       );
                     },
-                    child: const Text('Finalizar'),
+                    child: Text(_t(context, 'Finalizar', 'Checkout')),
                   ),
                 ],
               ),
             ),
     );
+  }
+
+  String _priceAndSize(Map<String, dynamic> product, String currencyCode) {
+    final size = product['size'];
+    final price = PreferencesFormatService.formatCurrency(
+      product['price'],
+      currencyCode: currencyCode,
+    );
+    return size == null
+        ? price
+        : '$price - ${_t(context, 'Tamanho', 'Size')} $size';
+  }
+
+  String _t(BuildContext context, String pt, String en) {
+    return Localizations.localeOf(context).languageCode == 'en' ? en : pt;
   }
 }

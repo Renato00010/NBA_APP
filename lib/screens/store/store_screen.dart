@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 import '../../services/cart_service.dart';
+import '../../services/preferences_format_service.dart';
 import 'cart_screen.dart';
+import 'product_detail_screen.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -111,14 +115,22 @@ class _StoreScreenState extends State<StoreScreen> {
   ];
 
   String _selectedCategory = 'Tudo';
-  final List<String> _categories = ['Tudo', 'Camisolas', 'Sapatilhas', 'Vestuário', 'Bolas', 'Acessórios'];
+  final List<String> _categories = [
+    'Tudo',
+    'Camisolas',
+    'Sapatilhas',
+    'Vestuário',
+    'Bolas',
+    'Acessórios',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    final filteredProducts = _selectedCategory == 'Tudo' 
-        ? _products 
+    final l10n = AppLocalizations.of(context)!;
+
+    final filteredProducts = _selectedCategory == 'Tudo'
+        ? _products
         : _products.where((p) => p['category'] == _selectedCategory).toList();
 
     return Scaffold(
@@ -127,9 +139,9 @@ class _StoreScreenState extends State<StoreScreen> {
         backgroundColor: theme.colorScheme.primary,
         elevation: 0,
         centerTitle: false,
-        title: const Text(
-          'NBA STORE',
-          style: TextStyle(
+        title: Text(
+          'NBA ${l10n.store.toUpperCase()}',
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -158,7 +170,10 @@ class _StoreScreenState extends State<StoreScreen> {
             height: 120,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [theme.colorScheme.primary.withValues(alpha: 0.8), theme.colorScheme.secondary],
+                colors: [
+                  theme.colorScheme.primary.withValues(alpha: 0.8),
+                  theme.colorScheme.secondary,
+                ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -168,22 +183,35 @@ class _StoreScreenState extends State<StoreScreen> {
                 Positioned(
                   right: -20,
                   bottom: -20,
-                  child: Icon(Icons.sports_basketball, size: 140, color: Colors.white.withValues(alpha: 0.1)),
+                  child: Icon(
+                    Icons.sports_basketball,
+                    size: 140,
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(24.0),
+                Padding(
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'NOVA COLEÇÃO',
-                        style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 2),
+                        _t(context, 'NOVA COLECAO', 'NEW COLLECTION'),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
+                        ),
                       ),
-                      SizedBox(height: 8),
-                      Text(
+                      const SizedBox(height: 8),
+                      const Text(
                         'City Edition 24/25',
-                        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ],
                   ),
@@ -191,7 +219,7 @@ class _StoreScreenState extends State<StoreScreen> {
               ],
             ),
           ),
-          
+
           // Categories
           Container(
             height: 60,
@@ -213,18 +241,24 @@ class _StoreScreenState extends State<StoreScreen> {
                     margin: const EdgeInsets.only(right: 12),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: isSelected ? theme.colorScheme.primary : const Color(0xFF1A1A1A),
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : const Color(0xFF1A1A1A),
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: isSelected ? theme.colorScheme.primary : Colors.white.withValues(alpha: 0.1),
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : Colors.white.withValues(alpha: 0.1),
                       ),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      category,
+                      _categoryLabel(context, category),
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.white70,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
                   ),
@@ -232,7 +266,7 @@ class _StoreScreenState extends State<StoreScreen> {
               },
             ),
           ),
-          
+
           // Products Grid
           Expanded(
             child: GridView.builder(
@@ -257,114 +291,192 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   Widget _buildProductCard(Map<String, dynamic> product, ThemeData theme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF151515),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Product Image
-          Expanded(
-            flex: 3,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  product['image'].startsWith('http')
-                      ? CachedNetworkImage(
-                          imageUrl: product['image'],
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: Colors.grey[900]),
-                          errorWidget: (context, url, error) => const Icon(Icons.image_not_supported, color: Colors.white24),
-                        )
-                      : Image.asset(
-                          product['image'],
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.image_not_supported, color: Colors.white24),
-                        ),
-                  if (product['isNew'] == true)
-                    Positioned(
-                      top: 12,
-                      left: 12,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'NOVO',
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailScreen(product: product),
           ),
-          // Product Details
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        product['category'].toUpperCase(),
-                        style: TextStyle(color: theme.colorScheme.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        product['name'],
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600, height: 1.2),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '€${product['price']}',
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          CartService.instance.addItem(product);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${product['name']} adicionado ao carrinho!'),
-                              duration: const Duration(milliseconds: 1500),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF151515),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Product Image
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    product['image'].startsWith('http')
+                        ? CachedNetworkImage(
+                            imageUrl: product['image'],
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                Container(color: Colors.grey[900]),
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.image_not_supported,
+                              color: Colors.white24,
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
+                          )
+                        : Image.asset(
+                            product['image'],
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.image_not_supported,
+                                  color: Colors.white24,
+                                ),
                           ),
-                          child: const Icon(Icons.add_shopping_cart, color: Colors.white, size: 16),
+                    if (product['isNew'] == true)
+                      Positioned(
+                        top: 12,
+                        left: 12,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'NOVO',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            // Product Details
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _categoryLabel(
+                            context,
+                            product['category'],
+                          ).toUpperCase(),
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product['name'],
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            height: 1.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        StreamBuilder(
+                          stream: database.preferencesDao.watchPreferences(),
+                          builder: (context, snapshot) {
+                            final currencyCode =
+                                snapshot.data?.currencyCode ?? 'EUR';
+                            return Text(
+                              PreferencesFormatService.formatCurrency(
+                                product['price'],
+                                currencyCode: currencyCode,
+                              ),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            );
+                          },
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            CartService.instance.addItem(product);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${product['name']} adicionado ao carrinho!',
+                                ),
+                                duration: const Duration(milliseconds: 1500),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add_shopping_cart,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String _categoryLabel(BuildContext context, String category) {
+    final isEnglish = Localizations.localeOf(context).languageCode == 'en';
+    if (!isEnglish) return category;
+    return switch (category) {
+      'Tudo' => 'All',
+      'Camisolas' => 'Jerseys',
+      'Sapatilhas' => 'Shoes',
+      'Vestuário' => 'Clothing',
+      'Bolas' => 'Balls',
+      'Acessórios' => 'Accessories',
+      _ => category,
+    };
+  }
+
+  String _t(BuildContext context, String pt, String en) {
+    return Localizations.localeOf(context).languageCode == 'en' ? en : pt;
   }
 }

@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../services/ticket_service.dart';
 
+bool _isEnglish(BuildContext context) =>
+    Localizations.localeOf(context).languageCode == 'en';
+
+String _t(BuildContext context, String pt, String en) =>
+    _isEnglish(context) ? en : pt;
+
 class GameDetailScreen extends StatefulWidget {
   final String gameId;
   final String homeName;
@@ -57,10 +63,10 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     if (_summary == null) return 'N/A';
     final venue = _summary!['gameInfo']?['venue'];
     if (venue == null) return 'N/A';
-    
+
     final name = venue['fullName']?.toString() ?? '';
     final city = venue['address']?['city']?.toString() ?? '';
-    
+
     if (name.isNotEmpty && city.isNotEmpty) {
       return '$name, $city';
     } else if (name.isNotEmpty) {
@@ -143,23 +149,41 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       children: [
         if (logoUrl.isNotEmpty)
-          Image.network(logoUrl, height: 48, width: 48, errorBuilder: (_, __, ___) => const Icon(Icons.sports_basketball, color: Colors.white54, size: 48))
+          Image.network(
+            logoUrl,
+            height: 48,
+            width: 48,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.sports_basketball,
+              color: Colors.white54,
+              size: 48,
+            ),
+          )
         else
           const Icon(Icons.sports_basketball, color: Colors.white54, size: 48),
         const SizedBox(height: 8),
         Text(
           location,
-          style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white54,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
           textAlign: TextAlign.center,
         ),
         Text(
           name,
-          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
           textAlign: TextAlign.center,
         ),
       ],
     );
   }
+
   double _americanToDecimal(dynamic moneyLine) {
     if (moneyLine == null) return 0.0;
     double value = double.tryParse(moneyLine.toString()) ?? 0.0;
@@ -182,15 +206,37 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         Row(
           children: [
             const Expanded(child: SizedBox()),
-            const SizedBox(width: 80, child: Text('1', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.w700))),
+            const SizedBox(
+              width: 80,
+              child: Text(
+                '1',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
             const SizedBox(width: 8),
-            const SizedBox(width: 80, child: Text('2', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.w700))),
+            const SizedBox(
+              width: 80,
+              child: Text(
+                '2',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
         ...pickcenter.map((pick) {
           final providerName = pick['provider']?['name'] ?? 'Provider';
-          
+
           final homeMoneyLine = pick['homeTeamOdds']?['moneyLine'];
           final awayMoneyLine = pick['awayTeamOdds']?['moneyLine'];
 
@@ -209,7 +255,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 Expanded(
                   child: Text(
                     providerName,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -231,7 +281,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         color: isFavorite ? Colors.transparent : const Color(0xFFFFC040),
-        border: Border.all(color: isFavorite ? Colors.white38 : const Color(0xFFFFC040)),
+        border: Border.all(
+          color: isFavorite ? Colors.white38 : const Color(0xFFFFC040),
+        ),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Center(
@@ -267,9 +319,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       for (final a in athletes) {
         final athleteName = a['athlete']?['displayName'] ?? '';
         final statVals = a['stats'] as List<dynamic>? ?? [];
-        int pts = ptsIdx != -1 && ptsIdx < statVals.length ? int.tryParse(statVals[ptsIdx].toString()) ?? 0 : 0;
-        int reb = rebIdx != -1 && rebIdx < statVals.length ? int.tryParse(statVals[rebIdx].toString()) ?? 0 : 0;
-        int ast = astIdx != -1 && astIdx < statVals.length ? int.tryParse(statVals[astIdx].toString()) ?? 0 : 0;
+        int pts = ptsIdx != -1 && ptsIdx < statVals.length
+            ? int.tryParse(statVals[ptsIdx].toString()) ?? 0
+            : 0;
+        int reb = rebIdx != -1 && rebIdx < statVals.length
+            ? int.tryParse(statVals[rebIdx].toString()) ?? 0
+            : 0;
+        int ast = astIdx != -1 && astIdx < statVals.length
+            ? int.tryParse(statVals[astIdx].toString()) ?? 0
+            : 0;
         stats.add({
           'title': '',
           'player': athleteName,
@@ -289,8 +347,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
@@ -306,7 +362,6 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // Custom Game Result Header
                   _buildScoreHeader(),
                   const SizedBox(height: 24),
@@ -317,14 +372,14 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   _buildInfoRow('TV', _getTvChannels()),
                   const SizedBox(height: 8),
                   // Venue info
-                  _buildInfoRow('Local', _getVenue()),
+                  _buildInfoRow(_t(context, 'Local', 'Venue'), _getVenue()),
                   const SizedBox(height: 8),
                   // Odds list
                   _buildOddsSection(),
                   const SizedBox(height: 24),
-                  const Text(
-                    'JOGADORES',
-                    style: TextStyle(
+                  Text(
+                    _t(context, 'JOGADORES', 'PLAYERS'),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w900,
@@ -333,7 +388,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   ),
                   const SizedBox(height: 12),
                   // Player cards sorted by points
-                  ..._getTopPerformers().map((player) => _buildPlayerCard(player)).toList(),
+                  ..._getTopPerformers()
+                      .map((player) => _buildPlayerCard(player))
+                      .toList(),
                 ],
               ),
             ),
@@ -394,10 +451,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 ),
                 Text(
                   player['team'] ?? '',
-                  style: const TextStyle(
-                    color: Colors.white38,
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
                 ),
               ],
             ),
@@ -422,10 +476,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       height: 56,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            theme.colorScheme.primary,
-            theme.colorScheme.secondary,
-          ],
+          colors: [theme.colorScheme.primary, theme.colorScheme.secondary],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -441,15 +492,19 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         child: InkWell(
           onTap: _handleBuyTicket,
           borderRadius: BorderRadius.circular(16),
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.confirmation_number_outlined, color: Colors.white, size: 24),
-                SizedBox(width: 12),
+                const Icon(
+                  Icons.confirmation_number_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
                 Text(
-                  'COMPRAR BILHETE',
-                  style: TextStyle(
+                  _t(context, 'COMPRAR BILHETE', 'BUY TICKET'),
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -469,7 +524,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       final venue = _getVenue();
       final date = DateTime.now().toString().split(' ')[0];
       final time = '19:00';
-      
+
       await TicketService.generateAndPrintTicket(
         gameId: widget.gameId,
         homeTeam: widget.homeName,
@@ -477,12 +532,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         venue: venue,
         date: date,
         time: time,
+        languageCode: Localizations.localeOf(context).languageCode,
       );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar bilhete: $e'),
+            content: Text(
+              '${_t(context, 'Erro ao gerar bilhete', 'Error generating ticket')}: $e',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -497,7 +555,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A1A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -525,10 +585,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               ),
               Text(
                 leader['team']!,
-                style: const TextStyle(
-                  color: Colors.white38,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white38, fontSize: 12),
               ),
             ],
           ),

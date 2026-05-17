@@ -29,6 +29,57 @@ class Standing {
     required this.roadRecord,
   });
 
+  factory Standing.fromEspnEntry(
+    Map<String, dynamic> entry,
+    String conference,
+  ) {
+    final team = entry['team'] as Map<String, dynamic>;
+    final stats = entry['stats'] as List<dynamic>? ?? [];
+
+    double statNum(String name) {
+      for (final s in stats) {
+        if (s['name'] == name) {
+          final v = s['value'];
+          if (v is num) return v.toDouble();
+          return double.tryParse(v.toString()) ?? 0;
+        }
+      }
+      return 0;
+    }
+
+    String statStr(String name) {
+      for (final s in stats) {
+        if (s['name'] == name) {
+          return s['displayValue']?.toString() ?? '-';
+        }
+      }
+      return '-';
+    }
+
+    final wins = statNum('wins').toInt();
+    final losses = statNum('losses').toInt();
+    final winPct = statNum('winPercent');
+    final normalizedConference = conference.toLowerCase().contains('west')
+        ? 'West'
+        : 'East';
+
+    return Standing(
+      teamId: int.tryParse(team['id']?.toString() ?? '') ?? 0,
+      teamName: team['displayName'] as String? ?? team['name'] as String? ?? '',
+      abbreviation: team['abbreviation'] as String? ?? '',
+      conference: normalizedConference,
+      wins: wins,
+      losses: losses,
+      winPercentage: winPct > 1 ? winPct / 100 : winPct,
+      gamesBack: statNum('gamesBehind'),
+      streak: statStr('streak'),
+      last10: statStr('Last Ten Games'),
+      conferenceRecord: statStr('vs. Conf.'),
+      homeRecord: statStr('Home'),
+      roadRecord: statStr('Road'),
+    );
+  }
+
   factory Standing.fromJson(Map<String, dynamic> json) {
     final team = json['team'] as Map<String, dynamic>;
     return Standing(

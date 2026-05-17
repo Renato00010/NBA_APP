@@ -1,17 +1,44 @@
-# nba_app
+# NBA App
 
-A new Flutter project.
+Aplicação Flutter para acompanhar a NBA em português e inglês, com equipas, jogos, classificações, notícias, jogadores, estatísticas, personalização e loja.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- Login/registo local com password encriptada.
+- Tema adaptado à equipa favorita.
+- Home com equipas, notícias e jogos do dia.
+- Jogos e detalhes de equipas/jogadores com cache local.
+- Perfil com idioma, moeda, unidades e alertas.
+- Loja NBA com carrinho persistente, moeda configurável, checkout fictício, fatura PDF e histórico de encomendas.
+- Calendário de jogos, classificação ao vivo (ESPN), notificações da equipa favorita e modo offline.
+- Dados mistos de ESPN/API, assets locais, cache Drift e sincronização de estatísticas.
 
-A few resources to get you started if this is your first Flutter project:
+## Como correr
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
+flutter run
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Para validar o projeto:
+
+```bash
+flutter analyze
+flutter test
+```
+
+## Dados e APIs
+
+- ESPN/NBA API via `NbaApiService`.
+- Notícias via `NewsApiService`, com seed local quando necessário.
+- Estatísticas de jogadores via Basketball Reference e seeds locais.
+- Persistência local com Drift/SQLite.
+
+## Estrutura principal
+
+- `lib/screens`: telas da app.
+- `lib/services`: serviços de API, cache, carrinho, tema e formatação.
+- `lib/db`: tabelas, DAOs e conexão Drift.
+- `assets/data`: dados locais e classificações por época.
+- `assets/player_photos` e `assets/store`: imagens usadas na app.

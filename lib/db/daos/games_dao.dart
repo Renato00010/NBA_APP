@@ -31,6 +31,23 @@ class GamesDao extends DatabaseAccessor<AppDatabase> with _$GamesDaoMixin {
   // Stream reativo
   Stream<List<CachedGame>> watchAllGames() => select(cachedGames).watch();
 
+  Future<List<CachedGame>> getGamesForTeamInRange(
+    String teamId,
+    DateTime start,
+    DateTime end,
+  ) {
+    return (select(cachedGames)
+          ..where(
+            (g) =>
+                (g.homeTeamId.equals(teamId) | g.awayTeamId.equals(teamId)) &
+                g.gameDate.isBetweenValues(start, end),
+          )
+          ..orderBy([
+            (g) => OrderingTerm(expression: g.gameDate, mode: OrderingMode.desc),
+          ]))
+        .get();
+  }
+
   // Buscar jogos por equipa (casa ou fora)
   Stream<List<CachedGame>> watchGamesByTeam(String teamId) =>
       (select(cachedGames)..where(

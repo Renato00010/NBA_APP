@@ -1,7 +1,7 @@
+import 'package:barcode/barcode.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:barcode/barcode.dart';
 
 class TicketService {
   static Future<void> generateAndPrintTicket({
@@ -11,16 +11,15 @@ class TicketService {
     required String venue,
     required String date,
     required String time,
+    String languageCode = 'pt',
   }) async {
     final pdf = pw.Document();
-    
-    // Generate QR code data
-    final qrData = 'NBA-TICKET-$gameId-${DateTime.now().millisecondsSinceEpoch}';
-    
-    // Create QR code using the barcode package
+    final isEnglish = languageCode == 'en';
+
+    final qrData =
+        'NBA-TICKET-$gameId-${DateTime.now().millisecondsSinceEpoch}';
     final bc = Barcode.qrCode();
-    
-    // Create PDF page
+
     pdf.addPage(
       pw.Page(
         pageFormat: PdfPageFormat.a4,
@@ -30,27 +29,40 @@ class TicketService {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Bilhete NBA - $gameId',
-                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold),
+                '${_t(isEnglish, 'Bilhete NBA', 'NBA Ticket')} - $gameId',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 30),
               pw.Text(
-                'Detalhes do Jogo:',
-                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                _t(isEnglish, 'Detalhes do Jogo:', 'Game Details:'),
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 10),
-              pw.Text('Equipa Visitante: $awayTeam'),
-              pw.Text('Equipa Casa: $homeTeam'),
+              pw.Text(
+                '${_t(isEnglish, 'Equipa Visitante', 'Away Team')}: $awayTeam',
+              ),
+              pw.Text(
+                '${_t(isEnglish, 'Equipa Casa', 'Home Team')}: $homeTeam',
+              ),
               pw.SizedBox(height: 10),
-              pw.Text('Data: $date'),
-              pw.Text('Hora: $time'),
-              pw.Text('Local: $venue'),
+              pw.Text('${_t(isEnglish, 'Data', 'Date')}: $date'),
+              pw.Text('${_t(isEnglish, 'Hora', 'Time')}: $time'),
+              pw.Text('${_t(isEnglish, 'Local', 'Venue')}: $venue'),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 20),
               pw.Text(
-                'Código QR:',
-                style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold),
+                _t(isEnglish, 'Codigo QR:', 'QR Code:'),
+                style: pw.TextStyle(
+                  fontSize: 18,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
               pw.SizedBox(height: 10),
               pw.BarcodeWidget(
@@ -68,24 +80,39 @@ class TicketService {
               pw.Divider(),
               pw.SizedBox(height: 20),
               pw.Text(
-                'Este bilhete é válido apenas para o jogo acima mencionado.',
-                style: pw.TextStyle(fontStyle: pw.FontStyle.italic, color: PdfColors.grey700),
+                _t(
+                  isEnglish,
+                  'Este bilhete e valido apenas para o jogo acima mencionado.',
+                  'This ticket is valid only for the game listed above.',
+                ),
+                style: pw.TextStyle(
+                  fontStyle: pw.FontStyle.italic,
+                  color: PdfColors.grey700,
+                ),
               ),
               pw.SizedBox(height: 10),
               pw.Text(
-                'Apresente este bilhete na entrada do estádio.',
-                style: pw.TextStyle(fontStyle: pw.FontStyle.italic, color: PdfColors.grey700),
+                _t(
+                  isEnglish,
+                  'Apresente este bilhete na entrada do estadio.',
+                  'Show this ticket at the arena entrance.',
+                ),
+                style: pw.TextStyle(
+                  fontStyle: pw.FontStyle.italic,
+                  color: PdfColors.grey700,
+                ),
               ),
             ],
           );
         },
       ),
     );
-    
-    // Print or save the PDF
+
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) => pdf.save(),
-      name: 'NBA_Ticket_$gameId.pdf',
+      name: isEnglish ? 'NBA_Ticket_$gameId.pdf' : 'Bilhete_NBA_$gameId.pdf',
     );
   }
+
+  static String _t(bool isEnglish, String pt, String en) => isEnglish ? en : pt;
 }

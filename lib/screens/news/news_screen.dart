@@ -21,6 +21,13 @@ class _NewsScreenState extends State<NewsScreen> {
     _loadNews();
   }
 
+  void _openArticle(BuildContext context, dynamic article) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => NewsDetailScreen(article: article)),
+    );
+  }
+
   Future<void> _loadNews() async {
     setState(() {
       _loading = true;
@@ -125,14 +132,7 @@ class _NewsScreenState extends State<NewsScreen> {
     final source = 'ESPN';
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NewsDetailScreen(article: article),
-          ),
-        );
-      },
+      onTap: () => _openArticle(context, article),
       child: Container(
         height: 380,
         width: double.infinity,
@@ -232,14 +232,7 @@ class _NewsScreenState extends State<NewsScreen> {
     final publishedAt = article['published'] ?? '';
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => NewsDetailScreen(article: article),
-          ),
-        );
-      },
+      onTap: () => _openArticle(context, article),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.all(12),

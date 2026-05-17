@@ -7,6 +7,7 @@ import '../db/app_database.dart';
 import '../models/standing.dart';
 import '../models/player_season_stats.dart';
 import 'nba_api_service.dart';
+import '../utils/game_status_utils.dart';
 
 class NbaRepository {
   final AppDatabase _db;
@@ -117,11 +118,129 @@ class NbaRepository {
     if (name.isEmpty) return '1'; // Default fallback
     final lowerName = name.toLowerCase().replaceAll('la ', 'los angeles ');
     for (final entry in _teamNames.entries) {
-      if (entry.value.toLowerCase() == lowerName || lowerName.contains(entry.value.toLowerCase())) {
+      if (entry.value.toLowerCase() == lowerName ||
+          lowerName.contains(entry.value.toLowerCase())) {
         return entry.key;
       }
     }
     return '1';
+  }
+
+  static int currentNbaSeasonYear() {
+    final now = DateTime.now();
+    return now.month >= 10 ? now.year + 1 : now.year;
+  }
+
+  static DateTime seasonStartDate(int seasonYear) =>
+      DateTime(seasonYear - 1, 10, 1);
+
+  static DateTime seasonEndDate(int seasonYear) =>
+      DateTime(seasonYear, 7, 1);
+
+  int _parseEspnScore(dynamic score) {
+    if (score == null) return 0;
+    if (score is Map) {
+      final raw =
+          score['displayValue']?.toString() ?? score['value']?.toString() ?? '0';
+      return int.tryParse(raw.split('.').first) ?? 0;
+    }
+    return int.tryParse(score.toString()) ?? 0;
+  }
+
+  CachedGamesCompanion? _companionFromEspnEvent(Map<String, dynamic> event) {
+    final competitions = event['competitions'] as List<dynamic>?;
+    if (competitions == null || competitions.isEmpty) return null;
+
+    final comp = competitions.first as Map<String, dynamic>;
+    final competitors = comp['competitors'] as List<dynamic>?;
+    if (competitors == null || competitors.length < 2) return null;
+
+    final home = competitors.firstWhere(
+      (c) => c['homeAway'] == 'home',
+      orElse: () => competitors.first,
+    );
+    final away = competitors.firstWhere(
+      (c) => c['homeAway'] == 'away',
+      orElse: () => competitors.last,
+    );
+
+    final homeTeam = home['team'] as Map<String, dynamic>?;
+    final awayTeam = away['team'] as Map<String, dynamic>?;
+    final homeName =
+        homeTeam?['displayName'] ?? homeTeam?['name'] ?? '';
+    final awayName =
+        awayTeam?['displayName'] ?? awayTeam?['name'] ?? '';
+
+    final statusSource =
+        comp['status'] as Map<String, dynamic>? ??
+        event['status'] as Map<String, dynamic>?;
+    final statusType = statusSource?['type'] as Map<String, dynamic>?;
+    final statusDetail =
+        statusType?['detail']?.toString() ??
+        statusType?['shortDetail']?.toString() ??
+        statusType?['state']?.toString() ??
+        '';
+    final statusState = statusType?['state']?.toString().toLowerCase() ?? '';
+
+    final dateStr = comp['date']?.toString() ?? event['date']?.toString();
+    if (dateStr == null) return null;
+
+    return CachedGamesCompanion(
+      gameId: Value(event['id'].toString()),
+      homeTeamId: Value(_findTeamIdByName(homeName)),
+      awayTeamId: Value(_findTeamIdByName(awayName)),
+      scoreHome: Value(_parseEspnScore(home['score'])),
+      scoreAway: Value(_parseEspnScore(away['score'])),
+      status: Value(_normalizeEspnGameStatus(statusState, statusDetail)),
+      gameDate: Value(DateTime.parse(dateStr)),
+    );
+  }
+
+  Future<void> _syncEspnEvents(List<dynamic> events) async {
+    final companions = <CachedGamesCompanion>[];
+    for (final event in events) {
+      if (event is! Map<String, dynamic>) continue;
+      final companion = _companionFromEspnEvent(event);
+      if (companion != null) companions.add(companion);
+    }
+    if (companions.isNotEmpty) {
+      await _db.gamesDao.upsertAllGames(companions);
+    }
+  }
+
+  Future<void> _syncTeamSeasonSchedule(String teamId) async {
+    final slug = _espnTeamSlugs[teamId];
+    if (slug == null) return;
+
+    final season = currentNbaSeasonYear();
+    for (final seasonType in [2, 3]) {
+      final events = await _api.getEspnTeamSchedule(
+        slug,
+        season: season,
+        seasonType: seasonType,
+      );
+      await _syncEspnEvents(events);
+    }
+  }
+
+  /// Jogos da época atual da equipa (calendário ESPN + cache local).
+  Future<List<CachedGame>> getTeamSeasonGames(String teamId) async {
+    await getTeams();
+    if (await _hasInternet()) {
+      try {
+        await _syncTeamSeasonSchedule(teamId);
+      } catch (e) {
+        debugPrint('Erro getTeamSeasonGames (ESPN): $e');
+      }
+    }
+
+    final season = currentNbaSeasonYear();
+    final games = await _db.gamesDao.getGamesForTeamInRange(
+      teamId,
+      seasonStartDate(season),
+      seasonEndDate(season),
+    );
+    return _withoutDemoGames(games);
   }
 
   Future<List<CachedGame>> getGamesByDate(DateTime date) async {
@@ -131,115 +250,88 @@ class NbaRepository {
         final daysToSync = [-1, 0, 1];
         for (final offset in daysToSync) {
           final targetDate = date.add(Duration(days: offset));
-          final dateStr = '${targetDate.year}${targetDate.month.toString().padLeft(2, '0')}${targetDate.day.toString().padLeft(2, '0')}';
-          
+          final dateStr =
+              '${targetDate.year}${targetDate.month.toString().padLeft(2, '0')}${targetDate.day.toString().padLeft(2, '0')}';
+
           final data = await _api.getEspnScoreboard(dateStr);
-          final List<CachedGamesCompanion> companions = [];
-          
-          for (final event in data) {
-            final comp = event['competitions'][0];
-            final competitors = comp['competitors'] as List<dynamic>;
-            final home = competitors.firstWhere((c) => c['homeAway'] == 'home');
-            final away = competitors.firstWhere((c) => c['homeAway'] == 'away');
-            
-            final homeName = home['team']['displayName'] ?? home['team']['name'] ?? '';
-            final awayName = away['team']['displayName'] ?? away['team']['name'] ?? '';
-            
-            final homeId = _findTeamIdByName(homeName);
-            final awayId = _findTeamIdByName(awayName);
-            
-            final statusDetail = event['status']['type']['detail'] ?? event['status']['type']['state'];
-            
-            companions.add(CachedGamesCompanion(
-              gameId: Value(event['id'].toString()),
-              homeTeamId: Value(homeId),
-              awayTeamId: Value(awayId),
-              scoreHome: Value(int.tryParse(home['score']?.toString() ?? '0') ?? 0),
-              scoreAway: Value(int.tryParse(away['score']?.toString() ?? '0') ?? 0),
-              status: Value(statusDetail),
-              gameDate: Value(DateTime.parse(event['date'])),
-            ));
-          }
-          
-          if (companions.isNotEmpty) {
-            await _db.gamesDao.upsertAllGames(companions);
-          }
+          await _syncEspnEvents(data);
         }
       } catch (e) {
         debugPrint('Erro getGamesByDate (ESPN): $e');
       }
     }
 
-    var localGames = await _db.gamesDao.getGamesByDate(date);
+    final localGames = await _db.gamesDao.getGamesByDate(date);
 
-    // OFFLINE FALLBACK: Se a DB local estiver vazia, inserir jogos de demonstração
-    if (localGames.isEmpty) {
-      await _seedFallbackGames();
-      localGames = await _db.gamesDao.getGamesByDate(date);
-    }
-
-    return localGames;
-  }
-
-  Future<void> _seedFallbackGames() async {
-    final today = DateTime.now();
-    final yesterday = today.subtract(const Duration(days: 1));
-
-    // Utilizando dados 100% REAIS de jogos marcantes dos Playoffs de 2024,
-    // mas com as datas ajustadas para "hoje" e "ontem" para aparecerem na UI.
-    final fallbacks = [
-      CachedGamesCompanion(
-        gameId: const Value('real_2024_finals_g3'),
-        homeTeamId: const Value('7'),  // Dallas Mavericks
-        awayTeamId: const Value('2'),  // Boston Celtics
-        scoreHome: const Value(99),
-        scoreAway: const Value(106),
-        status: const Value('Final'),
-        gameDate: Value(yesterday),
-      ),
-      CachedGamesCompanion(
-        gameId: const Value('real_2024_wcf_g1'),
-        homeTeamId: const Value('18'), // Minnesota Timberwolves
-        awayTeamId: const Value('7'),  // Dallas Mavericks
-        scoreHome: const Value(105),
-        scoreAway: const Value(108),
-        status: const Value('Final'),
-        gameDate: Value(yesterday),
-      ),
-      CachedGamesCompanion(
-        gameId: const Value('real_2024_ecf_g3'),
-        homeTeamId: const Value('12'), // Indiana Pacers
-        awayTeamId: const Value('2'),  // Boston Celtics
-        scoreHome: const Value(111),
-        scoreAway: const Value(114),
-        status: const Value('Final'),
-        gameDate: Value(today),
-      ),
-      CachedGamesCompanion(
-        gameId: const Value('real_2024_wcsf_g7'),
-        homeTeamId: const Value('8'),  // Denver Nuggets
-        awayTeamId: const Value('18'), // Minnesota Timberwolves
-        scoreHome: const Value(90),
-        scoreAway: const Value(98),
-        status: const Value('Final'),
-        gameDate: Value(today),
-      ),
-    ];
-    await _db.gamesDao.upsertAllGames(fallbacks);
+    return _withoutDemoGames(
+      localGames,
+    ).where((game) => _isSameLocalDate(game.gameDate, date)).toList();
   }
 
   /// Retorna jogos recentes para a aba de resultados
+  /// Jogos futuros reais da equipa (sincroniza calendário ESPN antes de filtrar).
+  Future<List<CachedGame>> getUpcomingGamesForTeam(
+    String teamId, {
+    int daysAhead = 14,
+  }) async {
+    final today = DateTime.now();
+    for (var offset = 0; offset <= daysAhead; offset++) {
+      await getGamesByDate(today.add(Duration(days: offset)));
+    }
+
+    final end = today.add(Duration(days: daysAhead + 1));
+    final games = await _db.gamesDao.getGamesInDateRange(today, end);
+    final upcoming = games
+        .where((game) {
+          if (game.homeTeamId != teamId && game.awayTeamId != teamId) {
+            return false;
+          }
+          final status = game.status.toLowerCase();
+          if (status.contains('final')) return false;
+          return game.gameDate.isAfter(
+            DateTime.now().subtract(const Duration(minutes: 15)),
+          );
+        })
+        .toList()
+      ..sort((a, b) => a.gameDate.compareTo(b.gameDate));
+    return _withoutDemoGames(upcoming);
+  }
+
+  static String _normalizeEspnGameStatus(String state, String detail) {
+    final d = detail.trim();
+    if (state == 'post' || GameStatusUtils.isFinal(d)) {
+      return d.isNotEmpty ? d : 'Final';
+    }
+    if (state == 'in' || GameStatusUtils.isLive(d)) {
+      return d.isNotEmpty ? d : 'Live';
+    }
+    if (state == 'pre' || GameStatusUtils.isScheduled(d)) {
+      return d.isNotEmpty ? d : 'Scheduled';
+    }
+    return d.isNotEmpty ? d : 'Scheduled';
+  }
+
   Future<List<CachedGame>> getRecentResults() async {
     final today = DateTime.now();
     final start = today.subtract(const Duration(days: 7));
-    var results = await _db.gamesDao.getGamesInDateRange(start, today);
-    
-    if (results.isEmpty) {
-      await _seedFallbackGames();
-      results = await _db.gamesDao.getGamesInDateRange(start, today);
-    }
-    
-    return results;
+    final results = await _db.gamesDao.getGamesInDateRange(start, today);
+    return _withoutDemoGames(
+      results.where((g) => GameStatusUtils.isFinal(g.status)).toList(),
+    );
+  }
+
+  List<CachedGame> _withoutDemoGames(List<CachedGame> games) {
+    return games
+        .where((game) => !game.gameId.startsWith('real_2024_'))
+        .toList();
+  }
+
+  bool _isSameLocalDate(DateTime value, DateTime date) {
+    final localValue = value.toLocal();
+    final localDate = date.toLocal();
+    return localValue.year == localDate.year &&
+        localValue.month == localDate.month &&
+        localValue.day == localDate.day;
   }
 
   Future<List<Player>> getPlayers({String? search}) async {
@@ -256,18 +348,51 @@ class NbaRepository {
   // -------- PLAYER SEASON STATS --------
   Future<List<PlayerSeasonStats>> getPlayerSeasonStats(String playerId) async {
     final seasons = await _db.playersDao.getPlayerSeasons(playerId);
-    return seasons.map((s) => PlayerSeasonStats(
-      season: s.season,
-      ppg: s.ppg,
-      rpg: s.rpg,
-      apg: s.apg,
-      per: s.per,
-      tsPct: s.tsPct,
-    )).toList();
+    return seasons
+        .map(
+          (s) => PlayerSeasonStats(
+            season: s.season,
+            ppg: s.ppg,
+            rpg: s.rpg,
+            apg: s.apg,
+            per: s.per,
+            tsPct: s.tsPct,
+          ),
+        )
+        .toList();
   }
 
-  // Existing getStandings method
   Future<List<Standing>> getStandings({int season = 2024}) async {
+    final isRecentSeason = season >= DateTime.now().year - 1;
+    if (isRecentSeason && await _hasInternet()) {
+      try {
+        await getTeams();
+        final espn = await _api.getEspnStandings();
+        if (espn.isNotEmpty) {
+          return espn.map((row) {
+            final mappedId = int.tryParse(_findTeamIdByName(row.teamName)) ?? row.teamId;
+            return Standing(
+              teamId: mappedId,
+              teamName: row.teamName,
+              abbreviation: row.abbreviation,
+              conference: row.conference,
+              wins: row.wins,
+              losses: row.losses,
+              winPercentage: row.winPercentage,
+              gamesBack: row.gamesBack,
+              streak: row.streak,
+              last10: row.last10,
+              conferenceRecord: row.conferenceRecord,
+              homeRecord: row.homeRecord,
+              roadRecord: row.roadRecord,
+            );
+          }).toList();
+        }
+      } catch (e) {
+        debugPrint('Erro getStandings (ESPN): $e');
+      }
+    }
+
     try {
       final path = 'assets/data/standings/$season.json';
       String jsonString;
@@ -277,9 +402,11 @@ class NbaRepository {
         // Fallback para Web (algumas configurações removem o prefixo assets/)
         jsonString = await rootBundle.loadString('data/standings/$season.json');
       }
-      
+
       final List<dynamic> parsed = json.decode(jsonString) as List<dynamic>;
-      return parsed.map((json) => Standing.fromJson(json as Map<String, dynamic>)).toList();
+      return parsed
+          .map((json) => Standing.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       debugPrint('Erro crítico ao carregar standings: $e');
     }

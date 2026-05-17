@@ -6,6 +6,7 @@ import '../../main.dart';
 import '../../db/app_database.dart';
 
 import 'player_detail_screen.dart';
+import '../comparator/player_comparator_screen.dart';
 
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({super.key});
@@ -112,6 +113,20 @@ class _PlayersScreenState extends State<PlayersScreen> {
             fontWeight: FontWeight.w700,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Comparar jogadores',
+            icon: const Icon(Icons.compare_arrows, color: Colors.white70),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PlayerComparatorScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [

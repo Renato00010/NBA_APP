@@ -7,14 +7,15 @@ import 'tables/nba_teams_table.dart';
 import 'tables/players_table.dart';
 import 'tables/cached_games_table.dart';
 import 'tables/user_preferences_table.dart';
-import 'tables/viewed_history_table.dart';
 import 'tables/player_seasons_table.dart';
+import 'tables/cart_items_table.dart';
+import 'tables/store_orders_table.dart';
 
 import 'daos/teams_dao.dart';
 import 'daos/players_dao.dart';
 import 'daos/games_dao.dart';
 import 'daos/preferences_dao.dart';
-import 'daos/history_dao.dart';
+import 'daos/commerce_dao.dart';
 import 'database_connection/connection.dart';
 
 // Explicitly exporting DAOs so screens can use them
@@ -25,15 +26,29 @@ export 'daos/games_dao.dart';
 part 'app_database.g.dart';
 
 @DriftDatabase(
-  tables: [NbaTeams, Players, CachedGames, UserPreferences, ViewedHistory, PlayerSeasons],
-  daos: [TeamsDao, PlayersDao, GamesDao, PreferencesDao, HistoryDao],
+  tables: [
+    NbaTeams,
+    Players,
+    CachedGames,
+    UserPreferences,
+    PlayerSeasons,
+    CartItems,
+    StoreOrders,
+  ],
+  daos: [
+    TeamsDao,
+    PlayersDao,
+    GamesDao,
+    PreferencesDao,
+    CommerceDao,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
   // Manual DAO accessors to ensure visibility in UI
   @override
@@ -45,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   @override
   late final PreferencesDao preferencesDao = PreferencesDao(this);
   @override
-  late final HistoryDao historyDao = HistoryDao(this);
+  late final CommerceDao commerceDao = CommerceDao(this);
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -94,6 +109,13 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 8) {
         await m.createTable(playerSeasons);
+      }
+      if (from < 9) {
+        await m.createTable(cartItems);
+        await m.createTable(storeOrders);
+      }
+      if (from < 10) {
+        await m.deleteTable('viewed_history');
       }
     },
   );

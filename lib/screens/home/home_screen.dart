@@ -6,8 +6,10 @@ import '../../widgets/team_logo.dart';
 import '../../services/news_api_service.dart';
 import 'search_delegate.dart';
 import '../news/news_detail_screen.dart';
-import '../profile/profile_screen.dart';
 import '../comparator/player_comparator_screen.dart';
+import '../profile/profile_screen.dart';
+import '../games/game_detail_screen.dart';
+import '../../utils/game_status_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -73,9 +75,22 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TeamDetailScreen(
-          teamId: teamId,
-          initialTeam: initialTeam,
+        builder: (context) =>
+            TeamDetailScreen(teamId: teamId, initialTeam: initialTeam),
+      ),
+    );
+  }
+
+  void _openGame(CachedGame game) {
+    final homeName = repository.getTeamName(game.homeTeamId);
+    final awayName = repository.getTeamName(game.awayTeamId);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GameDetailScreen(
+          gameId: game.gameId,
+          homeName: homeName,
+          awayName: awayName,
         ),
       ),
     );
@@ -87,7 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.primary, // Cor dinâmica da equipa favorita
+        backgroundColor:
+            theme.colorScheme.primary, // Cor dinâmica da equipa favorita
         elevation: 4,
         centerTitle: false,
         title: const Text(
@@ -103,14 +119,15 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white, size: 20),
             onPressed: () {
-              showSearch(
-                context: context,
-                delegate: NbaSearchDelegate(),
-              );
+              showSearch(context: context, delegate: NbaSearchDelegate());
             },
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle_outlined, color: Colors.white70, size: 22),
+            icon: const Icon(
+              Icons.account_circle_outlined,
+              color: Colors.white70,
+              size: 22,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -119,11 +136,17 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.compare_arrows, color: Colors.white70, size: 22),
+            icon: const Icon(
+              Icons.compare_arrows,
+              color: Colors.white70,
+              size: 22,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const PlayerComparatorScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const PlayerComparatorScreen(),
+                ),
               );
             },
           ),
@@ -140,11 +163,13 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               if (!_loadingNews && _news.isNotEmpty) _buildNewsTicker(),
               const SizedBox(height: 20),
-              _buildSectionHeader('Equipas'),
+              _buildSectionHeader(_t(context, 'Equipas', 'Teams')),
               const SizedBox(height: 12),
               _buildTeamsList(theme),
               const SizedBox(height: 32),
-              _buildSectionHeader('Jogos de Hoje'),
+              _buildSectionHeader(
+                _t(context, 'Jogos de Hoje', "Today's Games"),
+              ),
               const SizedBox(height: 16),
               _buildGamesSection(theme),
               const SizedBox(height: 100),
@@ -225,7 +250,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTeamsList(ThemeData theme) {
     if (_loadingTeams) {
-      return const SizedBox(height: 110, child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(
+        height: 110,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
     return SizedBox(
       height: 115,
@@ -258,14 +286,22 @@ class _HomeScreenState extends State<HomeScreen> {
           color: const Color(0xFF151515),
           borderRadius: BorderRadius.circular(24),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             children: [
-              Icon(Icons.calendar_today_outlined, color: Colors.white12, size: 48),
-              SizedBox(height: 16),
+              const Icon(
+                Icons.calendar_today_outlined,
+                color: Colors.white12,
+                size: 48,
+              ),
+              const SizedBox(height: 16),
               Text(
-                'Sem jogos agendados para hoje',
-                style: TextStyle(color: Colors.white38, fontSize: 14),
+                _t(
+                  context,
+                  'Sem jogos agendados para hoje',
+                  'No games scheduled for today',
+                ),
+                style: const TextStyle(color: Colors.white38, fontSize: 14),
               ),
             ],
           ),
@@ -277,19 +313,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  String _t(BuildContext context, String pt, String en) {
+    return Localizations.localeOf(context).languageCode == 'en' ? en : pt;
+  }
+
   Widget _buildGameCard(CachedGame game, ThemeData theme) {
-    final isLive = game.status.toLowerCase() == 'live';
+    final isLive = GameStatusUtils.isLive(game.status);
     final homeName = repository.getTeamName(game.homeTeamId).split(' ').last;
     final awayName = repository.getTeamName(game.awayTeamId).split(' ').last;
 
-    return Container(
+    return GestureDetector(
+      onTap: () => _openGame(game),
+      child: Container(
       margin: const EdgeInsets.only(left: 18, right: 18, bottom: 16),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: const Color(0xFF151515),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
-          color: isLive ? theme.colorScheme.primary.withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.03),
+          color: isLive
+              ? theme.colorScheme.primary.withValues(alpha: 0.4)
+              : Colors.white.withValues(alpha: 0.03),
           width: isLive ? 2 : 1,
         ),
       ),
@@ -301,7 +345,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               if (isLive)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE11D48),
@@ -309,7 +356,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const Text(
                     'LIVE',
-                    style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               Text(
@@ -334,6 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildTeamInGame(game.awayTeamId, awayName),
         ],
       ),
+    ),
     );
   }
 
@@ -387,7 +439,9 @@ class _HoverTeamItemState extends State<_HoverTeamItem> {
           curve: Curves.easeOutCubic,
           width: 85,
           margin: const EdgeInsets.symmetric(horizontal: 6),
-          transform: _isHovered ? (Matrix4.identity()..scale(1.15)) : Matrix4.identity(),
+          transform: _isHovered
+              ? (Matrix4.identity()..scale(1.15))
+              : Matrix4.identity(),
           child: Column(
             children: [
               AnimatedContainer(
@@ -396,19 +450,26 @@ class _HoverTeamItemState extends State<_HoverTeamItem> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: _isHovered 
-                      ? [Colors.white, widget.theme.colorScheme.primary]
-                      : [widget.theme.colorScheme.primary, widget.theme.colorScheme.tertiary],
+                    colors: _isHovered
+                        ? [Colors.white, widget.theme.colorScheme.primary]
+                        : [
+                            widget.theme.colorScheme.primary,
+                            widget.theme.colorScheme.tertiary,
+                          ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  boxShadow: _isHovered ? [
-                    BoxShadow(
-                      color: widget.theme.colorScheme.primary.withValues(alpha: 0.6),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    )
-                  ] : [],
+                  boxShadow: _isHovered
+                      ? [
+                          BoxShadow(
+                            color: widget.theme.colorScheme.primary.withValues(
+                              alpha: 0.6,
+                            ),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : [],
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(8),

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
+import '../../l10n/app_localizations.dart';
 import '../../widgets/team_logo.dart';
 import 'players_screen.dart';
-import '../teams/team_detail_screen.dart';
 import 'game_detail_screen.dart';
+import '../../utils/game_status_utils.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -16,10 +18,18 @@ class GamesScreen extends StatefulWidget {
 
 class _GamesScreenState extends State<GamesScreen> {
   List<CachedGame> _liveGames = [];
-  List<CachedGame> _todayGames = [];
+  List<CachedGame> _selectedDayGames = [];
   List<CachedGame> _pastResults = [];
   bool _loading = true;
+  DateTime _selectedDate = DateTime.now();
   Timer? _refreshTimer;
+
+  bool get _isToday {
+    final now = DateTime.now();
+    return _selectedDate.year == now.year &&
+        _selectedDate.month == now.month &&
+        _selectedDate.day == now.day;
+  }
 
   @override
   void initState() {
@@ -42,25 +52,14 @@ class _GamesScreenState extends State<GamesScreen> {
     }
     try {
       await repository.getTeams();
-      final today = DateTime.now();
-      
-      // Busca jogos de hoje (inclui janela de ontem/amanhã no repo)
-      final games = await repository.getGamesByDate(today);
-      
-      // Busca resultados recentes (últimos 7 dias)
+      final dayGames = await repository.getGamesByDate(_selectedDate);
       final recent = await repository.getRecentResults();
 
       if (mounted) {
         setState(() {
-          _liveGames = games.where((g) => 
-            g.status.toLowerCase().contains('qtr') || 
-            g.status.toLowerCase().contains('half') || 
-            g.status.toLowerCase().contains('end') || 
-            g.status.toLowerCase().contains('ot') || 
-            g.status.toLowerCase() == 'live'
-          ).toList();
-          _todayGames = games;
-          _pastResults = recent.where((g) => g.status == 'Final').toList();
+          _liveGames = dayGames.where((g) => GameStatusUtils.isLive(g.status)).toList();
+          _selectedDayGames = dayGames;
+          _pastResults = recent;
           _loading = false;
         });
       }
@@ -69,17 +68,58 @@ class _GamesScreenState extends State<GamesScreen> {
     }
   }
 
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2024, 10, 1),
+      lastDate: DateTime.now().add(const Duration(days: 14)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF17408B),
+              surface: Color(0xFF1A1A1A),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _selectedDate = picked);
+      await _loadGames();
+    }
+  }
+
+  void _shiftDate(int days) {
+    setState(() => _selectedDate = _selectedDate.add(Duration(days: days)));
+    _loadGames();
+  }
+
+  void _goToToday() {
+    setState(() => _selectedDate = DateTime.now());
+    _loadGames();
+  }
+
+  String _dateLabel(BuildContext context) {
+    if (_isToday) return _t(context, 'Hoje', 'Today');
+    final locale = Localizations.localeOf(context).languageCode;
+    return DateFormat.yMMMd(locale).format(_selectedDate);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF0A0A0A),
       appBar: AppBar(
-        backgroundColor: theme.colorScheme.primary, // Cor dinâmica
+        backgroundColor: theme.colorScheme.primary,
         elevation: 4,
-        title: const Text(
-          'JOGOS',
-          style: TextStyle(
+        title: Text(
+          l10n.games.toUpperCase(),
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w900,
@@ -102,14 +142,15 @@ class _GamesScreenState extends State<GamesScreen> {
         length: 3,
         child: Column(
           children: [
+            _buildDateBar(theme),
             TabBar(
               indicatorColor: theme.colorScheme.tertiary,
               labelColor: theme.colorScheme.tertiary,
               unselectedLabelColor: Colors.white54,
-              tabs: const [
-                Tab(text: 'Ao Vivo'),
-                Tab(text: 'Hoje'),
-                Tab(text: 'Resultados'),
+              tabs: [
+                Tab(text: _t(context, 'Ao Vivo', 'Live')),
+                Tab(text: _dateLabel(context)),
+                Tab(text: _t(context, 'Resultados', 'Results')),
               ],
             ),
             Expanded(
@@ -118,21 +159,29 @@ class _GamesScreenState extends State<GamesScreen> {
                   : TabBarView(
                       children: [
                         _liveGames.isEmpty
-                            ? const Center(
+                            ? Center(
                                 child: Text(
-                                  'Sem jogos ao vivo',
-                                  style: TextStyle(color: Colors.white54),
+                                  _t(
+                                    context,
+                                    'Sem jogos ao vivo',
+                                    'No live games',
+                                  ),
+                                  style: const TextStyle(color: Colors.white54),
                                 ),
                               )
                             : _buildGamesList(_liveGames, theme),
-                        _todayGames.isEmpty
-                            ? const Center(
+                        _selectedDayGames.isEmpty
+                            ? Center(
                                 child: Text(
-                                  'Sem jogos hoje',
-                                  style: TextStyle(color: Colors.white54),
+                                  _t(
+                                    context,
+                                    'Sem jogos nesta data',
+                                    'No games on this date',
+                                  ),
+                                  style: const TextStyle(color: Colors.white54),
                                 ),
                               )
-                            : _buildGamesList(_todayGames, theme),
+                            : _buildGamesList(_selectedDayGames, theme),
                         _buildGamesList(_pastResults, theme),
                       ],
                     ),
@@ -143,10 +192,71 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
+  Widget _buildDateBar(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      color: const Color(0xFF121212),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => _shiftDate(-1),
+            icon: const Icon(Icons.chevron_left, color: Colors.white70),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A1A),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.calendar_month, color: Color(0xFFFFC72C), size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      _dateLabel(context),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () => _shiftDate(1),
+            icon: const Icon(Icons.chevron_right, color: Colors.white70),
+          ),
+          if (!_isToday)
+            TextButton(
+              onPressed: _goToToday,
+              child: Text(
+                _t(context, 'Hoje', 'Today'),
+                style: TextStyle(color: theme.colorScheme.tertiary),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildGamesList(List<CachedGame> games, ThemeData theme) {
     if (games.isEmpty) {
-      return const Center(
-        child: Text('Sem resultados', style: TextStyle(color: Colors.white54)),
+      return Center(
+        child: Text(
+          _t(context, 'Sem resultados', 'No results'),
+          style: const TextStyle(color: Colors.white54),
+        ),
       );
     }
     return RefreshIndicator(
@@ -157,11 +267,9 @@ class _GamesScreenState extends State<GamesScreen> {
         itemCount: games.length,
         itemBuilder: (context, index) {
           final game = games[index];
-          final isLive = game.status == 'live';
+          final isLive = GameStatusUtils.isLive(game.status);
           final homeName = repository.getTeamName(game.homeTeamId);
           final awayName = repository.getTeamName(game.awayTeamId);
-          final homeCity = repository.getTeamCity(game.homeTeamId);
-          final awayCity = repository.getTeamCity(game.awayTeamId);
           return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -210,7 +318,6 @@ class _GamesScreenState extends State<GamesScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Away Team (Left)
                       Expanded(
                         child: Column(
                           children: [
@@ -234,7 +341,6 @@ class _GamesScreenState extends State<GamesScreen> {
                           ],
                         ),
                       ),
-                      // Score & Status (Center)
                       Expanded(
                         child: Column(
                           children: [
@@ -261,7 +367,6 @@ class _GamesScreenState extends State<GamesScreen> {
                           ],
                         ),
                       ),
-                      // Home Team (Right)
                       Expanded(
                         child: Column(
                           children: [
@@ -296,10 +401,7 @@ class _GamesScreenState extends State<GamesScreen> {
     );
   }
 
-  void _openTeam(String teamId) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => TeamDetailScreen(teamId: teamId)),
-    );
+  String _t(BuildContext context, String pt, String en) {
+    return Localizations.localeOf(context).languageCode == 'en' ? en : pt;
   }
 }

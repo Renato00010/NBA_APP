@@ -10,6 +10,8 @@ import '../comparator/player_comparator_screen.dart';
 import '../profile/profile_screen.dart';
 import '../games/game_detail_screen.dart';
 import '../../utils/game_status_utils.dart';
+import '../../widgets/basketball_loader.dart';
+import 'dart:ui';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -252,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_loadingTeams) {
       return const SizedBox(
         height: 110,
-        child: Center(child: CircularProgressIndicator()),
+        child: Center(child: BasketballLoader()),
       );
     }
     return SizedBox(
@@ -276,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildGamesSection(ThemeData theme) {
     if (_loadingGames) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: BasketballLoader());
     }
     if (_games.isEmpty) {
       return Container(
@@ -325,22 +327,36 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: () => _openGame(game),
       child: Container(
-      margin: const EdgeInsets.only(left: 18, right: 18, bottom: 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xFF151515),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: isLive
-              ? theme.colorScheme.primary.withValues(alpha: 0.4)
-              : Colors.white.withValues(alpha: 0.03),
-          width: isLive ? 2 : 1,
+        margin: const EdgeInsets.only(left: 18, right: 18, bottom: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: isLive
+                ? theme.colorScheme.primary.withValues(alpha: 0.4)
+                : Colors.white.withValues(alpha: 0.08),
+            width: isLive ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildTeamInGame(game.homeTeamId, homeName),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(28),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.03),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildTeamInGame(game.homeTeamId, homeName, 'game_${game.gameId}_${game.homeTeamId}'),
           Column(
             children: [
               if (isLive)
@@ -382,17 +398,20 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          _buildTeamInGame(game.awayTeamId, awayName),
+          _buildTeamInGame(game.awayTeamId, awayName, 'game_${game.gameId}_${game.awayTeamId}'),
         ],
       ),
+    ),
+    ),
+    ),
     ),
     );
   }
 
-  Widget _buildTeamInGame(String teamId, String name) {
+  Widget _buildTeamInGame(String teamId, String name, String heroTag) {
     return Column(
       children: [
-        TeamLogo(teamId: teamId, size: 54),
+        TeamLogo(teamId: teamId, size: 54, heroTag: heroTag),
         const SizedBox(height: 10),
         Text(
           name.toUpperCase(),

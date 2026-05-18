@@ -2967,6 +2967,17 @@ class $UserPreferencesTable extends UserPreferences
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _dateOfBirthMeta = const VerificationMeta(
+    'dateOfBirth',
+  );
+  @override
+  late final GeneratedColumn<String> dateOfBirth = GeneratedColumn<String>(
+    'date_of_birth',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2982,6 +2993,7 @@ class $UserPreferencesTable extends UserPreferences
     currencyCode,
     favoriteTeamAlerts,
     updatedAt,
+    dateOfBirth,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3094,6 +3106,15 @@ class $UserPreferencesTable extends UserPreferences
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('date_of_birth')) {
+      context.handle(
+        _dateOfBirthMeta,
+        dateOfBirth.isAcceptableOrUnknown(
+          data['date_of_birth']!,
+          _dateOfBirthMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3155,6 +3176,10 @@ class $UserPreferencesTable extends UserPreferences
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      dateOfBirth: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date_of_birth'],
+      ),
     );
   }
 
@@ -3178,6 +3203,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
   final String currencyCode;
   final bool favoriteTeamAlerts;
   final DateTime updatedAt;
+  final String? dateOfBirth;
   const UserPreference({
     required this.id,
     this.email,
@@ -3192,6 +3218,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     required this.currencyCode,
     required this.favoriteTeamAlerts,
     required this.updatedAt,
+    this.dateOfBirth,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3217,6 +3244,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     map['currency_code'] = Variable<String>(currencyCode);
     map['favorite_team_alerts'] = Variable<bool>(favoriteTeamAlerts);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || dateOfBirth != null) {
+      map['date_of_birth'] = Variable<String>(dateOfBirth);
+    }
     return map;
   }
 
@@ -3243,6 +3273,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       currencyCode: Value(currencyCode),
       favoriteTeamAlerts: Value(favoriteTeamAlerts),
       updatedAt: Value(updatedAt),
+      dateOfBirth: dateOfBirth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateOfBirth),
     );
   }
 
@@ -3265,6 +3298,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       favoriteTeamAlerts: serializer.fromJson<bool>(json['favoriteTeamAlerts']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      dateOfBirth: serializer.fromJson<String?>(json['dateOfBirth']),
     );
   }
   @override
@@ -3284,6 +3318,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
       'currencyCode': serializer.toJson<String>(currencyCode),
       'favoriteTeamAlerts': serializer.toJson<bool>(favoriteTeamAlerts),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'dateOfBirth': serializer.toJson<String?>(dateOfBirth),
     };
   }
 
@@ -3301,6 +3336,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     String? currencyCode,
     bool? favoriteTeamAlerts,
     DateTime? updatedAt,
+    Value<String?> dateOfBirth = const Value.absent(),
   }) => UserPreference(
     id: id ?? this.id,
     email: email.present ? email.value : this.email,
@@ -3317,6 +3353,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     currencyCode: currencyCode ?? this.currencyCode,
     favoriteTeamAlerts: favoriteTeamAlerts ?? this.favoriteTeamAlerts,
     updatedAt: updatedAt ?? this.updatedAt,
+    dateOfBirth: dateOfBirth.present ? dateOfBirth.value : this.dateOfBirth,
   );
   UserPreference copyWithCompanion(UserPreferencesCompanion data) {
     return UserPreference(
@@ -3349,6 +3386,9 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ? data.favoriteTeamAlerts.value
           : this.favoriteTeamAlerts,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      dateOfBirth: data.dateOfBirth.present
+          ? data.dateOfBirth.value
+          : this.dateOfBirth,
     );
   }
 
@@ -3367,7 +3407,8 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           ..write('measurementUnit: $measurementUnit, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('favoriteTeamAlerts: $favoriteTeamAlerts, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('dateOfBirth: $dateOfBirth')
           ..write(')'))
         .toString();
   }
@@ -3387,6 +3428,7 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
     currencyCode,
     favoriteTeamAlerts,
     updatedAt,
+    dateOfBirth,
   );
   @override
   bool operator ==(Object other) =>
@@ -3404,7 +3446,8 @@ class UserPreference extends DataClass implements Insertable<UserPreference> {
           other.measurementUnit == this.measurementUnit &&
           other.currencyCode == this.currencyCode &&
           other.favoriteTeamAlerts == this.favoriteTeamAlerts &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.dateOfBirth == this.dateOfBirth);
 }
 
 class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
@@ -3421,6 +3464,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
   final Value<String> currencyCode;
   final Value<bool> favoriteTeamAlerts;
   final Value<DateTime> updatedAt;
+  final Value<String?> dateOfBirth;
   const UserPreferencesCompanion({
     this.id = const Value.absent(),
     this.email = const Value.absent(),
@@ -3435,6 +3479,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.currencyCode = const Value.absent(),
     this.favoriteTeamAlerts = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
   });
   UserPreferencesCompanion.insert({
     this.id = const Value.absent(),
@@ -3450,6 +3495,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     this.currencyCode = const Value.absent(),
     this.favoriteTeamAlerts = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.dateOfBirth = const Value.absent(),
   });
   static Insertable<UserPreference> custom({
     Expression<int>? id,
@@ -3465,6 +3511,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Expression<String>? currencyCode,
     Expression<bool>? favoriteTeamAlerts,
     Expression<DateTime>? updatedAt,
+    Expression<String>? dateOfBirth,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3481,6 +3528,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       if (favoriteTeamAlerts != null)
         'favorite_team_alerts': favoriteTeamAlerts,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (dateOfBirth != null) 'date_of_birth': dateOfBirth,
     });
   }
 
@@ -3498,6 +3546,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     Value<String>? currencyCode,
     Value<bool>? favoriteTeamAlerts,
     Value<DateTime>? updatedAt,
+    Value<String?>? dateOfBirth,
   }) {
     return UserPreferencesCompanion(
       id: id ?? this.id,
@@ -3513,6 +3562,7 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
       currencyCode: currencyCode ?? this.currencyCode,
       favoriteTeamAlerts: favoriteTeamAlerts ?? this.favoriteTeamAlerts,
       updatedAt: updatedAt ?? this.updatedAt,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
     );
   }
 
@@ -3558,6 +3608,9 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (dateOfBirth.present) {
+      map['date_of_birth'] = Variable<String>(dateOfBirth.value);
+    }
     return map;
   }
 
@@ -3576,7 +3629,8 @@ class UserPreferencesCompanion extends UpdateCompanion<UserPreference> {
           ..write('measurementUnit: $measurementUnit, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('favoriteTeamAlerts: $favoriteTeamAlerts, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('dateOfBirth: $dateOfBirth')
           ..write(')'))
         .toString();
   }
@@ -7554,6 +7608,7 @@ typedef $$UserPreferencesTableCreateCompanionBuilder =
       Value<String> currencyCode,
       Value<bool> favoriteTeamAlerts,
       Value<DateTime> updatedAt,
+      Value<String?> dateOfBirth,
     });
 typedef $$UserPreferencesTableUpdateCompanionBuilder =
     UserPreferencesCompanion Function({
@@ -7570,6 +7625,7 @@ typedef $$UserPreferencesTableUpdateCompanionBuilder =
       Value<String> currencyCode,
       Value<bool> favoriteTeamAlerts,
       Value<DateTime> updatedAt,
+      Value<String?> dateOfBirth,
     });
 
 final class $$UserPreferencesTableReferences
@@ -7673,6 +7729,11 @@ class $$UserPreferencesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$NbaTeamsTableFilterComposer get favoriteTeamId {
     final $$NbaTeamsTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -7766,6 +7827,11 @@ class $$UserPreferencesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$NbaTeamsTableOrderingComposer get favoriteTeamId {
     final $$NbaTeamsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7849,6 +7915,11 @@ class $$UserPreferencesTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<String> get dateOfBirth => $composableBuilder(
+    column: $table.dateOfBirth,
+    builder: (column) => column,
+  );
+
   $$NbaTeamsTableAnnotationComposer get favoriteTeamId {
     final $$NbaTeamsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -7916,6 +7987,7 @@ class $$UserPreferencesTableTableManager
                 Value<String> currencyCode = const Value.absent(),
                 Value<bool> favoriteTeamAlerts = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> dateOfBirth = const Value.absent(),
               }) => UserPreferencesCompanion(
                 id: id,
                 email: email,
@@ -7930,6 +8002,7 @@ class $$UserPreferencesTableTableManager
                 currencyCode: currencyCode,
                 favoriteTeamAlerts: favoriteTeamAlerts,
                 updatedAt: updatedAt,
+                dateOfBirth: dateOfBirth,
               ),
           createCompanionCallback:
               ({
@@ -7946,6 +8019,7 @@ class $$UserPreferencesTableTableManager
                 Value<String> currencyCode = const Value.absent(),
                 Value<bool> favoriteTeamAlerts = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> dateOfBirth = const Value.absent(),
               }) => UserPreferencesCompanion.insert(
                 id: id,
                 email: email,
@@ -7960,6 +8034,7 @@ class $$UserPreferencesTableTableManager
                 currencyCode: currencyCode,
                 favoriteTeamAlerts: favoriteTeamAlerts,
                 updatedAt: updatedAt,
+                dateOfBirth: dateOfBirth,
               ),
           withReferenceMapper: (p0) => p0
               .map(

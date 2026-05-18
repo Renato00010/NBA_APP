@@ -7,19 +7,21 @@ class TeamLogo extends StatelessWidget {
   final String teamId;
   final double size;
   final Color? fallbackColor;
+  final String? heroTag;
 
   const TeamLogo({
     super.key,
     required this.teamId,
     this.size = 40,
     this.fallbackColor,
+    this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
     final color = fallbackColor ?? Theme.of(context).colorScheme.primary;
 
-    return SizedBox.square(
+    Widget child = SizedBox.square(
       dimension: size,
       child: CachedNetworkImage(
         imageUrl: NbaRepository.getTeamLogoUrl(teamId),
@@ -34,6 +36,14 @@ class TeamLogo extends StatelessWidget {
         ),
       ),
     );
+
+    if (heroTag != null) {
+      return Hero(
+        tag: heroTag!,
+        child: child,
+      );
+    }
+    return child;
   }
 }
 

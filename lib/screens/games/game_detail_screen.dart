@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../services/ticket_service.dart';
+import '../../widgets/basketball_loader.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../services/youtube_highlights_service.dart';
 
 bool _isEnglish(BuildContext context) =>
     Localizations.localeOf(context).languageCode == 'en';
@@ -27,11 +31,33 @@ class GameDetailScreen extends StatefulWidget {
 class _GameDetailScreenState extends State<GameDetailScreen> {
   Map<String, dynamic>? _summary;
   bool _loading = true;
+  HighlightVideo? _highlightVideo;
+  bool _loadingHighlights = true;
 
   @override
   void initState() {
     super.initState();
     _loadSummary();
+    _loadHighlights();
+  }
+
+  Future<void> _loadHighlights() async {
+    try {
+      final highlight = await YoutubeHighlightsService().findGameHighlights(
+        widget.homeName,
+        widget.awayName,
+      );
+      if (mounted) {
+        setState(() {
+          _highlightVideo = highlight;
+          _loadingHighlights = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loadingHighlights = false);
+      }
+    }
   }
 
   Future<void> _loadSummary() async {
@@ -105,36 +131,179 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
         children: [
-          // Away Team
-          Expanded(child: _buildTeamColumn(away)),
-          // Score & Status
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                '${away['score'] ?? '0'} - ${home['score'] ?? '0'}',
-                style: const TextStyle(
-                  color: Color(0xFFFFB800), // Yellow/Orange
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ),
+              // Away Team
+              Expanded(child: _buildTeamColumn(away)),
+              // Score & Status
+              Column(
+                children: [
+                  Text(
+                    '${away['score'] ?? '0'} - ${home['score'] ?? '0'}',
+                    style: const TextStyle(
+                      color: Color(0xFFFFB800), // Yellow/Orange
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    status,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                status,
-                style: const TextStyle(
-                  color: Colors.white54,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              // Home Team
+              Expanded(child: _buildTeamColumn(home)),
             ],
           ),
-          // Home Team
-          Expanded(child: _buildTeamColumn(home)),
+          _buildHighlightsCard(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildHighlightsCard() {
+    final highlight = _highlightVideo;
+    final isReady = highlight != null;
+    final thumbnailUrl = highlight?.thumbnailUrl ??
+        'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=400';
+
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E), // Soft dark surface
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () async {
+              if (highlight == null) return;
+
+              final url = Uri.parse(highlight.url);
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  // Left Side: Thumbnail + Squircle YouTube Play overlay
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: SizedBox(
+                          width: 120,
+                          height: 68,
+                          child: CachedNetworkImage(
+                            imageUrl: thumbnailUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: Colors.black26,
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white24,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.black26,
+                              child: const Icon(
+                                Icons.sports_basketball,
+                                color: Colors.white24,
+                                size: 30,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      // YouTube Red Play Squircle overlay
+                      Container(
+                        width: 38,
+                        height: 26,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFF0000), // Real YouTube Red
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.3),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.play_arrow,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+                  // Right Side: Title, Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Destaques do Jogo',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _loadingHighlights
+                              ? 'A procurar video...'
+                              : isReady
+                                  ? 'Video direto - YouTube'
+                                  : 'Highlight indisponivel',
+                          style: TextStyle(
+                            color: isReady
+                                ? const Color(0xFFFFB800)
+                                : Colors.white38,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white24,
+                    size: 14,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -146,21 +315,34 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final location = team['location'] ?? '';
     final name = team['name'] ?? '';
 
+    final teamId = team['id']?.toString() ?? '';
+    Widget logoWidget;
+
+    if (logoUrl.isNotEmpty) {
+      logoWidget = Image.network(
+        logoUrl,
+        height: 48,
+        width: 48,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.sports_basketball,
+          color: Colors.white54,
+          size: 48,
+        ),
+      );
+    } else {
+      logoWidget = const Icon(Icons.sports_basketball, color: Colors.white54, size: 48);
+    }
+
+    if (teamId.isNotEmpty) {
+      logoWidget = Hero(
+        tag: 'game_${widget.gameId}_$teamId',
+        child: logoWidget,
+      );
+    }
+
     return Column(
       children: [
-        if (logoUrl.isNotEmpty)
-          Image.network(
-            logoUrl,
-            height: 48,
-            width: 48,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.sports_basketball,
-              color: Colors.white54,
-              size: 48,
-            ),
-          )
-        else
-          const Icon(Icons.sports_basketball, color: Colors.white54, size: 48),
+        logoWidget,
         const SizedBox(height: 8),
         Text(
           location,
@@ -355,7 +537,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         title: const SizedBox.shrink(),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: BasketballLoader())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               physics: const BouncingScrollPhysics(),

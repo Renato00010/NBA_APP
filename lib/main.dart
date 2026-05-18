@@ -20,6 +20,7 @@ import 'services/connectivity_service.dart';
 import 'services/notification_service.dart';
 import 'screens/standings/standings_screen.dart';
 import 'widgets/offline_status_banner.dart';
+import 'widgets/basketball_loader.dart';
 
 late AppDatabase database;
 late NbaRepository repository;
@@ -140,7 +141,7 @@ class NbaAppState extends State<NbaApp> {
         home: Scaffold(
           backgroundColor: Color(0xFF0A0A0A),
           body: Center(
-            child: CircularProgressIndicator(color: Color(0xFF17408B)),
+            child: BasketballLoader(),
           ),
         ),
       );

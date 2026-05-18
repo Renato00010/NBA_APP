@@ -8,6 +8,8 @@ import '../../widgets/team_logo.dart';
 import 'players_screen.dart';
 import 'game_detail_screen.dart';
 import '../../utils/game_status_utils.dart';
+import '../../widgets/basketball_loader.dart';
+import 'dart:ui';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -155,7 +157,7 @@ class _GamesScreenState extends State<GamesScreen> {
             ),
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: BasketballLoader())
                   : TabBarView(
                       children: [
                         _liveGames.isEmpty
@@ -285,15 +287,29 @@ class _GamesScreenState extends State<GamesScreen> {
             },
             child: Container(
               margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF151515),
                 borderRadius: BorderRadius.circular(16),
                 border: isLive
                     ? Border.all(color: theme.colorScheme.secondary, width: 1)
-                    : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    : Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
-              child: Column(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.03),
+                    ),
+                    child: Column(
                 children: [
                   if (isLive)
                     Container(
@@ -325,6 +341,7 @@ class _GamesScreenState extends State<GamesScreen> {
                               teamId: game.awayTeamId,
                               size: 48,
                               fallbackColor: Colors.white38,
+                              heroTag: 'game_${game.gameId}_${game.awayTeamId}',
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -374,6 +391,7 @@ class _GamesScreenState extends State<GamesScreen> {
                               teamId: game.homeTeamId,
                               size: 48,
                               fallbackColor: Colors.white38,
+                              heroTag: 'game_${game.gameId}_${game.homeTeamId}',
                             ),
                             const SizedBox(height: 8),
                             Text(
@@ -395,6 +413,9 @@ class _GamesScreenState extends State<GamesScreen> {
                 ],
               ),
             ),
+            ),
+            ),
+          ),
           );
         },
       ),

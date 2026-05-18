@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   // Manual DAO accessors to ensure visibility in UI
   @override
@@ -116,6 +116,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 10) {
         await m.deleteTable('viewed_history');
+      }
+      if (from < 11) {
+        await m.addColumn(userPreferences, userPreferences.dateOfBirth);
       }
     },
   );

@@ -19,4 +19,5 @@ class UserPreferences extends Table {
   BoolColumn get favoriteTeamAlerts =>
       boolean().withDefault(const Constant(true))();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get dateOfBirth => text().nullable()();
 }

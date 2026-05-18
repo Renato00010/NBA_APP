@@ -28,7 +28,7 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
     return results.isEmpty ? null : results.first;
   }
 
-  Future<void> registerUser(String email, String passwordHash) async {
+  Future<void> registerUser(String email, String passwordHash, String username, String dateOfBirth) async {
     final existing = await getUserByEmail(email);
     if (existing != null) {
       throw Exception('Email ja registado');
@@ -38,6 +38,8 @@ class PreferencesDao extends DatabaseAccessor<AppDatabase>
       UserPreferencesCompanion(
         email: Value(email),
         passwordHash: Value(passwordHash),
+        displayName: Value(username),
+        dateOfBirth: Value(dateOfBirth),
         isLoggedIn: const Value(false),
         updatedAt: Value(DateTime.now()),
       ),

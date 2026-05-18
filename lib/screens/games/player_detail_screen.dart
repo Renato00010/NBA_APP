@@ -7,6 +7,7 @@ import '../../services/player_stats_seed.dart';
 import '../../services/player_stats_web_sync.dart';
 import '../../widgets/team_logo.dart';
 import '../../widgets/player_evolution_chart.dart';
+import '../../widgets/player_shot_chart.dart';
 import '../comparator/player_comparator_screen.dart';
 import '../../models/player_season_stats.dart';
 
@@ -702,7 +703,107 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
   bool _hasLocalCareerStats(Player p) => p.careerGames > 0;
 
-  void _showEvolutionChart(BuildContext context) async {
+  void _showEvolutionChart(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Visualização de Dados',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ListTile(
+                leading: const Icon(Icons.show_chart, color: Color(0xFFFFC72C)),
+                title: const Text('Gráfico de Evolução', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Compara o rendimento ao longo das épocas', style: TextStyle(color: Colors.white54)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEvolutionChartActual(context);
+                },
+              ),
+              const Divider(color: Colors.white12),
+              ListTile(
+                leading: const Icon(Icons.local_fire_department, color: Color(0xFFC9082A)),
+                title: const Text('Mapa de Lançamento (Heatmap)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                subtitle: const Text('Zonas quentes e frias no campo', style: TextStyle(color: Colors.white54)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showShotChart(context);
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showShotChart(BuildContext context) {
+    // Pegar estatísticas da época atual para basear o mapa
+    final stats = _manualStats?.currentSeason;
+    final fgPct = stats != null && stats.fgPct > 0 ? stats.fgPct : _player.fgPct;
+    final fg3Pct = stats != null && stats.fg3Pct > 0 ? stats.fg3Pct : _player.fg3Pct;
+    final position = _player.position ?? 'G';
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1A1A1A),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 24),
+              PlayerShotChart(
+                fgPct: fgPct,
+                fg3Pct: fg3Pct,
+                position: position,
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEvolutionChartActual(BuildContext context) async {
     List<PlayerSeasonStats> seasons = [];
     if (_manualStats != null) {
       final all = _allSeasonsForProfile(_manualStats!);

@@ -1,0 +1,22 @@
+IDEIAS FUTURAS PARA A NBA APP:
+
+1. Mini-Jogo "NBA Pick'em" (Prognósticos)
+Diariamente, o utilizador tenta adivinhar quem vai ganhar os jogos daquela noite. Se acertar, ganha pontos. Pode ter um ecrã de "Leaderboard".
+
+2. Fantasy Draft (Cria o teu 5 Inicial)
+O utilizador recebe um orçamento fictício e tem de recrutar 5 jogadores para a sua equipa de fantasia. Cada jogador tem um "preço" baseado nos pontos/assistências reais que faz.
+
+3. Widget Interativo para o Ecrã Principal do Telemóvel (iOS/Android)
+Usar o home_widget para criar um Widget real que fica no ecrã inicial do smartphone do utilizador mostrando o próximo jogo ou resultado em tempo real.
+
+4. Modo "Trivia / Quiz" de História da NBA
+Um modo Quiz onde perguntas detalhes históricos sobre a NBA para manter a app interativa a qualquer hora do dia.
+
+5. Resumos em Vídeo (Highlights)
+Integrar uma aba de "Vídeos" ou "Highlights" no ecrã do jogo. Quando um jogo termina, a app carrega um resumo do YouTube.
+
+8. Head-to-Head Histórico de Equipas
+Um ecrã onde o utilizador escolhe duas equipas e a app mostra o histórico recente de vitórias e estatísticas de confrontos diretos.
+
+9. Integração com Podcasts de NBA
+Leitor de áudio dentro da app que puxa o feed RSS de podcasts de basquetebol para o utilizador ouvir enquanto navega.

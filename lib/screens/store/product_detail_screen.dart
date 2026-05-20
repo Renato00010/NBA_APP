@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../../services/cart_service.dart';
 import '../../services/preferences_format_service.dart';
 import 'cart_screen.dart';
+import 'store_image.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   const ProductDetailScreen({super.key, required this.product});
@@ -163,7 +163,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                _ProductImage(imagePath: product['image']),
+                StoreImage(imagePath: product['image']),
                 Positioned(
                   left: 20,
                   bottom: 20,
@@ -467,31 +467,5 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   String _t(bool isEnglish, String pt, String en) {
     return isEnglish ? en : pt;
-  }
-}
-
-class _ProductImage extends StatelessWidget {
-  const _ProductImage({required this.imagePath});
-
-  final String imagePath;
-
-  @override
-  Widget build(BuildContext context) {
-    if (imagePath.startsWith('http')) {
-      return CachedNetworkImage(
-        imageUrl: imagePath,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(color: Colors.grey[900]),
-        errorWidget: (context, url, error) =>
-            const Icon(Icons.image_not_supported, color: Colors.white24),
-      );
-    }
-
-    return Image.asset(
-      imagePath,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.image_not_supported, color: Colors.white24),
-    );
   }
 }

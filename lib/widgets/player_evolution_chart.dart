@@ -5,7 +5,7 @@ import '../models/player_season_stats.dart';
 class PlayerEvolutionChart extends StatefulWidget {
   final List<PlayerSeasonStats> seasons;
 
-  const PlayerEvolutionChart({Key? key, required this.seasons}) : super(key: key);
+  const PlayerEvolutionChart({super.key, required this.seasons});
 
   @override
   State<PlayerEvolutionChart> createState() => _PlayerEvolutionChartState();
@@ -21,11 +21,13 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
     }
 
     final stats = widget.seasons.toList()
-      ..sort((a, b) => a.season.compareTo(b.season)); // Assumes format like '2022-23'
+      ..sort(
+        (a, b) => a.season.compareTo(b.season),
+      ); // Assumes format like '2022-23'
 
     List<FlSpot> spots = [];
     double maxY = 0;
-    
+
     for (int i = 0; i < stats.length; i++) {
       double val = 0;
       switch (_selectedStat) {
@@ -42,7 +44,7 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
       spots.add(FlSpot(i.toDouble(), val));
       if (val > maxY) maxY = val;
     }
-    
+
     maxY = maxY < 10 ? 10 : maxY * 1.2;
 
     return Column(
@@ -77,19 +79,19 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
                 show: true,
                 drawVerticalLine: true,
                 horizontalInterval: maxY / 5,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Colors.white12,
-                  strokeWidth: 1,
-                ),
-                getDrawingVerticalLine: (value) => FlLine(
-                  color: Colors.white12,
-                  strokeWidth: 1,
-                ),
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: Colors.white12, strokeWidth: 1),
+                getDrawingVerticalLine: (value) =>
+                    FlLine(color: Colors.white12, strokeWidth: 1),
               ),
               titlesData: FlTitlesData(
                 show: true,
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -105,7 +107,10 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
                             shortSeason,
-                            style: const TextStyle(fontSize: 10, color: Colors.grey),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
                           ),
                         );
                       }
@@ -121,7 +126,10 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
                     getTitlesWidget: (value, meta) {
                       return Text(
                         value.toStringAsFixed(1),
-                        style: const TextStyle(fontSize: 10, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   ),
@@ -145,7 +153,9 @@ class _PlayerEvolutionChartState extends State<PlayerEvolutionChart> {
                   dotData: FlDotData(show: true),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).primaryColor.withValues(alpha: 0.2),
                   ),
                 ),
               ],

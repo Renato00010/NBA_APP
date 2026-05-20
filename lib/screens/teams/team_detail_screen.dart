@@ -620,7 +620,7 @@ class _TeamGameTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${isHome ? 'vs' : '@'} $opponentName',
+                  'vs $opponentName',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

@@ -1,5 +1,6 @@
 // lib/screens/store/checkout_screen.dart
-import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:async';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,6 +9,8 @@ import 'package:printing/printing.dart';
 import '../../main.dart';
 import '../../services/cart_service.dart';
 import '../../services/preferences_format_service.dart';
+import '../../services/email_simulation_service.dart';
+import 'store_image.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -100,27 +103,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    await _printInvoice(order, isEnglish);
+    final pdfBytes = await _printInvoice(order, isEnglish);
     await cart.addOrder(order);
     await cart.clear();
 
     if (context.mounted) {
       setState(() => _processing = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _t(
-              isEnglish,
-              'Encomenda criada. A fatura foi gerada.',
-              'Order created. The invoice was generated.',
+      await EmailSimulationService.showEmailPrompt(
+        context: context,
+        documentName: '${order.id}.pdf',
+        documentTypePt: 'Fatura de Compra',
+        documentTypeEn: 'Purchase Invoice',
+        pdfBytes: pdfBytes,
+      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _t(
+                isEnglish,
+                'Encomenda criada. A fatura foi gerada.',
+                'Order created. The invoice was generated.',
+              ),
             ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 
-  Future<void> _printInvoice(OrderRecord order, bool isEnglish) async {
+  Future<Uint8List> _printInvoice(OrderRecord order, bool isEnglish) async {
     final doc = pw.Document();
 
     doc.addPage(
@@ -197,10 +209,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
 
+    final pdfBytes = await doc.save();
     await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => doc.save(),
+      onLayout: (PdfPageFormat format) async => pdfBytes,
       name: '${order.id}.pdf',
     );
+    return pdfBytes;
   }
 
   @override
@@ -321,6 +335,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             ),
                           ),
                           const Divider(color: Colors.white12),
+                          _deliveryEstimationRow(cart.items.length, isEnglish),
+                          const Divider(color: Colors.white12),
                           _totalRow(cart.total, currencyCode, isEnglish),
                         ],
                       ),
@@ -428,6 +444,54 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Widget _deliveryEstimationRow(int itemsCount, bool isEnglish) {
+    final days = itemsCount * 2;
+    final seconds = itemsCount * 15;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _t(isEnglish, 'Prazo de entrega estimado', 'Estimated delivery time'),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              Text(
+                _t(isEnglish, '$days dias úteis', '$days business days'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _t(isEnglish, 'Simulação de entrega live', 'Live delivery simulation'),
+                style: const TextStyle(color: Colors.amberAccent, fontSize: 11),
+              ),
+              Text(
+                '${seconds}s',
+                style: const TextStyle(
+                  color: Colors.amberAccent,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   static String _invoiceName(Map<String, dynamic> product, bool isEnglish) {
     final size = product['size'];
     return size == null
@@ -491,19 +555,7 @@ class _OrderItemRow extends StatelessWidget {
     final size = product['size'];
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: product['image'].startsWith('http')
-          ? CachedNetworkImage(
-              imageUrl: product['image'],
-              width: 46,
-              height: 46,
-              fit: BoxFit.cover,
-            )
-          : Image.asset(
-              product['image'],
-              width: 46,
-              height: 46,
-              fit: BoxFit.cover,
-            ),
+      leading: StoreImage(imagePath: product['image'], width: 46, height: 46),
       title: Text(product['name'], style: const TextStyle(color: Colors.white)),
       subtitle: size == null
           ? null
@@ -556,33 +608,10 @@ class _OrderHistory extends StatelessWidget {
     final content = Column(
       children: orders
           .map(
-            (order) => ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(
-                Icons.local_shipping_outlined,
-                color: Color(0xFFFFC72C),
-              ),
-              title: Text(
-                order.id,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              subtitle: Text(
-                '${order.status} - ${order.items.length} item(s)',
-                style: const TextStyle(color: Colors.white54),
-              ),
-              trailing: Text(
-                PreferencesFormatService.formatCurrency(
-                  order.totalEur,
-                  currencyCode: order.currencyCode,
-                ),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+            (order) => _LiveOrderTile(
+              order: order,
+              currencyCode: currencyCode,
+              isEnglish: isEnglish,
             ),
           )
           .toList(),
@@ -603,6 +632,188 @@ class _OrderHistory extends StatelessWidget {
           child: content,
         ),
       ],
+    );
+  }
+}
+
+class _LiveOrderTile extends StatefulWidget {
+  final OrderRecord order;
+  final String currencyCode;
+  final bool isEnglish;
+
+  const _LiveOrderTile({
+    required this.order,
+    required this.currencyCode,
+    required this.isEnglish,
+  });
+
+  @override
+  State<_LiveOrderTile> createState() => _LiveOrderTileState();
+}
+
+class _LiveOrderTileState extends State<_LiveOrderTile> {
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimerIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LiveOrderTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _startTimerIfNeeded();
+  }
+
+  void _startTimerIfNeeded() {
+    final itemsCount = widget.order.items.length;
+    final totalDurationSeconds = itemsCount * 15;
+    final elapsedSeconds = DateTime.now().difference(widget.order.createdAt).inSeconds;
+
+    if (elapsedSeconds < totalDurationSeconds) {
+      _timer?.cancel();
+      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (mounted) {
+          setState(() {});
+          final currentElapsed = DateTime.now().difference(widget.order.createdAt).inSeconds;
+          if (currentElapsed >= totalDurationSeconds) {
+            _timer?.cancel();
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final itemsCount = widget.order.items.length;
+    final totalDurationSeconds = itemsCount * 15;
+    final elapsedSeconds = DateTime.now().difference(widget.order.createdAt).inSeconds;
+    final remainingSeconds = totalDurationSeconds - elapsedSeconds;
+
+    final bool isDelivered = elapsedSeconds >= totalDurationSeconds;
+    final bool isInTransit = !isDelivered && elapsedSeconds >= totalDurationSeconds * 0.3;
+
+    final String statusText;
+    final IconData statusIcon;
+    final Color statusColor;
+    final double progress;
+
+    if (isDelivered) {
+      statusText = widget.isEnglish ? 'Delivered' : 'Entregue';
+      statusIcon = Icons.check_circle_outline;
+      statusColor = Colors.greenAccent;
+      progress = 1.0;
+    } else if (isInTransit) {
+      statusText = widget.isEnglish 
+          ? 'In transit (ETA: ${remainingSeconds}s)' 
+          : 'Em trânsito (Faltam ${remainingSeconds}s)';
+      statusIcon = Icons.local_shipping_outlined;
+      statusColor = Colors.orangeAccent;
+      progress = elapsedSeconds / totalDurationSeconds;
+    } else {
+      statusText = widget.isEnglish 
+          ? 'Processing (ETA: ${remainingSeconds}s)' 
+          : 'Em processamento (Faltam ${remainingSeconds}s)';
+      statusIcon = Icons.pending_actions_outlined;
+      statusColor = Colors.amberAccent;
+      progress = elapsedSeconds / totalDurationSeconds;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: statusColor.withValues(alpha: 0.15),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(statusIcon, color: statusColor, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.order.id,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        statusText,
+                        style: TextStyle(
+                          color: statusColor.withValues(alpha: 0.85),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  PreferencesFormatService.formatCurrency(
+                    widget.order.totalEur,
+                    currencyCode: widget.order.currencyCode,
+                  ),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            if (!isDelivered) ...[
+              const SizedBox(height: 10),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.white.withValues(alpha: 0.05),
+                  valueColor: AlwaysStoppedAnimation<Color>(statusColor),
+                  minHeight: 4,
+                ),
+              ),
+            ],
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '$itemsCount item(s)',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
+                Text(
+                  widget.isEnglish
+                      ? 'Real delivery: ${itemsCount * 2} business days'
+                      : 'Entrega real: ${itemsCount * 2} dias úteis',
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

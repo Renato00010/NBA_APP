@@ -7,6 +7,7 @@ mixin _$PlayersDaoMixin on DatabaseAccessor<AppDatabase> {
   $NbaTeamsTable get nbaTeams => attachedDatabase.nbaTeams;
   $PlayersTable get players => attachedDatabase.players;
   $PlayerSeasonsTable get playerSeasons => attachedDatabase.playerSeasons;
+  $RetiredPlayersTable get retiredPlayers => attachedDatabase.retiredPlayers;
   PlayersDaoManager get managers => PlayersDaoManager(this);
 }
 
@@ -19,4 +20,9 @@ class PlayersDaoManager {
       $$PlayersTableTableManager(_db.attachedDatabase, _db.players);
   $$PlayerSeasonsTableTableManager get playerSeasons =>
       $$PlayerSeasonsTableTableManager(_db.attachedDatabase, _db.playerSeasons);
+  $$RetiredPlayersTableTableManager get retiredPlayers =>
+      $$RetiredPlayersTableTableManager(
+        _db.attachedDatabase,
+        _db.retiredPlayers,
+      );
 }

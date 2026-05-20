@@ -63,7 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
               surface: Color(0xFF1A1A1A),
               onSurface: Colors.white,
             ),
-            dialogBackgroundColor: const Color(0xFF151515),
+            dialogTheme: const DialogThemeData(
+              backgroundColor: Color(0xFF151515),
+            ),
           ),
           child: child!,
         );
@@ -118,7 +120,12 @@ class _LoginScreenState extends State<LoginScreen> {
         final hashedPassword = await _hashPassword(password);
 
         // Regista
-        await database.preferencesDao.registerUser(email, hashedPassword, username, dob);
+        await database.preferencesDao.registerUser(
+          email,
+          hashedPassword,
+          username,
+          dob,
+        );
 
         // Inicia sessão
         await database.preferencesDao.setLoggedIn(email);
@@ -200,10 +207,13 @@ class _LoginScreenState extends State<LoginScreen> {
             suffixIcon: isPassword
                 ? IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      _obscurePassword
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                       color: Colors.white38,
                     ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    onPressed: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   )
                 : null,
             filled: true,
@@ -269,13 +279,18 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Center(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 40,
+                ),
                 child: Container(
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.3),
@@ -296,7 +311,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(24),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF17408B).withValues(alpha: 0.5),
+                              color: const Color(
+                                0xFF17408B,
+                              ).withValues(alpha: 0.5),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
@@ -325,7 +342,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _isRegister ? 'Regista-te para acompanhar a liga' : 'Acede às estatísticas e jogos',
+                        _isRegister
+                            ? 'Regista-te para acompanhar a liga'
+                            : 'Acede às estatísticas e jogos',
                         style: const TextStyle(
                           color: Colors.white54,
                           fontSize: 14,
@@ -374,15 +393,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFC9082A).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFFC9082A,
+                            ).withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: const Color(0xFFC9082A).withValues(alpha: 0.4),
+                              color: const Color(
+                                0xFFC9082A,
+                              ).withValues(alpha: 0.4),
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.error_outline, color: Color(0xFFC9082A), size: 18),
+                              const Icon(
+                                Icons.error_outline,
+                                color: Color(0xFFC9082A),
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -415,7 +442,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             elevation: 8,
-                            shadowColor: const Color(0xFF17408B).withValues(alpha: 0.5),
+                            shadowColor: const Color(
+                              0xFF17408B,
+                            ).withValues(alpha: 0.5),
                           ),
                           child: _loading
                               ? const SizedBox(
@@ -455,8 +484,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: RichText(
                           text: TextSpan(
-                            text: _isRegister ? 'Já tens conta? ' : 'Não tens conta? ',
-                            style: const TextStyle(color: Colors.white54, fontSize: 14),
+                            text: _isRegister
+                                ? 'Já tens conta? '
+                                : 'Não tens conta? ',
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 14,
+                            ),
                             children: [
                               TextSpan(
                                 text: _isRegister ? 'Entrar' : 'Registar',

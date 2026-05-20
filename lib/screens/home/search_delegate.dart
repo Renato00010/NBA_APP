@@ -61,7 +61,10 @@ class NbaSearchDelegate extends SearchDelegate {
         child: const Center(
           child: Text(
             'Digita para pesquisar',
-            style: TextStyle(color: Colors.white24, fontWeight: FontWeight.w700),
+            style: TextStyle(
+              color: Colors.white24,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       );
@@ -115,23 +118,37 @@ class NbaSearchDelegate extends SearchDelegate {
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       leading: CircleAvatar(
         backgroundColor: const Color(0xFF1A1A1A),
-        backgroundImage: (player.photoWebpPath != null && !kIsWeb) 
+        backgroundImage: (player.photoWebpPath != null && !kIsWeb)
             ? AssetImage(player.photoWebpPath!) as ImageProvider
             : null,
-        child: (player.photoWebpPath == null || kIsWeb) ? const Icon(Icons.person, color: Colors.white24) : null,
+        child: (player.photoWebpPath == null || kIsWeb)
+            ? const Icon(Icons.person, color: Colors.white24)
+            : null,
       ),
       title: Text(
         player.fullName.toUpperCase(),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: -0.5),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          fontSize: 16,
+          letterSpacing: -0.5,
+        ),
       ),
       subtitle: Text(
         'JOGADOR | ${player.position ?? 'N/A'}',
-        style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1),
+        style: const TextStyle(
+          color: Colors.white38,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1,
+        ),
       ),
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => PlayerDetailScreen(player: player)),
+          MaterialPageRoute(
+            builder: (context) => PlayerDetailScreen(player: player),
+          ),
         );
       },
     );
@@ -145,23 +162,36 @@ class NbaSearchDelegate extends SearchDelegate {
         height: 40,
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           shape: BoxShape.circle,
         ),
         child: TeamLogo(teamId: team.teamId, size: 30),
       ),
       title: Text(
         team.name.toUpperCase(),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: -0.5),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w900,
+          fontSize: 16,
+          letterSpacing: -0.5,
+        ),
       ),
       subtitle: Text(
         'EQUIPA | ${team.city}',
-        style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1),
+        style: const TextStyle(
+          color: Colors.white38,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 1,
+        ),
       ),
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TeamDetailScreen(teamId: team.teamId, initialTeam: team)),
+          MaterialPageRoute(
+            builder: (context) =>
+                TeamDetailScreen(teamId: team.teamId, initialTeam: team),
+          ),
         );
       },
     );

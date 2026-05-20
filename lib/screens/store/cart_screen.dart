@@ -1,11 +1,11 @@
 // lib/screens/store/cart_screen.dart
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../main.dart';
 import '../../services/cart_service.dart';
 import '../../services/preferences_format_service.dart';
 import 'checkout_screen.dart';
+import 'store_image.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -81,25 +81,11 @@ class _CartScreenState extends State<CartScreen> {
               itemBuilder: (context, index) {
                 final product = items[index];
                 return ListTile(
-                  leading: product['image'].startsWith('http')
-                      ? CachedNetworkImage(
-                          imageUrl: product['image'],
-                          width: 48,
-                          height: 48,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) =>
-                              Container(color: Colors.grey[900]),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.image_not_supported,
-                            color: Colors.white24,
-                          ),
-                        )
-                      : Image.asset(
-                          product['image'],
-                          width: 48,
-                          height: 48,
-                          fit: BoxFit.cover,
-                        ),
+                  leading: StoreImage(
+                    imagePath: product['image'],
+                    width: 48,
+                    height: 48,
+                  ),
                   title: Text(
                     product['name'],
                     style: const TextStyle(color: Colors.white),

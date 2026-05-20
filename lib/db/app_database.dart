@@ -1,5 +1,9 @@
 import 'package:drift/drift.dart';
 
+// Drift already generates these DAO getters; these explicit accessors keep the
+// app code simple and stable across generated-part rebuilds.
+// ignore_for_file: overridden_fields
+
 // Exporting drift types so UI files can see 'Value', 'Insertable', etc.
 export 'package:drift/drift.dart' show Value, Insertable, Constant;
 
@@ -10,6 +14,7 @@ import 'tables/user_preferences_table.dart';
 import 'tables/player_seasons_table.dart';
 import 'tables/cart_items_table.dart';
 import 'tables/store_orders_table.dart';
+import 'tables/retired_players_table.dart';
 
 import 'daos/teams_dao.dart';
 import 'daos/players_dao.dart';
@@ -34,21 +39,16 @@ part 'app_database.g.dart';
     PlayerSeasons,
     CartItems,
     StoreOrders,
+    RetiredPlayers,
   ],
-  daos: [
-    TeamsDao,
-    PlayersDao,
-    GamesDao,
-    PreferencesDao,
-    CommerceDao,
-  ],
+  daos: [TeamsDao, PlayersDao, GamesDao, PreferencesDao, CommerceDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
-  AppDatabase.forTesting(QueryExecutor e) : super(e);
+  AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   // Manual DAO accessors to ensure visibility in UI
   @override
@@ -119,6 +119,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 11) {
         await m.addColumn(userPreferences, userPreferences.dateOfBirth);
+      }
+      if (from < 12) {
+        await m.createTable(retiredPlayers);
       }
     },
   );

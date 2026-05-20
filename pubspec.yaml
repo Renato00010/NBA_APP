@@ -56,6 +56,11 @@ dependencies:
   flutter_local_notifications: ^19.0.0
   timezone: ^0.10.0
   flutter_timezone: ^4.1.0
+  youtube_player_iframe: ^6.0.0
+  google_generative_ai: ^0.4.0
+  flutter_markdown: ^0.7.3
+  mailer: ^7.1.0
+
 
 dev_dependencies:
   flutter_test:
@@ -91,6 +96,7 @@ flutter:
     - assets/data/standings/2023.json
     - assets/data/standings/2024.json
     - assets/data/standings/2025.json
+    - assets/data/standings/2026.json
     - assets/store/
 
   # An image asset can refer to one or more resolution-specific "variants", see

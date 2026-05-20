@@ -2,11 +2,12 @@ import 'package:drift/drift.dart';
 import '../app_database.dart';
 import '../tables/players_table.dart';
 import '../tables/player_seasons_table.dart';
+import '../tables/retired_players_table.dart';
 
 
 part 'players_dao.g.dart';
 
-@DriftAccessor(tables: [Players, PlayerSeasons])
+@DriftAccessor(tables: [Players, PlayerSeasons, RetiredPlayers])
 
 class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
   PlayersDao(super.db);
@@ -65,6 +66,7 @@ class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
     required String? country,
     required String? previousTeam,
     required int? experienceYears,
+    required String? careerTeams,
   }) => (update(players)..where((p) => p.playerId.equals(playerId))).write(
     PlayersCompanion(
       teamId: Value(teamId),
@@ -78,6 +80,7 @@ class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
       previousTeam: Value(previousTeam),
       experienceYears: Value(experienceYears),
       photoWebpPath: Value(photoWebpPath),
+      careerTeams: Value(careerTeams),
     ),
   );
 
@@ -153,5 +156,19 @@ class PlayersDao extends DatabaseAccessor<AppDatabase> with _$PlayersDaoMixin {
 
   Future<void> deletePlayerSeasons(String playerId) =>
       (delete(playerSeasons)..where((s) => s.playerId.equals(playerId))).go();
+
+  // --- Metodos para RetiredPlayers ---
+
+  Future<List<RetiredPlayer>> getAllRetiredPlayers() => select(retiredPlayers).get();
+
+  Future<List<RetiredPlayer>> searchRetiredPlayers(String query) => (select(
+    retiredPlayers,
+  )..where((p) => p.fullName.lower().contains(query.toLowerCase()))).get();
+
+  Future<void> upsertAllRetiredPlayers(List<RetiredPlayersCompanion> retiredList) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(retiredPlayers, retiredList);
+    });
+  }
 }
 

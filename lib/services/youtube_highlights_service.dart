@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,12 +37,25 @@ class YoutubeHighlightsService {
     String homeName,
     String awayName,
   ) async {
-    final query = 'NBA $awayName vs $homeName full game highlights';
+    final query = _queryFor(homeName, awayName);
 
     final viaInvidious = await _findWithInvidious(query);
     if (viaInvidious != null) return viaInvidious;
 
     return _findWithYoutubeSearchPage(query);
+  }
+
+  String searchUrl(String homeName, String awayName) {
+    final encodedQuery = Uri.encodeComponent(_queryFor(homeName, awayName));
+    return 'https://www.youtube.com/results?search_query=$encodedQuery';
+  }
+
+  String _queryFor(String homeName, String awayName) {
+    final langCode = PlatformDispatcher.instance.locale.languageCode;
+    if (langCode == 'pt') {
+      return '$awayName x $homeName melhores momentos nba';
+    }
+    return 'NBA $awayName vs $homeName full game highlights';
   }
 
   Future<HighlightVideo?> _findWithInvidious(String query) async {
@@ -112,14 +124,28 @@ class YoutubeHighlightsService {
       final jsonStr = _extractYtInitialData(body);
       if (jsonStr != null) {
         final data = jsonDecode(jsonStr);
-        final video = _firstVideoRenderer(data);
-        if (video != null) {
-          final videoId = video['videoId'];
-          final title = _videoTitle(video);
-          if (_isValidVideoId(videoId) && _looksLikeGameHighlight(title)) {
-            return HighlightVideo.fromVideoId(videoId, title: title);
+        HighlightVideo? matchedVideo;
+        
+        void searchVideos(dynamic node) {
+          if (matchedVideo != null) return;
+          if (node is Map) {
+            final video = node['videoRenderer'];
+            if (video is Map<String, dynamic>) {
+              final videoId = video['videoId'];
+              final title = _videoTitle(video);
+              if (_isValidVideoId(videoId) && _looksLikeGameHighlight(title)) {
+                matchedVideo = HighlightVideo.fromVideoId(videoId, title: title);
+                return;
+              }
+            }
+            node.values.forEach(searchVideos);
+          } else if (node is List) {
+            node.forEach(searchVideos);
           }
         }
+        
+        searchVideos(data);
+        if (matchedVideo != null) return matchedVideo;
       }
 
       final regexMatch = RegExp(
@@ -190,27 +216,6 @@ class YoutubeHighlightsService {
     return null;
   }
 
-  Map<String, dynamic>? _firstVideoRenderer(dynamic node) {
-    if (node is Map) {
-      final video = node['videoRenderer'];
-      if (video is Map<String, dynamic>) return video;
-
-      for (final value in node.values) {
-        final found = _firstVideoRenderer(value);
-        if (found != null) return found;
-      }
-    }
-
-    if (node is List) {
-      for (final value in node) {
-        final found = _firstVideoRenderer(value);
-        if (found != null) return found;
-      }
-    }
-
-    return null;
-  }
-
   String _videoTitle(Map<String, dynamic> video) {
     final runs = video['title']?['runs'];
     if (runs is List && runs.isNotEmpty) {
@@ -229,9 +234,14 @@ class YoutubeHighlightsService {
 
   bool _looksLikeGameHighlight(String title) {
     final normalized = title.toLowerCase();
-    return normalized.contains('nba') &&
-        (normalized.contains('highlight') ||
-            normalized.contains('recap') ||
-            normalized.contains('full game'));
+    final hasHighlightKw = normalized.contains('highlight') ||
+        normalized.contains('recap') ||
+        normalized.contains('full game') ||
+        normalized.contains('melhores') ||
+        normalized.contains('resumo');
+    
+    // For English titles, 'nba' is usually required to avoid generic highlights,
+    // but for specific Portuguese game matchups, 'melhores' is often enough.
+    return hasHighlightKw;
   }
 }

@@ -9,6 +9,7 @@ import 'players_screen.dart';
 import 'game_detail_screen.dart';
 import '../../utils/game_status_utils.dart';
 import '../../widgets/basketball_loader.dart';
+import '../../widgets/live_game_clock.dart';
 import 'dart:ui';
 
 class GamesScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _GamesScreenState extends State<GamesScreen> {
   List<CachedGame> _selectedDayGames = [];
   List<CachedGame> _pastResults = [];
   bool _loading = true;
+  bool _refreshing = false;
   DateTime _selectedDate = DateTime.now();
   Timer? _refreshTimer;
 
@@ -37,7 +39,7 @@ class _GamesScreenState extends State<GamesScreen> {
   void initState() {
     super.initState();
     _loadGames();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       _loadGames(isBackground: true);
     });
   }
@@ -49,9 +51,13 @@ class _GamesScreenState extends State<GamesScreen> {
   }
 
   Future<void> _loadGames({bool isBackground = false}) async {
+    if (isBackground && !_isToday && _liveGames.isEmpty) return;
+    if (_refreshing) return;
+
     if (!isBackground && mounted) {
       setState(() => _loading = true);
     }
+    _refreshing = true;
     try {
       await repository.getTeams();
       final dayGames = await repository.getGamesByDate(_selectedDate);
@@ -59,7 +65,9 @@ class _GamesScreenState extends State<GamesScreen> {
 
       if (mounted) {
         setState(() {
-          _liveGames = dayGames.where((g) => GameStatusUtils.isLive(g.status)).toList();
+          _liveGames = dayGames
+              .where((g) => GameStatusUtils.isLive(g.status))
+              .toList();
           _selectedDayGames = dayGames;
           _pastResults = recent;
           _loading = false;
@@ -67,6 +75,8 @@ class _GamesScreenState extends State<GamesScreen> {
       }
     } catch (e) {
       if (mounted) setState(() => _loading = false);
+    } finally {
+      _refreshing = false;
     }
   }
 
@@ -209,7 +219,10 @@ class _GamesScreenState extends State<GamesScreen> {
               onTap: _pickDate,
               borderRadius: BorderRadius.circular(12),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1A1A1A),
                   borderRadius: BorderRadius.circular(12),
@@ -220,7 +233,11 @@ class _GamesScreenState extends State<GamesScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.calendar_month, color: Color(0xFFFFC72C), size: 20),
+                    const Icon(
+                      Icons.calendar_month,
+                      color: Color(0xFFFFC72C),
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       _dateLabel(context),
@@ -281,6 +298,7 @@ class _GamesScreenState extends State<GamesScreen> {
                     gameId: game.gameId,
                     homeName: homeName,
                     awayName: awayName,
+                    gameDate: game.gameDate,
                   ),
                 ),
               );
@@ -305,117 +323,122 @@ class _GamesScreenState extends State<GamesScreen> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.03),
                     ),
                     child: Column(
-                children: [
-                  if (isLive)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondary,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'AO VIVO',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            TeamLogo(
-                              teamId: game.awayTeamId,
-                              size: 48,
-                              fallbackColor: Colors.white38,
-                              heroTag: 'game_${game.gameId}_${game.awayTeamId}',
+                      children: [
+                        if (isLive)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              awayName.split(' ').last.toUpperCase(),
-                              style: const TextStyle(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'AO VIVO',
+                              style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text(
-                              '${game.scoreAway} - ${game.scoreHome}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              game.status.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white54,
                                 fontSize: 10,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w700,
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
+                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            TeamLogo(
-                              teamId: game.homeTeamId,
-                              size: 48,
-                              fallbackColor: Colors.white38,
-                              heroTag: 'game_${game.gameId}_${game.homeTeamId}',
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              homeName.split(' ').last.toUpperCase(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  TeamLogo(
+                                    teamId: game.awayTeamId,
+                                    size: 48,
+                                    fallbackColor: Colors.white38,
+                                    heroTag:
+                                        'game_${game.gameId}_${game.awayTeamId}',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    awayName.split(' ').last.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '${game.scoreAway} - ${game.scoreHome}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  LiveGameClock(
+                                    status: game.status,
+                                    style: const TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                children: [
+                                  TeamLogo(
+                                    teamId: game.homeTeamId,
+                                    size: 48,
+                                    fallbackColor: Colors.white38,
+                                    heroTag:
+                                        'game_${game.gameId}_${game.homeTeamId}',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    homeName.split(' ').last.toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
-            ),
-            ),
-          ),
           );
         },
       ),

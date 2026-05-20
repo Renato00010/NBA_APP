@@ -5655,6 +5655,808 @@ class StoreOrdersCompanion extends UpdateCompanion<StoreOrder> {
   }
 }
 
+class $RetiredPlayersTable extends RetiredPlayers
+    with TableInfo<$RetiredPlayersTable, RetiredPlayer> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $RetiredPlayersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _playerIdMeta = const VerificationMeta(
+    'playerId',
+  );
+  @override
+  late final GeneratedColumn<String> playerId = GeneratedColumn<String>(
+    'player_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fullNameMeta = const VerificationMeta(
+    'fullName',
+  );
+  @override
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+    'full_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _displayNameMeta = const VerificationMeta(
+    'displayName',
+  );
+  @override
+  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
+    'display_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<String> position = GeneratedColumn<String>(
+    'position',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _jerseyNumberMeta = const VerificationMeta(
+    'jerseyNumber',
+  );
+  @override
+  late final GeneratedColumn<String> jerseyNumber = GeneratedColumn<String>(
+    'jersey_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _heightCmMeta = const VerificationMeta(
+    'heightCm',
+  );
+  @override
+  late final GeneratedColumn<double> heightCm = GeneratedColumn<double>(
+    'height_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _weightKgMeta = const VerificationMeta(
+    'weightKg',
+  );
+  @override
+  late final GeneratedColumn<double> weightKg = GeneratedColumn<double>(
+    'weight_kg',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _birthDateMeta = const VerificationMeta(
+    'birthDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> birthDate = GeneratedColumn<DateTime>(
+    'birth_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _countryMeta = const VerificationMeta(
+    'country',
+  );
+  @override
+  late final GeneratedColumn<String> country = GeneratedColumn<String>(
+    'country',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _previousTeamMeta = const VerificationMeta(
+    'previousTeam',
+  );
+  @override
+  late final GeneratedColumn<String> previousTeam = GeneratedColumn<String>(
+    'previous_team',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _experienceYearsMeta = const VerificationMeta(
+    'experienceYears',
+  );
+  @override
+  late final GeneratedColumn<int> experienceYears = GeneratedColumn<int>(
+    'experience_years',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _careerTeamsMeta = const VerificationMeta(
+    'careerTeams',
+  );
+  @override
+  late final GeneratedColumn<String> careerTeams = GeneratedColumn<String>(
+    'career_teams',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoWebpPathMeta = const VerificationMeta(
+    'photoWebpPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoWebpPath = GeneratedColumn<String>(
+    'photo_webp_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    playerId,
+    fullName,
+    displayName,
+    position,
+    jerseyNumber,
+    heightCm,
+    weightKg,
+    birthDate,
+    country,
+    previousTeam,
+    experienceYears,
+    careerTeams,
+    photoWebpPath,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'retired_players';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<RetiredPlayer> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('player_id')) {
+      context.handle(
+        _playerIdMeta,
+        playerId.isAcceptableOrUnknown(data['player_id']!, _playerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_playerIdMeta);
+    }
+    if (data.containsKey('full_name')) {
+      context.handle(
+        _fullNameMeta,
+        fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fullNameMeta);
+    }
+    if (data.containsKey('display_name')) {
+      context.handle(
+        _displayNameMeta,
+        displayName.isAcceptableOrUnknown(
+          data['display_name']!,
+          _displayNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
+      );
+    }
+    if (data.containsKey('jersey_number')) {
+      context.handle(
+        _jerseyNumberMeta,
+        jerseyNumber.isAcceptableOrUnknown(
+          data['jersey_number']!,
+          _jerseyNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('height_cm')) {
+      context.handle(
+        _heightCmMeta,
+        heightCm.isAcceptableOrUnknown(data['height_cm']!, _heightCmMeta),
+      );
+    }
+    if (data.containsKey('weight_kg')) {
+      context.handle(
+        _weightKgMeta,
+        weightKg.isAcceptableOrUnknown(data['weight_kg']!, _weightKgMeta),
+      );
+    }
+    if (data.containsKey('birth_date')) {
+      context.handle(
+        _birthDateMeta,
+        birthDate.isAcceptableOrUnknown(data['birth_date']!, _birthDateMeta),
+      );
+    }
+    if (data.containsKey('country')) {
+      context.handle(
+        _countryMeta,
+        country.isAcceptableOrUnknown(data['country']!, _countryMeta),
+      );
+    }
+    if (data.containsKey('previous_team')) {
+      context.handle(
+        _previousTeamMeta,
+        previousTeam.isAcceptableOrUnknown(
+          data['previous_team']!,
+          _previousTeamMeta,
+        ),
+      );
+    }
+    if (data.containsKey('experience_years')) {
+      context.handle(
+        _experienceYearsMeta,
+        experienceYears.isAcceptableOrUnknown(
+          data['experience_years']!,
+          _experienceYearsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('career_teams')) {
+      context.handle(
+        _careerTeamsMeta,
+        careerTeams.isAcceptableOrUnknown(
+          data['career_teams']!,
+          _careerTeamsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('photo_webp_path')) {
+      context.handle(
+        _photoWebpPathMeta,
+        photoWebpPath.isAcceptableOrUnknown(
+          data['photo_webp_path']!,
+          _photoWebpPathMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {playerId};
+  @override
+  RetiredPlayer map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return RetiredPlayer(
+      playerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}player_id'],
+      )!,
+      fullName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_name'],
+      )!,
+      displayName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}display_name'],
+      ),
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}position'],
+      ),
+      jerseyNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}jersey_number'],
+      ),
+      heightCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}height_cm'],
+      ),
+      weightKg: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}weight_kg'],
+      ),
+      birthDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}birth_date'],
+      ),
+      country: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}country'],
+      ),
+      previousTeam: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}previous_team'],
+      ),
+      experienceYears: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}experience_years'],
+      ),
+      careerTeams: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}career_teams'],
+      ),
+      photoWebpPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_webp_path'],
+      ),
+    );
+  }
+
+  @override
+  $RetiredPlayersTable createAlias(String alias) {
+    return $RetiredPlayersTable(attachedDatabase, alias);
+  }
+}
+
+class RetiredPlayer extends DataClass implements Insertable<RetiredPlayer> {
+  final String playerId;
+  final String fullName;
+  final String? displayName;
+  final String? position;
+  final String? jerseyNumber;
+  final double? heightCm;
+  final double? weightKg;
+  final DateTime? birthDate;
+  final String? country;
+  final String? previousTeam;
+  final int? experienceYears;
+  final String? careerTeams;
+  final String? photoWebpPath;
+  const RetiredPlayer({
+    required this.playerId,
+    required this.fullName,
+    this.displayName,
+    this.position,
+    this.jerseyNumber,
+    this.heightCm,
+    this.weightKg,
+    this.birthDate,
+    this.country,
+    this.previousTeam,
+    this.experienceYears,
+    this.careerTeams,
+    this.photoWebpPath,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['player_id'] = Variable<String>(playerId);
+    map['full_name'] = Variable<String>(fullName);
+    if (!nullToAbsent || displayName != null) {
+      map['display_name'] = Variable<String>(displayName);
+    }
+    if (!nullToAbsent || position != null) {
+      map['position'] = Variable<String>(position);
+    }
+    if (!nullToAbsent || jerseyNumber != null) {
+      map['jersey_number'] = Variable<String>(jerseyNumber);
+    }
+    if (!nullToAbsent || heightCm != null) {
+      map['height_cm'] = Variable<double>(heightCm);
+    }
+    if (!nullToAbsent || weightKg != null) {
+      map['weight_kg'] = Variable<double>(weightKg);
+    }
+    if (!nullToAbsent || birthDate != null) {
+      map['birth_date'] = Variable<DateTime>(birthDate);
+    }
+    if (!nullToAbsent || country != null) {
+      map['country'] = Variable<String>(country);
+    }
+    if (!nullToAbsent || previousTeam != null) {
+      map['previous_team'] = Variable<String>(previousTeam);
+    }
+    if (!nullToAbsent || experienceYears != null) {
+      map['experience_years'] = Variable<int>(experienceYears);
+    }
+    if (!nullToAbsent || careerTeams != null) {
+      map['career_teams'] = Variable<String>(careerTeams);
+    }
+    if (!nullToAbsent || photoWebpPath != null) {
+      map['photo_webp_path'] = Variable<String>(photoWebpPath);
+    }
+    return map;
+  }
+
+  RetiredPlayersCompanion toCompanion(bool nullToAbsent) {
+    return RetiredPlayersCompanion(
+      playerId: Value(playerId),
+      fullName: Value(fullName),
+      displayName: displayName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayName),
+      position: position == null && nullToAbsent
+          ? const Value.absent()
+          : Value(position),
+      jerseyNumber: jerseyNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(jerseyNumber),
+      heightCm: heightCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(heightCm),
+      weightKg: weightKg == null && nullToAbsent
+          ? const Value.absent()
+          : Value(weightKg),
+      birthDate: birthDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(birthDate),
+      country: country == null && nullToAbsent
+          ? const Value.absent()
+          : Value(country),
+      previousTeam: previousTeam == null && nullToAbsent
+          ? const Value.absent()
+          : Value(previousTeam),
+      experienceYears: experienceYears == null && nullToAbsent
+          ? const Value.absent()
+          : Value(experienceYears),
+      careerTeams: careerTeams == null && nullToAbsent
+          ? const Value.absent()
+          : Value(careerTeams),
+      photoWebpPath: photoWebpPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoWebpPath),
+    );
+  }
+
+  factory RetiredPlayer.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return RetiredPlayer(
+      playerId: serializer.fromJson<String>(json['playerId']),
+      fullName: serializer.fromJson<String>(json['fullName']),
+      displayName: serializer.fromJson<String?>(json['displayName']),
+      position: serializer.fromJson<String?>(json['position']),
+      jerseyNumber: serializer.fromJson<String?>(json['jerseyNumber']),
+      heightCm: serializer.fromJson<double?>(json['heightCm']),
+      weightKg: serializer.fromJson<double?>(json['weightKg']),
+      birthDate: serializer.fromJson<DateTime?>(json['birthDate']),
+      country: serializer.fromJson<String?>(json['country']),
+      previousTeam: serializer.fromJson<String?>(json['previousTeam']),
+      experienceYears: serializer.fromJson<int?>(json['experienceYears']),
+      careerTeams: serializer.fromJson<String?>(json['careerTeams']),
+      photoWebpPath: serializer.fromJson<String?>(json['photoWebpPath']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'playerId': serializer.toJson<String>(playerId),
+      'fullName': serializer.toJson<String>(fullName),
+      'displayName': serializer.toJson<String?>(displayName),
+      'position': serializer.toJson<String?>(position),
+      'jerseyNumber': serializer.toJson<String?>(jerseyNumber),
+      'heightCm': serializer.toJson<double?>(heightCm),
+      'weightKg': serializer.toJson<double?>(weightKg),
+      'birthDate': serializer.toJson<DateTime?>(birthDate),
+      'country': serializer.toJson<String?>(country),
+      'previousTeam': serializer.toJson<String?>(previousTeam),
+      'experienceYears': serializer.toJson<int?>(experienceYears),
+      'careerTeams': serializer.toJson<String?>(careerTeams),
+      'photoWebpPath': serializer.toJson<String?>(photoWebpPath),
+    };
+  }
+
+  RetiredPlayer copyWith({
+    String? playerId,
+    String? fullName,
+    Value<String?> displayName = const Value.absent(),
+    Value<String?> position = const Value.absent(),
+    Value<String?> jerseyNumber = const Value.absent(),
+    Value<double?> heightCm = const Value.absent(),
+    Value<double?> weightKg = const Value.absent(),
+    Value<DateTime?> birthDate = const Value.absent(),
+    Value<String?> country = const Value.absent(),
+    Value<String?> previousTeam = const Value.absent(),
+    Value<int?> experienceYears = const Value.absent(),
+    Value<String?> careerTeams = const Value.absent(),
+    Value<String?> photoWebpPath = const Value.absent(),
+  }) => RetiredPlayer(
+    playerId: playerId ?? this.playerId,
+    fullName: fullName ?? this.fullName,
+    displayName: displayName.present ? displayName.value : this.displayName,
+    position: position.present ? position.value : this.position,
+    jerseyNumber: jerseyNumber.present ? jerseyNumber.value : this.jerseyNumber,
+    heightCm: heightCm.present ? heightCm.value : this.heightCm,
+    weightKg: weightKg.present ? weightKg.value : this.weightKg,
+    birthDate: birthDate.present ? birthDate.value : this.birthDate,
+    country: country.present ? country.value : this.country,
+    previousTeam: previousTeam.present ? previousTeam.value : this.previousTeam,
+    experienceYears: experienceYears.present
+        ? experienceYears.value
+        : this.experienceYears,
+    careerTeams: careerTeams.present ? careerTeams.value : this.careerTeams,
+    photoWebpPath: photoWebpPath.present
+        ? photoWebpPath.value
+        : this.photoWebpPath,
+  );
+  RetiredPlayer copyWithCompanion(RetiredPlayersCompanion data) {
+    return RetiredPlayer(
+      playerId: data.playerId.present ? data.playerId.value : this.playerId,
+      fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      displayName: data.displayName.present
+          ? data.displayName.value
+          : this.displayName,
+      position: data.position.present ? data.position.value : this.position,
+      jerseyNumber: data.jerseyNumber.present
+          ? data.jerseyNumber.value
+          : this.jerseyNumber,
+      heightCm: data.heightCm.present ? data.heightCm.value : this.heightCm,
+      weightKg: data.weightKg.present ? data.weightKg.value : this.weightKg,
+      birthDate: data.birthDate.present ? data.birthDate.value : this.birthDate,
+      country: data.country.present ? data.country.value : this.country,
+      previousTeam: data.previousTeam.present
+          ? data.previousTeam.value
+          : this.previousTeam,
+      experienceYears: data.experienceYears.present
+          ? data.experienceYears.value
+          : this.experienceYears,
+      careerTeams: data.careerTeams.present
+          ? data.careerTeams.value
+          : this.careerTeams,
+      photoWebpPath: data.photoWebpPath.present
+          ? data.photoWebpPath.value
+          : this.photoWebpPath,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RetiredPlayer(')
+          ..write('playerId: $playerId, ')
+          ..write('fullName: $fullName, ')
+          ..write('displayName: $displayName, ')
+          ..write('position: $position, ')
+          ..write('jerseyNumber: $jerseyNumber, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('country: $country, ')
+          ..write('previousTeam: $previousTeam, ')
+          ..write('experienceYears: $experienceYears, ')
+          ..write('careerTeams: $careerTeams, ')
+          ..write('photoWebpPath: $photoWebpPath')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    playerId,
+    fullName,
+    displayName,
+    position,
+    jerseyNumber,
+    heightCm,
+    weightKg,
+    birthDate,
+    country,
+    previousTeam,
+    experienceYears,
+    careerTeams,
+    photoWebpPath,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is RetiredPlayer &&
+          other.playerId == this.playerId &&
+          other.fullName == this.fullName &&
+          other.displayName == this.displayName &&
+          other.position == this.position &&
+          other.jerseyNumber == this.jerseyNumber &&
+          other.heightCm == this.heightCm &&
+          other.weightKg == this.weightKg &&
+          other.birthDate == this.birthDate &&
+          other.country == this.country &&
+          other.previousTeam == this.previousTeam &&
+          other.experienceYears == this.experienceYears &&
+          other.careerTeams == this.careerTeams &&
+          other.photoWebpPath == this.photoWebpPath);
+}
+
+class RetiredPlayersCompanion extends UpdateCompanion<RetiredPlayer> {
+  final Value<String> playerId;
+  final Value<String> fullName;
+  final Value<String?> displayName;
+  final Value<String?> position;
+  final Value<String?> jerseyNumber;
+  final Value<double?> heightCm;
+  final Value<double?> weightKg;
+  final Value<DateTime?> birthDate;
+  final Value<String?> country;
+  final Value<String?> previousTeam;
+  final Value<int?> experienceYears;
+  final Value<String?> careerTeams;
+  final Value<String?> photoWebpPath;
+  final Value<int> rowid;
+  const RetiredPlayersCompanion({
+    this.playerId = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.displayName = const Value.absent(),
+    this.position = const Value.absent(),
+    this.jerseyNumber = const Value.absent(),
+    this.heightCm = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.country = const Value.absent(),
+    this.previousTeam = const Value.absent(),
+    this.experienceYears = const Value.absent(),
+    this.careerTeams = const Value.absent(),
+    this.photoWebpPath = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  RetiredPlayersCompanion.insert({
+    required String playerId,
+    required String fullName,
+    this.displayName = const Value.absent(),
+    this.position = const Value.absent(),
+    this.jerseyNumber = const Value.absent(),
+    this.heightCm = const Value.absent(),
+    this.weightKg = const Value.absent(),
+    this.birthDate = const Value.absent(),
+    this.country = const Value.absent(),
+    this.previousTeam = const Value.absent(),
+    this.experienceYears = const Value.absent(),
+    this.careerTeams = const Value.absent(),
+    this.photoWebpPath = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : playerId = Value(playerId),
+       fullName = Value(fullName);
+  static Insertable<RetiredPlayer> custom({
+    Expression<String>? playerId,
+    Expression<String>? fullName,
+    Expression<String>? displayName,
+    Expression<String>? position,
+    Expression<String>? jerseyNumber,
+    Expression<double>? heightCm,
+    Expression<double>? weightKg,
+    Expression<DateTime>? birthDate,
+    Expression<String>? country,
+    Expression<String>? previousTeam,
+    Expression<int>? experienceYears,
+    Expression<String>? careerTeams,
+    Expression<String>? photoWebpPath,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (playerId != null) 'player_id': playerId,
+      if (fullName != null) 'full_name': fullName,
+      if (displayName != null) 'display_name': displayName,
+      if (position != null) 'position': position,
+      if (jerseyNumber != null) 'jersey_number': jerseyNumber,
+      if (heightCm != null) 'height_cm': heightCm,
+      if (weightKg != null) 'weight_kg': weightKg,
+      if (birthDate != null) 'birth_date': birthDate,
+      if (country != null) 'country': country,
+      if (previousTeam != null) 'previous_team': previousTeam,
+      if (experienceYears != null) 'experience_years': experienceYears,
+      if (careerTeams != null) 'career_teams': careerTeams,
+      if (photoWebpPath != null) 'photo_webp_path': photoWebpPath,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  RetiredPlayersCompanion copyWith({
+    Value<String>? playerId,
+    Value<String>? fullName,
+    Value<String?>? displayName,
+    Value<String?>? position,
+    Value<String?>? jerseyNumber,
+    Value<double?>? heightCm,
+    Value<double?>? weightKg,
+    Value<DateTime?>? birthDate,
+    Value<String?>? country,
+    Value<String?>? previousTeam,
+    Value<int?>? experienceYears,
+    Value<String?>? careerTeams,
+    Value<String?>? photoWebpPath,
+    Value<int>? rowid,
+  }) {
+    return RetiredPlayersCompanion(
+      playerId: playerId ?? this.playerId,
+      fullName: fullName ?? this.fullName,
+      displayName: displayName ?? this.displayName,
+      position: position ?? this.position,
+      jerseyNumber: jerseyNumber ?? this.jerseyNumber,
+      heightCm: heightCm ?? this.heightCm,
+      weightKg: weightKg ?? this.weightKg,
+      birthDate: birthDate ?? this.birthDate,
+      country: country ?? this.country,
+      previousTeam: previousTeam ?? this.previousTeam,
+      experienceYears: experienceYears ?? this.experienceYears,
+      careerTeams: careerTeams ?? this.careerTeams,
+      photoWebpPath: photoWebpPath ?? this.photoWebpPath,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (playerId.present) {
+      map['player_id'] = Variable<String>(playerId.value);
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (displayName.present) {
+      map['display_name'] = Variable<String>(displayName.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<String>(position.value);
+    }
+    if (jerseyNumber.present) {
+      map['jersey_number'] = Variable<String>(jerseyNumber.value);
+    }
+    if (heightCm.present) {
+      map['height_cm'] = Variable<double>(heightCm.value);
+    }
+    if (weightKg.present) {
+      map['weight_kg'] = Variable<double>(weightKg.value);
+    }
+    if (birthDate.present) {
+      map['birth_date'] = Variable<DateTime>(birthDate.value);
+    }
+    if (country.present) {
+      map['country'] = Variable<String>(country.value);
+    }
+    if (previousTeam.present) {
+      map['previous_team'] = Variable<String>(previousTeam.value);
+    }
+    if (experienceYears.present) {
+      map['experience_years'] = Variable<int>(experienceYears.value);
+    }
+    if (careerTeams.present) {
+      map['career_teams'] = Variable<String>(careerTeams.value);
+    }
+    if (photoWebpPath.present) {
+      map['photo_webp_path'] = Variable<String>(photoWebpPath.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('RetiredPlayersCompanion(')
+          ..write('playerId: $playerId, ')
+          ..write('fullName: $fullName, ')
+          ..write('displayName: $displayName, ')
+          ..write('position: $position, ')
+          ..write('jerseyNumber: $jerseyNumber, ')
+          ..write('heightCm: $heightCm, ')
+          ..write('weightKg: $weightKg, ')
+          ..write('birthDate: $birthDate, ')
+          ..write('country: $country, ')
+          ..write('previousTeam: $previousTeam, ')
+          ..write('experienceYears: $experienceYears, ')
+          ..write('careerTeams: $careerTeams, ')
+          ..write('photoWebpPath: $photoWebpPath, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -5667,6 +6469,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PlayerSeasonsTable playerSeasons = $PlayerSeasonsTable(this);
   late final $CartItemsTable cartItems = $CartItemsTable(this);
   late final $StoreOrdersTable storeOrders = $StoreOrdersTable(this);
+  late final $RetiredPlayersTable retiredPlayers = $RetiredPlayersTable(this);
   late final TeamsDao teamsDao = TeamsDao(this as AppDatabase);
   late final PlayersDao playersDao = PlayersDao(this as AppDatabase);
   late final GamesDao gamesDao = GamesDao(this as AppDatabase);
@@ -5686,6 +6489,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     playerSeasons,
     cartItems,
     storeOrders,
+    retiredPlayers,
   ];
 }
 
@@ -9215,6 +10019,372 @@ typedef $$StoreOrdersTableProcessedTableManager =
       StoreOrder,
       PrefetchHooks Function()
     >;
+typedef $$RetiredPlayersTableCreateCompanionBuilder =
+    RetiredPlayersCompanion Function({
+      required String playerId,
+      required String fullName,
+      Value<String?> displayName,
+      Value<String?> position,
+      Value<String?> jerseyNumber,
+      Value<double?> heightCm,
+      Value<double?> weightKg,
+      Value<DateTime?> birthDate,
+      Value<String?> country,
+      Value<String?> previousTeam,
+      Value<int?> experienceYears,
+      Value<String?> careerTeams,
+      Value<String?> photoWebpPath,
+      Value<int> rowid,
+    });
+typedef $$RetiredPlayersTableUpdateCompanionBuilder =
+    RetiredPlayersCompanion Function({
+      Value<String> playerId,
+      Value<String> fullName,
+      Value<String?> displayName,
+      Value<String?> position,
+      Value<String?> jerseyNumber,
+      Value<double?> heightCm,
+      Value<double?> weightKg,
+      Value<DateTime?> birthDate,
+      Value<String?> country,
+      Value<String?> previousTeam,
+      Value<int?> experienceYears,
+      Value<String?> careerTeams,
+      Value<String?> photoWebpPath,
+      Value<int> rowid,
+    });
+
+class $$RetiredPlayersTableFilterComposer
+    extends Composer<_$AppDatabase, $RetiredPlayersTable> {
+  $$RetiredPlayersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get playerId => $composableBuilder(
+    column: $table.playerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get birthDate => $composableBuilder(
+    column: $table.birthDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoWebpPath => $composableBuilder(
+    column: $table.photoWebpPath,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$RetiredPlayersTableOrderingComposer
+    extends Composer<_$AppDatabase, $RetiredPlayersTable> {
+  $$RetiredPlayersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get playerId => $composableBuilder(
+    column: $table.playerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get heightCm => $composableBuilder(
+    column: $table.heightCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get weightKg => $composableBuilder(
+    column: $table.weightKg,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get birthDate => $composableBuilder(
+    column: $table.birthDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get country => $composableBuilder(
+    column: $table.country,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoWebpPath => $composableBuilder(
+    column: $table.photoWebpPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$RetiredPlayersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $RetiredPlayersTable> {
+  $$RetiredPlayersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get playerId =>
+      $composableBuilder(column: $table.playerId, builder: (column) => column);
+
+  GeneratedColumn<String> get fullName =>
+      $composableBuilder(column: $table.fullName, builder: (column) => column);
+
+  GeneratedColumn<String> get displayName => $composableBuilder(
+    column: $table.displayName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
+  GeneratedColumn<String> get jerseyNumber => $composableBuilder(
+    column: $table.jerseyNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get heightCm =>
+      $composableBuilder(column: $table.heightCm, builder: (column) => column);
+
+  GeneratedColumn<double> get weightKg =>
+      $composableBuilder(column: $table.weightKg, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get birthDate =>
+      $composableBuilder(column: $table.birthDate, builder: (column) => column);
+
+  GeneratedColumn<String> get country =>
+      $composableBuilder(column: $table.country, builder: (column) => column);
+
+  GeneratedColumn<String> get previousTeam => $composableBuilder(
+    column: $table.previousTeam,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get experienceYears => $composableBuilder(
+    column: $table.experienceYears,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get careerTeams => $composableBuilder(
+    column: $table.careerTeams,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get photoWebpPath => $composableBuilder(
+    column: $table.photoWebpPath,
+    builder: (column) => column,
+  );
+}
+
+class $$RetiredPlayersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RetiredPlayersTable,
+          RetiredPlayer,
+          $$RetiredPlayersTableFilterComposer,
+          $$RetiredPlayersTableOrderingComposer,
+          $$RetiredPlayersTableAnnotationComposer,
+          $$RetiredPlayersTableCreateCompanionBuilder,
+          $$RetiredPlayersTableUpdateCompanionBuilder,
+          (
+            RetiredPlayer,
+            BaseReferences<_$AppDatabase, $RetiredPlayersTable, RetiredPlayer>,
+          ),
+          RetiredPlayer,
+          PrefetchHooks Function()
+        > {
+  $$RetiredPlayersTableTableManager(
+    _$AppDatabase db,
+    $RetiredPlayersTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$RetiredPlayersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$RetiredPlayersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$RetiredPlayersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> playerId = const Value.absent(),
+                Value<String> fullName = const Value.absent(),
+                Value<String?> displayName = const Value.absent(),
+                Value<String?> position = const Value.absent(),
+                Value<String?> jerseyNumber = const Value.absent(),
+                Value<double?> heightCm = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
+                Value<DateTime?> birthDate = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                Value<String?> previousTeam = const Value.absent(),
+                Value<int?> experienceYears = const Value.absent(),
+                Value<String?> careerTeams = const Value.absent(),
+                Value<String?> photoWebpPath = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RetiredPlayersCompanion(
+                playerId: playerId,
+                fullName: fullName,
+                displayName: displayName,
+                position: position,
+                jerseyNumber: jerseyNumber,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                birthDate: birthDate,
+                country: country,
+                previousTeam: previousTeam,
+                experienceYears: experienceYears,
+                careerTeams: careerTeams,
+                photoWebpPath: photoWebpPath,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String playerId,
+                required String fullName,
+                Value<String?> displayName = const Value.absent(),
+                Value<String?> position = const Value.absent(),
+                Value<String?> jerseyNumber = const Value.absent(),
+                Value<double?> heightCm = const Value.absent(),
+                Value<double?> weightKg = const Value.absent(),
+                Value<DateTime?> birthDate = const Value.absent(),
+                Value<String?> country = const Value.absent(),
+                Value<String?> previousTeam = const Value.absent(),
+                Value<int?> experienceYears = const Value.absent(),
+                Value<String?> careerTeams = const Value.absent(),
+                Value<String?> photoWebpPath = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => RetiredPlayersCompanion.insert(
+                playerId: playerId,
+                fullName: fullName,
+                displayName: displayName,
+                position: position,
+                jerseyNumber: jerseyNumber,
+                heightCm: heightCm,
+                weightKg: weightKg,
+                birthDate: birthDate,
+                country: country,
+                previousTeam: previousTeam,
+                experienceYears: experienceYears,
+                careerTeams: careerTeams,
+                photoWebpPath: photoWebpPath,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$RetiredPlayersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RetiredPlayersTable,
+      RetiredPlayer,
+      $$RetiredPlayersTableFilterComposer,
+      $$RetiredPlayersTableOrderingComposer,
+      $$RetiredPlayersTableAnnotationComposer,
+      $$RetiredPlayersTableCreateCompanionBuilder,
+      $$RetiredPlayersTableUpdateCompanionBuilder,
+      (
+        RetiredPlayer,
+        BaseReferences<_$AppDatabase, $RetiredPlayersTable, RetiredPlayer>,
+      ),
+      RetiredPlayer,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9233,4 +10403,6 @@ class $AppDatabaseManager {
       $$CartItemsTableTableManager(_db, _db.cartItems);
   $$StoreOrdersTableTableManager get storeOrders =>
       $$StoreOrdersTableTableManager(_db, _db.storeOrders);
+  $$RetiredPlayersTableTableManager get retiredPlayers =>
+      $$RetiredPlayersTableTableManager(_db, _db.retiredPlayers);
 }

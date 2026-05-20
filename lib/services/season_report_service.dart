@@ -18,8 +18,9 @@ class SeasonReportService {
     final pdf = pw.Document();
     final isEnglish = languageCode == 'en';
 
-    final completedGames =
-        games.where((g) => GameStatusUtils.isFinal(g.status)).toList();
+    final completedGames = games
+        .where((g) => GameStatusUtils.isFinal(g.status))
+        .toList();
 
     final totalGames = completedGames.length;
     final wins = completedGames.where((g) {
@@ -123,7 +124,7 @@ class SeasonReportService {
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('${isHome ? 'vs' : '@'} $opponentName'),
+                      pw.Text('vs $opponentName'),
                       pw.Text('$teamScore - $opponentScore'),
                     ],
                   ),

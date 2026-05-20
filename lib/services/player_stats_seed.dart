@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Medias estimadas (so para roster local sem dados BR/manual).
@@ -33,14 +35,16 @@ class PlayerStatsSeed {
 
   static Future<void> init() async {
     try {
-      final String jsonString = await rootBundle.loadString('assets/data/nba_players.json');
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/nba_players.json',
+      );
       final Map<String, dynamic> jsonData = json.decode(jsonString);
-      
+
       _profiles = jsonData.map((key, value) {
         return MapEntry(key, PlayerStatsProfile.fromJson(value));
       });
     } catch (e) {
-      print('Erro ao carregar PlayerStatsSeed: $e');
+      debugPrint('Erro ao carregar PlayerStatsSeed: $e');
     }
   }
 
@@ -81,8 +85,9 @@ class PlayerStatsSeed {
       48.0,
       68.0,
     );
-    final per = (10.0 + perGame.ppg * 0.45 + perGame.apg * 0.25 + perGame.rpg * 0.2)
-        .clamp(10.0, 31.0);
+    final per =
+        (10.0 + perGame.ppg * 0.45 + perGame.apg * 0.25 + perGame.rpg * 0.2)
+            .clamp(10.0, 31.0);
     final usg = (18.0 + perGame.ppg * 0.55 + perGame.topg * 0.9).clamp(
       16.0,
       37.0,
@@ -132,23 +137,46 @@ class PlayerStatsSeed {
     );
 
     final historicalSeasons = <SeasonStats>[];
-    final numHistorical = i(2, 9, 8); // Entre 3 e 10 anos de carreira (contando a atual)
-    
+    final numHistorical = i(
+      2,
+      9,
+      8,
+    ); // Entre 3 e 10 anos de carreira (contando a atual)
+
     final possibleTeams = [
-      'LAL', 'BOS', 'GSW', 'CHI', 'MIA', 'MIL', 'PHX', 'DEN', 'PHI', 'BKN',
-      'DAL', 'LAC', 'ATL', 'TOR', 'MEM', 'NYK', 'CLE', 'UTA', 'POR', 'SAC'
+      'LAL',
+      'BOS',
+      'GSW',
+      'CHI',
+      'MIA',
+      'MIL',
+      'PHX',
+      'DEN',
+      'PHI',
+      'BKN',
+      'DAL',
+      'LAC',
+      'ATL',
+      'TOR',
+      'MEM',
+      'NYK',
+      'CLE',
+      'UTA',
+      'POR',
+      'SAC',
     ];
-    
+
     var lastTeam = teamName ?? 'NBA';
 
     for (var yearOffset = 1; yearOffset <= numHistorical; yearOffset++) {
       final yearStart = 2024 - yearOffset;
       final yearEnd = (yearStart + 1) % 100;
       final seasonStr = '$yearStart-${yearEnd.toString().padLeft(2, '0')}';
-      
+
       // 20% de chance de ter mudado de time no passado
       if (i(1, 100, 100 + yearOffset) < 20) {
-        lastTeam = possibleTeams[i(0, possibleTeams.length - 1, 200 + yearOffset)];
+        lastTeam =
+            possibleTeams[i(0, possibleTeams.length - 1, 200 + yearOffset)];
       }
 
       historicalSeasons.add(
@@ -164,16 +192,34 @@ class PlayerStatsSeed {
           spg: (perGame.spg - d(-0.2, 0.5, 14 + yearOffset)).clamp(0.1, 3.2),
           bpg: (perGame.bpg - d(-0.2, 0.5, 15 + yearOffset)).clamp(0.0, 4.0),
           topg: (perGame.topg - d(-0.5, 0.8, 16 + yearOffset)).clamp(0.4, 5.8),
-          fgPct: (perGame.fgPct - d(-2.0, 3.0, 17 + yearOffset)).clamp(34.0, 68.0),
-          fg3Pct: (perGame.fg3Pct - d(-3.0, 5.0, 18 + yearOffset)).clamp(20.0, 52.0),
-          ftPct: (perGame.ftPct - d(-2.0, 4.0, 19 + yearOffset)).clamp(50.0, 98.0),
+          fgPct: (perGame.fgPct - d(-2.0, 3.0, 17 + yearOffset)).clamp(
+            34.0,
+            68.0,
+          ),
+          fg3Pct: (perGame.fg3Pct - d(-3.0, 5.0, 18 + yearOffset)).clamp(
+            20.0,
+            52.0,
+          ),
+          ftPct: (perGame.ftPct - d(-2.0, 4.0, 19 + yearOffset)).clamp(
+            50.0,
+            98.0,
+          ),
           per: (per - d(-1.0, 3.0, 20 + yearOffset)).clamp(6.0, 32.0),
           tsPct: (tsPct - d(-1.0, 3.0, 21 + yearOffset)).clamp(40.0, 72.0),
           usgPct: (usg - d(-2.0, 4.0, 22 + yearOffset)).clamp(12.0, 40.0),
-          impactMetric: (impact - d(-0.5, 1.5, 23 + yearOffset)).clamp(-6.0, 13.0),
+          impactMetric: (impact - d(-0.5, 1.5, 23 + yearOffset)).clamp(
+            -6.0,
+            13.0,
+          ),
           impactMetricLabel: 'BPM',
-          offensiveRating: (offRtg - d(-2.0, 5.0, 24 + yearOffset)).clamp(90.0, 130.0),
-          defensiveRating: (defRtg + d(-2.0, 3.0, 25 + yearOffset)).clamp(100.0, 126.0),
+          offensiveRating: (offRtg - d(-2.0, 5.0, 24 + yearOffset)).clamp(
+            90.0,
+            130.0,
+          ),
+          defensiveRating: (defRtg + d(-2.0, 3.0, 25 + yearOffset)).clamp(
+            100.0,
+            126.0,
+          ),
           orb: (orb - d(-0.1, 0.5, 26 + yearOffset)).clamp(0.1, 5.0),
           drb: (drb - d(-0.2, 1.0, 27 + yearOffset)).clamp(0.4, 14.0),
           pf: (pf + d(-0.5, 0.6, 28 + yearOffset)).clamp(0.8, 4.5),
@@ -236,9 +282,7 @@ class PlayerStatsSeed {
           tov: (perGame.topg + d(-1.0, 1.4, 52)).round().clamp(0, 9),
         ),
       ],
-      awards: const [
-        AwardItem('Sem premios manuais cadastrados'),
-      ],
+      awards: const [AwardItem('Sem premios manuais cadastrados')],
       health: const HealthStatus(
         status: 'Ativo',
         injuryDescription: '-',
@@ -344,17 +388,32 @@ class PlayerStatsSeed {
     var str = value.toLowerCase();
     // Mapa simples para remover acentos comuns
     const accents = {
-      'á': 'a', 'à': 'a', 'ã': 'a', 'â': 'a', 'é': 'e', 'ê': 'e',
-      'í': 'i', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ú': 'u', 'ç': 'c',
-      'ć': 'c', 'č': 'c', 'š': 's', 'ž': 'z', 'đ': 'd', 'ý': 'y'
+      'á': 'a',
+      'à': 'a',
+      'ã': 'a',
+      'â': 'a',
+      'é': 'e',
+      'ê': 'e',
+      'í': 'i',
+      'ó': 'o',
+      'ô': 'o',
+      'õ': 'o',
+      'ú': 'u',
+      'ç': 'c',
+      'ć': 'c',
+      'č': 'c',
+      'š': 's',
+      'ž': 'z',
+      'đ': 'd',
+      'ý': 'y',
     };
     accents.forEach((key, val) => str = str.replaceAll(key, val));
-    
+
     return str
-      .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
-      .replaceAll(RegExp(r'_+'), '_')
-      .trim()
-      .replaceAll(RegExp(r'^_+|_+$'), '');
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .trim()
+        .replaceAll(RegExp(r'^_+|_+$'), '');
   }
 
   static int _stableSeed(String fullName, String? position) {
@@ -395,11 +454,15 @@ class PlayerStatsProfile {
   factory PlayerStatsProfile.fromJson(Map<String, dynamic> json) {
     return PlayerStatsProfile(
       currentSeason: SeasonStats.fromJson(json['currentSeason']),
-      seasons: (json['seasons'] as List).map((s) => SeasonStats.fromJson(s)).toList(),
+      seasons: (json['seasons'] as List)
+          .map((s) => SeasonStats.fromJson(s))
+          .toList(),
       career: CareerTotals.fromJson(json['career']),
       careerHighs: CareerHighs.fromJson(json['careerHighs']),
-      recentGames: [], 
-      awards: (json['awards'] as List).map((a) => AwardItem(a.toString())).toList(),
+      recentGames: [],
+      awards: (json['awards'] as List)
+          .map((a) => AwardItem(a.toString()))
+          .toList(),
       health: HealthStatus.fromJson(json['health']),
     );
   }

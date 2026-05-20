@@ -1,10 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:drift/drift.dart';
 
 import '../db/app_database.dart';
-import '../db/daos/players_dao.dart';
 import 'basketball_reference_service.dart';
-
 
 /// Sincroniza medias na BD a partir de sites (Basketball-Reference.com, HTML).
 class PlayerStatsWebSync {
@@ -59,28 +56,32 @@ class PlayerStatsWebSync {
             );
 
             final c = profile.career;
-            
+
             // Salva todas as temporadas historicas para offline real
-            final seasonsToSave = profile.seasons.map((s) => PlayerSeasonsCompanion(
-              playerId: Value(player.playerId),
-              season: Value(s.season),
-              team: Value(s.team),
-              gp: Value(s.gp),
-              gs: Value(s.gs),
-              mpg: Value(s.mpg),
-              ppg: Value(s.ppg),
-              rpg: Value(s.rpg),
-              apg: Value(s.apg),
-              spg: Value(s.spg),
-              bpg: Value(s.bpg),
-              topg: Value(s.topg),
-              fgPct: Value(s.fgPct),
-              fg3Pct: Value(s.fg3Pct),
-              ftPct: Value(s.ftPct),
-              per: Value(s.per),
-              tsPct: Value(s.tsPct),
-              usgPct: Value(s.usgPct),
-            )).toList();
+            final seasonsToSave = profile.seasons
+                .map(
+                  (s) => PlayerSeasonsCompanion(
+                    playerId: Value(player.playerId),
+                    season: Value(s.season),
+                    team: Value(s.team),
+                    gp: Value(s.gp),
+                    gs: Value(s.gs),
+                    mpg: Value(s.mpg),
+                    ppg: Value(s.ppg),
+                    rpg: Value(s.rpg),
+                    apg: Value(s.apg),
+                    spg: Value(s.spg),
+                    bpg: Value(s.bpg),
+                    topg: Value(s.topg),
+                    fgPct: Value(s.fgPct),
+                    fg3Pct: Value(s.fg3Pct),
+                    ftPct: Value(s.ftPct),
+                    per: Value(s.per),
+                    tsPct: Value(s.tsPct),
+                    usgPct: Value(s.usgPct),
+                  ),
+                )
+                .toList();
 
             await _playersDao.deletePlayerSeasons(player.playerId);
             await _playersDao.upsertPlayerSeasons(seasonsToSave);
@@ -89,7 +90,7 @@ class PlayerStatsWebSync {
                 .map((e) => e.team)
                 .where((t) => t.isNotEmpty && t != 'TOT')
                 .toList(); // Mantem ordem cronologica
-            
+
             final uniqueTeams = <String>[];
             for (final t in teamList) {
               if (uniqueTeams.isEmpty || uniqueTeams.last != t) {
@@ -134,20 +135,42 @@ class PlayerStatsWebSync {
       final s = profile.currentSeason;
       await _playersDao.updatePlayerSeasonStats(
         player.playerId,
-        ppg: s.ppg, rpg: s.rpg, apg: s.apg, spg: s.spg, bpg: s.bpg,
-        mpg: s.mpg, topg: s.topg, fgPct: s.fgPct, fg3Pct: s.fg3Pct, ftPct: s.ftPct,
+        ppg: s.ppg,
+        rpg: s.rpg,
+        apg: s.apg,
+        spg: s.spg,
+        bpg: s.bpg,
+        mpg: s.mpg,
+        topg: s.topg,
+        fgPct: s.fgPct,
+        fg3Pct: s.fg3Pct,
+        ftPct: s.ftPct,
       );
 
-      final seasonsToSave = profile.seasons.map((s) => PlayerSeasonsCompanion(
-        playerId: Value(player.playerId),
-        season: Value(s.season),
-        team: Value(s.team),
-        gp: Value(s.gp), gs: Value(s.gs), mpg: Value(s.mpg), ppg: Value(s.ppg),
-        rpg: Value(s.rpg), apg: Value(s.apg), spg: Value(s.spg), bpg: Value(s.bpg),
-        topg: Value(s.topg), fgPct: Value(s.fgPct), fg3Pct: Value(s.fg3Pct),
-        ftPct: Value(s.ftPct), per: Value(s.per), tsPct: Value(s.tsPct),
-        usgPct: Value(s.usgPct),
-      )).toList();
+      final seasonsToSave = profile.seasons
+          .map(
+            (s) => PlayerSeasonsCompanion(
+              playerId: Value(player.playerId),
+              season: Value(s.season),
+              team: Value(s.team),
+              gp: Value(s.gp),
+              gs: Value(s.gs),
+              mpg: Value(s.mpg),
+              ppg: Value(s.ppg),
+              rpg: Value(s.rpg),
+              apg: Value(s.apg),
+              spg: Value(s.spg),
+              bpg: Value(s.bpg),
+              topg: Value(s.topg),
+              fgPct: Value(s.fgPct),
+              fg3Pct: Value(s.fg3Pct),
+              ftPct: Value(s.ftPct),
+              per: Value(s.per),
+              tsPct: Value(s.tsPct),
+              usgPct: Value(s.usgPct),
+            ),
+          )
+          .toList();
 
       await _playersDao.deletePlayerSeasons(player.playerId);
       await _playersDao.upsertPlayerSeasons(seasonsToSave);
@@ -156,7 +179,7 @@ class PlayerStatsWebSync {
           .map((e) => e.team)
           .where((t) => t.isNotEmpty && t != 'TOT')
           .toList();
-      
+
       final uniqueTeams = <String>[];
       for (final t in teamList) {
         if (uniqueTeams.isEmpty || uniqueTeams.last != t) {
@@ -167,9 +190,15 @@ class PlayerStatsWebSync {
       final c = profile.career;
       await _playersDao.updatePlayerCareerStats(
         player.playerId,
-        points: c.points, rebounds: c.rebounds, assists: c.assists,
-        steals: c.steals, blocks: c.blocks, games: c.games, starts: c.starts,
-        turnovers: c.turnovers, careerTeams: uniqueTeams.join(','),
+        points: c.points,
+        rebounds: c.rebounds,
+        assists: c.assists,
+        steals: c.steals,
+        blocks: c.blocks,
+        games: c.games,
+        starts: c.starts,
+        turnovers: c.turnovers,
+        careerTeams: uniqueTeams.join(','),
       );
 
       return true;

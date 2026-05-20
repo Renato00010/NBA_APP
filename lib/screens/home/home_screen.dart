@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../../main.dart';
 import '../../db/app_database.dart';
@@ -11,7 +14,11 @@ import '../profile/profile_screen.dart';
 import '../games/game_detail_screen.dart';
 import '../../utils/game_status_utils.dart';
 import '../../widgets/basketball_loader.dart';
-import 'dart:ui';
+import '../../widgets/live_game_clock.dart';
+import '../chatbot/ai_chatbot_screen.dart';
+import '../playground/playground_hub_screen.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,11 +35,22 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loadingTeams = true;
   bool _loadingGames = true;
   bool _loadingNews = true;
+  bool _refreshingGames = false;
+  Timer? _liveRefreshTimer;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _liveRefreshTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _loadGames(isBackground: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _liveRefreshTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -61,6 +79,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
+      await _loadGames();
+    } catch (e) {
+      if (mounted) setState(() => _loadingGames = false);
+    }
+  }
+
+  Future<void> _loadGames({bool isBackground = false}) async {
+    if (_refreshingGames) return;
+
+    _refreshingGames = true;
+    try {
       final games = await repository.getGamesByDate(DateTime.now());
       if (mounted) {
         setState(() {
@@ -68,8 +97,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _loadingGames = false;
         });
       }
-    } catch (e) {
-      if (mounted) setState(() => _loadingGames = false);
+    } catch (_) {
+      if (mounted && !isBackground) {
+        setState(() => _loadingGames = false);
+      }
+    } finally {
+      _refreshingGames = false;
     }
   }
 
@@ -93,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
           gameId: game.gameId,
           homeName: homeName,
           awayName: awayName,
+          gameDate: game.gameDate,
         ),
       ),
     );
@@ -164,8 +198,10 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!_loadingNews && _news.isNotEmpty) _buildNewsTicker(),
+              _buildPlaygroundEntryCard(theme),
               const SizedBox(height: 20),
               _buildSectionHeader(_t(context, 'Equipas', 'Teams')),
+
               const SizedBox(height: 12),
               _buildTeamsList(theme),
               const SizedBox(height: 32),
@@ -179,8 +215,40 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withValues(alpha: 0.4),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            )
+          ],
+        ),
+
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AiChatbotScreen(),
+              ),
+            );
+          },
+          backgroundColor: theme.colorScheme.primary,
+          elevation: 0,
+          child: const Icon(
+            Icons.smart_toy_outlined,
+            color: Colors.white,
+            size: 26,
+          ),
+        ),
+      ),
     );
   }
+
 
   Widget _buildSectionHeader(String title) {
     return Padding(
@@ -356,55 +424,65 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildTeamInGame(game.homeTeamId, homeName, 'game_${game.gameId}_${game.homeTeamId}'),
-          Column(
-            children: [
-              if (isLive)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
+                  _buildTeamInGame(
+                    game.homeTeamId,
+                    homeName,
+                    'game_${game.gameId}_${game.homeTeamId}',
                   ),
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE11D48),
-                    borderRadius: BorderRadius.circular(6),
+                  Column(
+                    children: [
+                      if (isLive)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE11D48),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'LIVE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        '${game.scoreHome} - ${game.scoreAway}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 34,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -1,
+                        ),
+                      ),
+                      LiveGameClock(
+                        status: game.status,
+                        style: TextStyle(
+                          color: isLive
+                              ? const Color(0xFFE11D48)
+                              : Colors.white38,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Text(
-                    'LIVE',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  _buildTeamInGame(
+                    game.awayTeamId,
+                    awayName,
+                    'game_${game.gameId}_${game.awayTeamId}',
                   ),
-                ),
-              Text(
-                '${game.scoreHome} - ${game.scoreAway}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 34,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -1,
-                ),
+                ],
               ),
-              Text(
-                game.status.toUpperCase(),
-                style: TextStyle(
-                  color: isLive ? const Color(0xFFE11D48) : Colors.white38,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
+            ),
           ),
-          _buildTeamInGame(game.awayTeamId, awayName, 'game_${game.gameId}_${game.awayTeamId}'),
-        ],
+        ),
       ),
-    ),
-    ),
-    ),
-    ),
     );
   }
 
@@ -423,6 +501,117 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPlaygroundEntryCard(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(left: 18, right: 18, top: 22, bottom: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF8C00), Color(0xFF8A2BE2)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF8A2BE2).withValues(alpha: 0.35),
+            blurRadius: 15,
+            spreadRadius: 1,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PlaygroundHubScreen(),
+                ),
+              );
+            },
+            splashColor: Colors.white.withValues(alpha: 0.15),
+            child: Padding(
+              padding: const EdgeInsets.all(22.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.25),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.sports_basketball_outlined,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _t(context, 'NOVO • DIVERSÃO', 'NEW • FUN ZONE'),
+                            style: const TextStyle(
+                              color: Colors.amberAccent,
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _t(context, 'ZONA PLAYGROUND', 'PLAYGROUND ZONE'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _t(
+                            context,
+                            'Joga Basket Grid, Fantasy Draft e Trivia Quiz!',
+                            'Play Basket Grid, Fantasy Draft & Trivia Quiz!',
+                          ),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -459,7 +648,7 @@ class _HoverTeamItemState extends State<_HoverTeamItem> {
           width: 85,
           margin: const EdgeInsets.symmetric(horizontal: 6),
           transform: _isHovered
-              ? (Matrix4.identity()..scale(1.15))
+              ? (Matrix4.identity()..scaleByDouble(1.15, 1.15, 1, 1))
               : Matrix4.identity(),
           child: Column(
             children: [

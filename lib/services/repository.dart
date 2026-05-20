@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart'; // debugPrint
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:drift/drift.dart'; // Value<T>
 import '../db/app_database.dart';
 import '../models/standing.dart';
 import '../models/player_season_stats.dart';
@@ -134,14 +133,15 @@ class NbaRepository {
   static DateTime seasonStartDate(int seasonYear) =>
       DateTime(seasonYear - 1, 10, 1);
 
-  static DateTime seasonEndDate(int seasonYear) =>
-      DateTime(seasonYear, 7, 1);
+  static DateTime seasonEndDate(int seasonYear) => DateTime(seasonYear, 7, 1);
 
   int _parseEspnScore(dynamic score) {
     if (score == null) return 0;
     if (score is Map) {
       final raw =
-          score['displayValue']?.toString() ?? score['value']?.toString() ?? '0';
+          score['displayValue']?.toString() ??
+          score['value']?.toString() ??
+          '0';
       return int.tryParse(raw.split('.').first) ?? 0;
     }
     return int.tryParse(score.toString()) ?? 0;
@@ -166,10 +166,8 @@ class NbaRepository {
 
     final homeTeam = home['team'] as Map<String, dynamic>?;
     final awayTeam = away['team'] as Map<String, dynamic>?;
-    final homeName =
-        homeTeam?['displayName'] ?? homeTeam?['name'] ?? '';
-    final awayName =
-        awayTeam?['displayName'] ?? awayTeam?['name'] ?? '';
+    final homeName = homeTeam?['displayName'] ?? homeTeam?['name'] ?? '';
+    final awayName = awayTeam?['displayName'] ?? awayTeam?['name'] ?? '';
 
     final statusSource =
         comp['status'] as Map<String, dynamic>? ??
@@ -281,19 +279,16 @@ class NbaRepository {
 
     final end = today.add(Duration(days: daysAhead + 1));
     final games = await _db.gamesDao.getGamesInDateRange(today, end);
-    final upcoming = games
-        .where((game) {
-          if (game.homeTeamId != teamId && game.awayTeamId != teamId) {
-            return false;
-          }
-          final status = game.status.toLowerCase();
-          if (status.contains('final')) return false;
-          return game.gameDate.isAfter(
-            DateTime.now().subtract(const Duration(minutes: 15)),
-          );
-        })
-        .toList()
-      ..sort((a, b) => a.gameDate.compareTo(b.gameDate));
+    final upcoming = games.where((game) {
+      if (game.homeTeamId != teamId && game.awayTeamId != teamId) {
+        return false;
+      }
+      final status = game.status.toLowerCase();
+      if (status.contains('final')) return false;
+      return game.gameDate.isAfter(
+        DateTime.now().subtract(const Duration(minutes: 15)),
+      );
+    }).toList()..sort((a, b) => a.gameDate.compareTo(b.gameDate));
     return _withoutDemoGames(upcoming);
   }
 
@@ -370,7 +365,8 @@ class NbaRepository {
         final espn = await _api.getEspnStandings();
         if (espn.isNotEmpty) {
           return espn.map((row) {
-            final mappedId = int.tryParse(_findTeamIdByName(row.teamName)) ?? row.teamId;
+            final mappedId =
+                int.tryParse(_findTeamIdByName(row.teamName)) ?? row.teamId;
             return Standing(
               teamId: mappedId,
               teamName: row.teamName,

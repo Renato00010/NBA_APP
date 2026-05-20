@@ -4,9 +4,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
 
-import '../db/app_database.dart';
 import '../main.dart';
-import 'repository.dart';
 
 class NotificationService {
   NotificationService._();
@@ -39,15 +37,23 @@ class NotificationService {
   }
 
   Future<bool> requestPermissions() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (android != null) {
       return await android.requestNotificationsPermission() ?? false;
     }
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (ios != null) {
-      return await ios.requestPermissions(alert: true, badge: true, sound: true) ??
+      return await ios.requestPermissions(
+            alert: true,
+            badge: true,
+            sound: true,
+          ) ??
           false;
     }
     return true;
@@ -75,11 +81,11 @@ class NotificationService {
       final notifyAt = game.gameDate.subtract(const Duration(hours: 1));
       if (!notifyAt.isAfter(DateTime.now())) continue;
 
-      final opponentId =
-          game.homeTeamId == teamId ? game.awayTeamId : game.homeTeamId;
+      final opponentId = game.homeTeamId == teamId
+          ? game.awayTeamId
+          : game.homeTeamId;
       final opponent = repository.getTeamName(opponentId);
-      final isHome = game.homeTeamId == teamId;
-      final title = isHome ? '$teamName vs $opponent' : '$teamName @ $opponent';
+      final title = '$teamName vs $opponent';
 
       final id = game.gameId.hashCode & 0x7FFFFFFF;
       await _plugin.zonedSchedule(
@@ -91,8 +97,7 @@ class NotificationService {
           android: AndroidNotificationDetails(
             'nba_team_games',
             'Jogos da equipa favorita',
-            channelDescription:
-                'Lembretes antes dos jogos reais da tua equipa',
+            channelDescription: 'Lembretes antes dos jogos reais da tua equipa',
             importance: Importance.high,
             priority: Priority.high,
           ),

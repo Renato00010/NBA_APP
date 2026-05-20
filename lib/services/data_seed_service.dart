@@ -1,10 +1,8 @@
-import 'package:drift/drift.dart';
 import '../db/app_database.dart';
-import '../db/daos/players_dao.dart';
-import '../db/daos/teams_dao.dart';
 import 'nba_api_service.dart';
 import 'player_bio_seed.dart';
 import 'player_photo_seed.dart';
+import 'player_stats_seed.dart';
 
 class DataSeedService {
   final NbaApiService _apiService;
@@ -349,7 +347,317 @@ class DataSeedService {
   Future<void> seedDatabase() async {
     await _seedTeams();
     await _seedPlayers();
+    await _seedRetiredPlayers();
   }
+
+  // Seed retired players
+  Future<void> _seedRetiredPlayers() async {
+    final retiredLegends = [
+      RetiredPlayersCompanion(
+        playerId: const Value('R1'),
+        fullName: const Value('Michael Jordan'),
+        displayName: const Value('Michael Jordan'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('23'),
+        heightCm: const Value(198.12),
+        weightKg: const Value(98.0),
+        birthDate: Value(DateTime(1963, 2, 17)),
+        country: const Value('USA'),
+        previousTeam: const Value('North Carolina'),
+        experienceYears: const Value(15),
+        careerTeams: const Value('CHI,WAS'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R2'),
+        fullName: const Value('Kobe Bryant'),
+        displayName: const Value('Kobe Bryant'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('24'),
+        heightCm: const Value(198.12),
+        weightKg: const Value(96.0),
+        birthDate: Value(DateTime(1978, 8, 23)),
+        country: const Value('USA'),
+        previousTeam: const Value('Lower Merion HS'),
+        experienceYears: const Value(20),
+        careerTeams: const Value('LAL'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R3'),
+        fullName: const Value('Shaquille O\'Neal'),
+        displayName: const Value('Shaquille O\'Neal'),
+        position: const Value('C'),
+        jerseyNumber: const Value('32'),
+        heightCm: const Value(215.90),
+        weightKg: const Value(147.4),
+        birthDate: Value(DateTime(1972, 3, 6)),
+        country: const Value('USA'),
+        previousTeam: const Value('LSU'),
+        experienceYears: const Value(19),
+        careerTeams: const Value('ORL,LAL,MIA,PHX,CLE,BOS'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R4'),
+        fullName: const Value('Magic Johnson'),
+        displayName: const Value('Magic Johnson'),
+        position: const Value('PG'),
+        jerseyNumber: const Value('32'),
+        heightCm: const Value(205.74),
+        weightKg: const Value(99.8),
+        birthDate: Value(DateTime(1959, 8, 14)),
+        country: const Value('USA'),
+        previousTeam: const Value('Michigan State'),
+        experienceYears: const Value(13),
+        careerTeams: const Value('LAL'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R5'),
+        fullName: const Value('Larry Bird'),
+        displayName: const Value('Larry Bird'),
+        position: const Value('SF'),
+        jerseyNumber: const Value('33'),
+        heightCm: const Value(205.74),
+        weightKg: const Value(99.8),
+        birthDate: Value(DateTime(1956, 12, 07)),
+        country: const Value('USA'),
+        previousTeam: const Value('Indiana State'),
+        experienceYears: const Value(13),
+        careerTeams: const Value('BOS'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R6'),
+        fullName: const Value('Allen Iverson'),
+        displayName: const Value('Allen Iverson'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('3'),
+        heightCm: const Value(182.88),
+        weightKg: const Value(74.8),
+        birthDate: Value(DateTime(1975, 6, 7)),
+        country: const Value('USA'),
+        previousTeam: const Value('Georgetown'),
+        experienceYears: const Value(14),
+        careerTeams: const Value('PHI,DEN,DET,MEM'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R7'),
+        fullName: const Value('Dwyane Wade'),
+        displayName: const Value('Dwyane Wade'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('3'),
+        heightCm: const Value(193.04),
+        weightKg: const Value(99.8),
+        birthDate: Value(DateTime(1982, 1, 17)),
+        country: const Value('USA'),
+        previousTeam: const Value('Marquette'),
+        experienceYears: const Value(16),
+        careerTeams: const Value('MIA,CHI,CLE'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R8'),
+        fullName: const Value('Dirk Nowitzki'),
+        displayName: const Value('Dirk Nowitzki'),
+        position: const Value('PF'),
+        jerseyNumber: const Value('41'),
+        heightCm: const Value(213.36),
+        weightKg: const Value(111.1),
+        birthDate: Value(DateTime(1978, 6, 19)),
+        country: const Value('Germany'),
+        previousTeam: const Value('Germany'),
+        experienceYears: const Value(21),
+        careerTeams: const Value('DAL'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R9'),
+        fullName: const Value('Tim Duncan'),
+        displayName: const Value('Tim Duncan'),
+        position: const Value('PF'),
+        jerseyNumber: const Value('21'),
+        heightCm: const Value(210.82),
+        weightKg: const Value(113.4),
+        birthDate: Value(DateTime(1976, 4, 25)),
+        country: const Value('USA'),
+        previousTeam: const Value('Wake Forest'),
+        experienceYears: const Value(19),
+        careerTeams: const Value('SAS'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R10'),
+        fullName: const Value('Kevin Garnett'),
+        displayName: const Value('Kevin Garnett'),
+        position: const Value('PF'),
+        jerseyNumber: const Value('5'),
+        heightCm: const Value(210.82),
+        weightKg: const Value(108.9),
+        birthDate: Value(DateTime(1976, 5, 19)),
+        country: const Value('USA'),
+        previousTeam: const Value('Farragut Academy HS'),
+        experienceYears: const Value(21),
+        careerTeams: const Value('MIN,BOS,BKN'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R11'),
+        fullName: const Value('Reggie Miller'),
+        displayName: const Value('Reggie Miller'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('31'),
+        heightCm: const Value(200.66),
+        weightKg: const Value(83.9),
+        birthDate: Value(DateTime(1965, 8, 24)),
+        country: const Value('USA'),
+        previousTeam: const Value('UCLA'),
+        experienceYears: const Value(18),
+        careerTeams: const Value('IND'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R12'),
+        fullName: const Value('Charles Barkley'),
+        displayName: const Value('Charles Barkley'),
+        position: const Value('PF'),
+        jerseyNumber: const Value('34'),
+        heightCm: const Value(198.12),
+        weightKg: const Value(114.3),
+        birthDate: Value(DateTime(1963, 2, 20)),
+        country: const Value('USA'),
+        previousTeam: const Value('Auburn'),
+        experienceYears: const Value(16),
+        careerTeams: const Value('PHI,PHX,HOU'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R13'),
+        fullName: const Value('Hakeem Olajuwon'),
+        displayName: const Value('Hakeem Olajuwon'),
+        position: const Value('C'),
+        jerseyNumber: const Value('34'),
+        heightCm: const Value(213.36),
+        weightKg: const Value(115.7),
+        birthDate: Value(DateTime(1963, 1, 21)),
+        country: const Value('Nigeria'),
+        previousTeam: const Value('Houston'),
+        experienceYears: const Value(18),
+        careerTeams: const Value('HOU,TOR'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R14'),
+        fullName: const Value('Steve Nash'),
+        displayName: const Value('Steve Nash'),
+        position: const Value('PG'),
+        jerseyNumber: const Value('13'),
+        heightCm: const Value(190.50),
+        weightKg: const Value(88.5),
+        birthDate: Value(DateTime(1974, 2, 7)),
+        country: const Value('Canada'),
+        previousTeam: const Value('Santa Clara'),
+        experienceYears: const Value(18),
+        careerTeams: const Value('PHX,DAL,LAL'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R15'),
+        fullName: const Value('Paul Pierce'),
+        displayName: const Value('Paul Pierce'),
+        position: const Value('SF'),
+        jerseyNumber: const Value('34'),
+        heightCm: const Value(200.66),
+        weightKg: const Value(106.6),
+        birthDate: Value(DateTime(1977, 10, 13)),
+        country: const Value('USA'),
+        previousTeam: const Value('Kansas'),
+        experienceYears: const Value(19),
+        careerTeams: const Value('BOS,BKN,WAS,LAC'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R16'),
+        fullName: const Value('Ray Allen'),
+        displayName: const Value('Ray Allen'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('34'),
+        heightCm: const Value(195.58),
+        weightKg: const Value(93.0),
+        birthDate: Value(DateTime(1975, 7, 20)),
+        country: const Value('USA'),
+        previousTeam: const Value('UConn'),
+        experienceYears: const Value(18),
+        careerTeams: const Value('MIL,OKC,BOS,MIA'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R17'),
+        fullName: const Value('Vince Carter'),
+        displayName: const Value('Vince Carter'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('15'),
+        heightCm: const Value(198.12),
+        weightKg: const Value(99.8),
+        birthDate: Value(DateTime(1977, 1, 26)),
+        country: const Value('USA'),
+        previousTeam: const Value('North Carolina'),
+        experienceYears: const Value(22),
+        careerTeams: const Value('TOR,BKN,ORL,PHX,DAL,MEM,SAC,ATL'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R18'),
+        fullName: const Value('Tracy McGrady'),
+        displayName: const Value('Tracy McGrady'),
+        position: const Value('SG'),
+        jerseyNumber: const Value('1'),
+        heightCm: const Value(203.20),
+        weightKg: const Value(95.3),
+        birthDate: Value(DateTime(1979, 5, 24)),
+        country: const Value('USA'),
+        previousTeam: const Value('Mt. Zion Christian Acad.'),
+        experienceYears: const Value(15),
+        careerTeams: const Value('TOR,ORL,HOU,NYK,DET,ATL,SAS'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R19'),
+        fullName: const Value('Yao Ming'),
+        displayName: const Value('Yao Ming'),
+        position: const Value('C'),
+        jerseyNumber: const Value('11'),
+        heightCm: const Value(228.60),
+        weightKg: const Value(140.6),
+        birthDate: Value(DateTime(1980, 9, 12)),
+        country: const Value('China'),
+        previousTeam: const Value('China'),
+        experienceYears: const Value(8),
+        careerTeams: const Value('HOU'),
+        photoWebpPath: const Value(null),
+      ),
+      RetiredPlayersCompanion(
+        playerId: const Value('R20'),
+        fullName: const Value('Scottie Pippen'),
+        displayName: const Value('Scottie Pippen'),
+        position: const Value('SF'),
+        jerseyNumber: const Value('33'),
+        heightCm: const Value(203.20),
+        weightKg: const Value(95.3),
+        birthDate: Value(DateTime(1965, 9, 25)),
+        country: const Value('USA'),
+        previousTeam: const Value('Central Arkansas'),
+        experienceYears: const Value(17),
+        careerTeams: const Value('CHI,HOU,POR'),
+        photoWebpPath: const Value(null),
+      ),
+    ];
+    await _playersDao.upsertAllRetiredPlayers(retiredLegends);
+  }
+
+  
 
   Future<void> _seedTeams() async {
     final companions = _teams
@@ -387,6 +695,65 @@ class DataSeedService {
           ),
     };
 
+    String cleanTeamCode(String name) {
+      final n = name.toLowerCase();
+      if (n.contains('lakers')) return 'LAL';
+      if (n.contains('celtics')) return 'BOS';
+      if (n.contains('warriors') || n == 'gs') return 'GSW';
+      if (n.contains('heat')) return 'MIA';
+      if (n.contains('nets')) return 'BKN';
+      if (n.contains('clippers')) return 'LAC';
+      if (n.contains('hawks')) return 'ATL';
+      if (n.contains('hornets')) return 'CHA';
+      if (n.contains('bulls')) return 'CHI';
+      if (n.contains('cavaliers')) return 'CLE';
+      if (n.contains('mavericks')) return 'DAL';
+      if (n.contains('nuggets')) return 'DEN';
+      if (n.contains('pistons')) return 'DET';
+      if (n.contains('rockets')) return 'HOU';
+      if (n.contains('pacers')) return 'IND';
+      if (n.contains('grizzlies')) return 'MEM';
+      if (n.contains('bucks')) return 'MIL';
+      if (n.contains('timberwolves')) return 'MIN';
+      if (n.contains('pelicans')) return 'NOP';
+      if (n.contains('knicks')) return 'NYK';
+      if (n.contains('thunder') || n == 'okc') return 'OKC';
+      if (n.contains('magic')) return 'ORL';
+      if (n.contains('76ers') || n == 'phi') return 'PHI';
+      if (n.contains('suns') || n == 'phx') return 'PHX';
+      if (n.contains('trail blazers') || n == 'por') return 'POR';
+      if (n.contains('kings')) return 'SAC';
+      if (n.contains('spurs') || n == 'sas') return 'SAS';
+      if (n.contains('raptors')) return 'TOR';
+      if (n.contains('jazz')) return 'UTA';
+      if (n.contains('wizards') || n == 'was') return 'WAS';
+      return name.toUpperCase();
+    }
+
+    String getCareerTeamsString(String fullName, String teamId) {
+      final statsProfile = PlayerStatsSeed.forName(fullName) ??
+          PlayerStatsSeed.estimatedProfileForRosterGap(
+            fullName: fullName,
+            position: 'SF',
+            teamName: _teams.firstWhere((t) => t.id == teamId, orElse: () => _teams.first).name,
+          );
+
+      final teamCodes = <String>{};
+      
+      // Add current team code
+      final activeTeamName = _teams.firstWhere((t) => t.id == teamId, orElse: () => _teams.first).name;
+      teamCodes.add(cleanTeamCode(activeTeamName));
+
+      // Add career seasons teams
+      for (final s in statsProfile.seasons) {
+        if (s.team.isNotEmpty && s.team != 'TOT') {
+          teamCodes.add(cleanTeamCode(s.team));
+        }
+      }
+      
+      return teamCodes.join(',');
+    }
+
     var seedId = -100000;
     final companions = <PlayersCompanion>[];
     for (final entry in _playersByTeam.entries) {
@@ -398,6 +765,7 @@ class DataSeedService {
         );
         final bio = PlayerBioSeed.forName(player.fullName);
         final existingPlayer = existingPlayerByName[normalizedName];
+        final careerTeamsString = getCareerTeamsString(player.fullName, teamId);
 
         if (existingPlayer != null) {
           if (existingPlayer.teamId != teamId ||
@@ -410,7 +778,8 @@ class DataSeedService {
               existingPlayer.birthDate != bio?.birthDate ||
               existingPlayer.country != bio?.country ||
               existingPlayer.previousTeam != bio?.previousTeam ||
-              existingPlayer.experienceYears != bio?.experienceYears) {
+              existingPlayer.experienceYears != bio?.experienceYears ||
+              existingPlayer.careerTeams != careerTeamsString) {
             await _playersDao.updatePlayerSeedData(
               existingPlayer.playerId,
               teamId: teamId,
@@ -424,6 +793,7 @@ class DataSeedService {
               country: bio?.country,
               previousTeam: bio?.previousTeam,
               experienceYears: bio?.experienceYears,
+              careerTeams: careerTeamsString,
             );
           }
           continue;
@@ -444,6 +814,7 @@ class DataSeedService {
             previousTeam: Value(bio?.previousTeam),
             experienceYears: Value(bio?.experienceYears),
             photoWebpPath: Value(assetPhotoPath),
+            careerTeams: Value(careerTeamsString),
           ),
         );
       }

@@ -150,8 +150,17 @@ class NewsDetailScreen extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           final url = Uri.parse(article['links']['web']['href']);
-                          if (await canLaunchUrl(url)) {
-                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                          final opened = await launchUrl(
+                            url,
+                            mode: LaunchMode.externalApplication,
+                          );
+
+                          if (!opened && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Nao foi possivel abrir a noticia.'),
+                              ),
+                            );
                           }
                         },
                         icon: const Icon(Icons.open_in_browser),

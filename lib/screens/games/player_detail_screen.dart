@@ -529,26 +529,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     );
   }
 
-  Widget _careerInfoButton(
-    Player player,
-    String measurementUnit,
-    ThemeData theme,
-  ) {
-    return Tooltip(
-      message: 'Mais informações',
-      child: IconButton(
-        onPressed: () => _showPlayerInfoSheet(player, measurementUnit, theme),
-        icon: Stack(
-          alignment: Alignment.center,
-          children: const [
-            Icon(Icons.sports_basketball, color: Color(0xFFFFC72C), size: 30),
-            Icon(Icons.info_outline, color: Colors.black, size: 17),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showPlayerInfoSheet(
     Player player,
     String measurementUnit,
@@ -736,18 +716,39 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
               const SizedBox(height: 24),
               ListTile(
                 leading: const Icon(Icons.show_chart, color: Color(0xFFFFC72C)),
-                title: const Text('Gráfico de Evolução', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Compara o rendimento ao longo das épocas', style: TextStyle(color: Colors.white54)),
+                title: const Text(
+                  'Gráfico de Evolução',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Compara o rendimento ao longo das épocas',
+                  style: TextStyle(color: Colors.white54),
+                ),
                 onTap: () {
                   Navigator.pop(context);
-                  _showEvolutionChartActual(context);
+                  _showEvolutionChartActual();
                 },
               ),
               const Divider(color: Colors.white12),
               ListTile(
-                leading: const Icon(Icons.local_fire_department, color: Color(0xFFC9082A)),
-                title: const Text('Mapa de Lançamento (Heatmap)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                subtitle: const Text('Zonas quentes e frias no campo', style: TextStyle(color: Colors.white54)),
+                leading: const Icon(
+                  Icons.local_fire_department,
+                  color: Color(0xFFC9082A),
+                ),
+                title: const Text(
+                  'Mapa de Lançamento (Heatmap)',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Zonas quentes e frias no campo',
+                  style: TextStyle(color: Colors.white54),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _showShotChart(context);
@@ -764,8 +765,12 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
   void _showShotChart(BuildContext context) {
     // Pegar estatísticas da época atual para basear o mapa
     final stats = _manualStats?.currentSeason;
-    final fgPct = stats != null && stats.fgPct > 0 ? stats.fgPct : _player.fgPct;
-    final fg3Pct = stats != null && stats.fg3Pct > 0 ? stats.fg3Pct : _player.fg3Pct;
+    final fgPct = stats != null && stats.fgPct > 0
+        ? stats.fgPct
+        : _player.fgPct;
+    final fg3Pct = stats != null && stats.fg3Pct > 0
+        ? stats.fg3Pct
+        : _player.fg3Pct;
     final position = _player.position ?? 'G';
 
     showModalBottomSheet(
@@ -790,11 +795,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              PlayerShotChart(
-                fgPct: fgPct,
-                fg3Pct: fg3Pct,
-                position: position,
-              ),
+              PlayerShotChart(fgPct: fgPct, fg3Pct: fg3Pct, position: position),
               const SizedBox(height: 24),
             ],
           ),
@@ -803,7 +804,8 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     );
   }
 
-  void _showEvolutionChartActual(BuildContext context) async {
+  void _showEvolutionChartActual() async {
+    final messenger = ScaffoldMessenger.of(context);
     List<PlayerSeasonStats> seasons = [];
     if (_manualStats != null) {
       final all = _allSeasonsForProfile(_manualStats!);
@@ -829,7 +831,7 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
 
     if (seasons.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(content: Text('Nenhum dado de temporada encontrado.')),
       );
       return;
@@ -1557,54 +1559,11 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     );
   }
 
-  Widget _teamLogo(Player player) {
-    return Container(
-      width: 58,
-      height: 58,
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.24),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TeamLogo(
-        teamId: player.teamId,
-        size: 42,
-        fallbackColor: Colors.black54,
-      ),
-    );
-  }
-
   Widget _miniLogo(Player player) {
     return TeamLogo(
       teamId: player.teamId,
       size: 42,
       fallbackColor: Colors.white38,
-    );
-  }
-
-  Widget _summaryChip(String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Text(
-        value,
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
     );
   }
 
@@ -1897,32 +1856,6 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     return '$day/$month/${date.year}';
-  }
-
-  Widget _metricTile(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white24,
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 1,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
   }
 
   Widget _statCard(

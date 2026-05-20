@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../l10n/app_localizations.dart';
 import '../../main.dart';
 import '../../services/cart_service.dart';
 import '../../services/preferences_format_service.dart';
 import 'cart_screen.dart';
 import 'product_detail_screen.dart';
+import 'store_image.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -319,26 +319,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    product['image'].startsWith('http')
-                        ? CachedNetworkImage(
-                            imageUrl: product['image'],
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                Container(color: Colors.grey[900]),
-                            errorWidget: (context, url, error) => const Icon(
-                              Icons.image_not_supported,
-                              color: Colors.white24,
-                            ),
-                          )
-                        : Image.asset(
-                            product['image'],
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.image_not_supported,
-                                  color: Colors.white24,
-                                ),
-                          ),
+                    StoreImage(imagePath: product['image']),
                     if (product['isNew'] == true)
                       Positioned(
                         top: 12,

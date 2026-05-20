@@ -24,6 +24,7 @@ abstract final class GameStatusUtils {
         s.contains('progress') ||
         s.contains('qtr') ||
         s.contains('quarter') ||
+        RegExp(r'\b(1st|2nd|3rd|4th|q1|q2|q3|q4)\b').hasMatch(s) ||
         s.contains('halftime') ||
         s.contains('half time') ||
         s == 'half' ||

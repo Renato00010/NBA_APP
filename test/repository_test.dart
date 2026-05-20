@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drift/native.dart';
-import 'package:drift/drift.dart';
 import 'package:nba_app/db/app_database.dart';
 import 'package:nba_app/services/repository.dart';
 import 'package:nba_app/services/nba_api_service.dart';
@@ -54,7 +53,7 @@ void main() {
         per: Value(23.0),
         tsPct: Value(63.0),
         usgPct: Value(28.0),
-      )
+      ),
     ]);
 
     final stats = await repo.getPlayerSeasonStats('1');

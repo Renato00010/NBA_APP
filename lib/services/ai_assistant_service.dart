@@ -92,7 +92,14 @@ class AiChatSession {
 }
 
 class AiAssistantService {
-  static const String _defaultApiKey = 'AIzaSyCXrxFGgR9iUSpzqpj4uW_4aBLZaamf2Uk';
+  static String? customApiKey;
+
+  static const String _defaultApiKey = String.fromEnvironment(
+    'GEMINI_API_KEY',
+    defaultValue: 'AIzaSyCXrxFGgR9iUSpzqpj4uW_4aBLZaamf2Uk',
+  );
+
+  static String get apiKey => customApiKey ?? _defaultApiKey;
   
   final String _systemInstruction = 
       "Tu és o Assistente Virtual da NBA, um especialista apaixonado por basquetebol. "
@@ -105,7 +112,7 @@ class AiAssistantService {
 
   AiChatSession startChat() {
     return AiChatSession(
-      apiKey: _defaultApiKey,
+      apiKey: apiKey,
       systemInstruction: _systemInstruction,
     );
   }
@@ -127,7 +134,7 @@ class AiAssistantService {
         "- 'analysis': uma análise tática e histórica detalhada e entusiasmante das duas equipas (máximo 2-3 parágrafos) em ${isEn ? 'Inglês (en-US)' : 'Português de Portugal (pt-PT)'}.\n"
         "- 'prediction': uma previsão entusiasmante do vencedor e possível margem de pontos em ${isEn ? 'Inglês (en-US)' : 'Português de Portugal (pt-PT)'}.";
 
-    final String url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$_defaultApiKey';
+    final String url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$apiKey';
     String finalUrl = url;
     if (kIsWeb) {
       finalUrl = 'https://corsproxy.io/?url=${Uri.encodeComponent(url)}';

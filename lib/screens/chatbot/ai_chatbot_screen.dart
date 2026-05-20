@@ -25,7 +25,7 @@ class AiChatbotScreen extends StatefulWidget {
 
 class _AiChatbotScreenState extends State<AiChatbotScreen> with SingleTickerProviderStateMixin {
   final AiAssistantService _aiService = AiAssistantService();
-  late final AiChatSession _chatSession;
+  late AiChatSession _chatSession;
   final List<ChatMessage> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -76,6 +76,100 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> with SingleTickerProv
     });
   }
 
+  void _showApiKeyDialog() {
+    final controller = TextEditingController(text: AiAssistantService.customApiKey ?? '');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: Text(
+            _t('Configurar Chave API Gemini', 'Configure Gemini API Key'),
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _t(
+                  'A chave padrão da aplicação foi revogada por segurança. Pode introduzir a sua própria API Key do Gemini aqui.',
+                  'The default app key has been revoked for security. You can input your own Gemini API Key here.',
+                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: InputDecoration(
+                  labelText: _t('Chave API Gemini (API Key)', 'Gemini API Key'),
+                  labelStyle: const TextStyle(color: Colors.white54, fontSize: 12),
+                  hintText: 'AIzaSy...',
+                  hintStyle: const TextStyle(color: Colors.white30),
+                  filled: true,
+                  fillColor: Colors.black26,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.white10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.amberAccent),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  AiAssistantService.customApiKey = null;
+                  _chatSession = _aiService.startChat();
+                });
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_t('Usando a chave padrão / ambiente.', 'Using default / environment key.')),
+                    backgroundColor: Colors.blueAccent,
+                  ),
+                );
+              },
+              child: Text(
+                _t('Limpar / Padrão', 'Clear / Default'),
+                style: const TextStyle(color: Colors.white54),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () {
+                final key = controller.text.trim();
+                if (key.isNotEmpty) {
+                  setState(() {
+                    AiAssistantService.customApiKey = key;
+                    _chatSession = _aiService.startChat();
+                  });
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(_t('Chave API configurada com sucesso!', 'API Key configured successfully!')),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              child: Text(_t('Guardar', 'Save')),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _sendMessage(String text) async {
     if (text.trim().isEmpty) return;
 
@@ -104,6 +198,10 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> with SingleTickerProv
           timestamp: DateTime.now(),
         ));
       });
+
+      if (responseText.contains('403') || responseText.contains('leaked') || responseText.contains('API key')) {
+        _showApiKeyDialog();
+      }
     } catch (e) {
       debugPrint("Chat Error: $e");
       setState(() {
@@ -198,6 +296,13 @@ class _AiChatbotScreenState extends State<AiChatbotScreen> with SingleTickerProv
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.vpn_key_outlined, color: Colors.white70),
+            tooltip: _t('Configurar API Key', 'Configure API Key'),
+            onPressed: _showApiKeyDialog,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
